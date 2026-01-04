@@ -37,19 +37,20 @@
 
     <div class="hers-labs-hero__sliding-images">
       <div class="hers-labs-hero__images-track">
-        {%- for i in (1..2) -%}
-          <div class="hers-labs-hero__images-set">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'sliding_image' -%}
+        {%- assign image_blocks = section.blocks | where: 'type', 'sliding_image' -%}
+        {%- if image_blocks.size > 0 -%}
+          {%- for i in (1..2) -%}
+            <div class="hers-labs-hero__images-set">
+              {%- for block in image_blocks -%}
                 {%- if block.settings.image != blank -%}
                   <div class="hers-labs-hero__image-wrapper" {{ block.shopify_attributes }}>
                     {{ block.settings.image | image_url: width: 400 | image_tag: loading: 'lazy', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
                   </div>
                 {%- endif -%}
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        {%- endfor -%}
+              {%- endfor -%}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
       </div>
     </div>
   </div>
@@ -177,6 +178,54 @@
           "id": "alt_text",
           "label": "Alt Text",
           "info": "Description of the image for accessibility"
+        }
+      ]
+    },
+    {
+      "type": "data_panel",
+      "name": "Data Panel (Deprecated)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_chart",
+          "label": "Show Chart",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "chart_value",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Chart Value",
+          "default": 75
+        },
+        {
+          "type": "color",
+          "id": "chart_color",
+          "label": "Chart Color",
+          "default": "#4fd1c7"
+        },
+        {
+          "type": "text",
+          "id": "chart_label",
+          "label": "Chart Label"
         }
       ]
     }
