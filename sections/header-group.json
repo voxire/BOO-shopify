@@ -36,9 +36,103 @@
         "padding_top": 0,
         "padding_bottom": 0
       }
+    },
+    "hers_top_bar_9wzAfT": {
+      "type": "hers-top-bar",
+      "blocks": {
+        "proposition_d9LAqD": {
+          "type": "proposition",
+          "settings": {
+            "text": "Why Hers?",
+            "link": ""
+          }
+        },
+        "proposition_wfApK3": {
+          "type": "proposition",
+          "settings": {
+            "text": "100% online",
+            "link": ""
+          }
+        },
+        "proposition_zyLe33": {
+          "type": "proposition",
+          "settings": {
+            "text": "Personalized to your needs",
+            "link": ""
+          }
+        },
+        "proposition_qXWBEY": {
+          "type": "proposition",
+          "settings": {
+            "text": "Ongoing support",
+            "link": ""
+          }
+        },
+        "proposition_WiNkGV": {
+          "type": "proposition",
+          "settings": {
+            "text": "US-Sourced ingredients",
+            "link": ""
+          }
+        },
+        "proposition_UYEwdM": {
+          "type": "proposition",
+          "settings": {
+            "text": "Unlimited provider messaging",
+            "link": ""
+          }
+        },
+        "proposition_ykMYLB": {
+          "type": "proposition",
+          "settings": {
+            "text": "Perimenopause care",
+            "link": ""
+          }
+        },
+        "proposition_CXmzbV": {
+          "type": "proposition",
+          "settings": {
+            "text": "Anxiety relief",
+            "link": ""
+          }
+        },
+        "proposition_AN8r6P": {
+          "type": "proposition",
+          "settings": {
+            "text": "Glowing skin",
+            "link": ""
+          }
+        },
+        "proposition_qqk6gE": {
+          "type": "proposition",
+          "settings": {
+            "text": "Lab testing",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "proposition_d9LAqD",
+        "proposition_wfApK3",
+        "proposition_zyLe33",
+        "proposition_qXWBEY",
+        "proposition_WiNkGV",
+        "proposition_UYEwdM",
+        "proposition_ykMYLB",
+        "proposition_CXmzbV",
+        "proposition_AN8r6P",
+        "proposition_qqk6gE"
+      ],
+      "name": "Hers Top Bar",
+      "settings": {
+        "color_scheme": "",
+        "padding_top": 12,
+        "padding_bottom": 12
+      }
     }
   },
   "order": [
-    "header"
+    "header",
+    "hers_top_bar_9wzAfT"
   ]
 }
