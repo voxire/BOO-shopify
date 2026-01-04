@@ -226,26 +226,14 @@
   outline-offset: 2px;
 }
 
-/* Animation - Seamless infinite loop with 3 sets */
+/* Animation - Seamless infinite loop */
 @keyframes slideImages {
   0% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-33.333%);
+    transform: translateX(-50%);
   }
-}
-
-/* Hide animation until images are loaded */
-.hers-labs-hero__images-track:not([data-images-loaded="true"]) {
-  animation: none;
-  opacity: 0;
-}
-
-.hers-labs-hero__images-track[data-images-loaded="true"] {
-  animation: slideImages 20s linear infinite;
-  opacity: 1;
-  transition: opacity 0.3s ease;
 }
 
 /* Ensure no gaps or white space during animation */

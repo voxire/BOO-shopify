@@ -19,54 +19,11 @@ class HersLabsHero extends HTMLElement {
       const track = this.section.querySelector('.hers-labs-hero__images-track');
       if (track) {
         track.style.animation = 'none';
-        track.setAttribute('data-images-loaded', 'true');
       }
-      this.initButtonInteractions();
-      return;
     }
 
-    // Preload all images and start animation when ready
-    this.preloadImages();
-    
     // Initialize button interactions
     this.initButtonInteractions();
-  }
-
-  preloadImages() {
-    const track = this.section.querySelector('.hers-labs-hero__images-track');
-    if (!track) return;
-
-    const images = track.querySelectorAll('.hers-labs-hero__sliding-image');
-    if (images.length === 0) {
-      track.setAttribute('data-images-loaded', 'true');
-      return;
-    }
-
-    let loadedCount = 0;
-    const totalImages = images.length;
-
-    const checkAllLoaded = () => {
-      loadedCount++;
-      if (loadedCount >= totalImages) {
-        track.setAttribute('data-images-loaded', 'true');
-      }
-    };
-
-    images.forEach(img => {
-      if (img.complete && img.naturalHeight !== 0) {
-        checkAllLoaded();
-      } else {
-        img.addEventListener('load', checkAllLoaded, { once: true });
-        img.addEventListener('error', checkAllLoaded, { once: true });
-      }
-    });
-
-    // Fallback: start animation after 2 seconds even if not all loaded
-    setTimeout(() => {
-      if (track.getAttribute('data-images-loaded') !== 'true') {
-        track.setAttribute('data-images-loaded', 'true');
-      }
-    }, 2000);
   }
 
   initButtonInteractions() {
