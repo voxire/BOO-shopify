@@ -16,7 +16,7 @@ class HersLabsHero extends HTMLElement {
 
     // Check for reduced motion preference
     if (this.reducedMotion) {
-      const track = this.section.querySelector('.hers-labs-hero__panels-track');
+      const track = this.section.querySelector('.hers-labs-hero__images-track');
       if (track) {
         track.style.animation = 'none';
       }

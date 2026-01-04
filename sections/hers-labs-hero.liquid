@@ -35,33 +35,17 @@
       </div>
     {%- endif -%}
 
-    <div class="hers-labs-hero__sliding-panels">
-      <div class="hers-labs-hero__panels-track">
+    <div class="hers-labs-hero__sliding-images">
+      <div class="hers-labs-hero__images-track">
         {%- for i in (1..2) -%}
-          <div class="hers-labs-hero__panels-set">
+          <div class="hers-labs-hero__images-set">
             {%- for block in section.blocks -%}
-              {%- if block.type == 'data_panel' -%}
-                <div class="hers-labs-hero__panel" {{ block.shopify_attributes }}>
-                  <div class="hers-labs-hero__panel-header">
-                    <h3 class="hers-labs-hero__panel-title">{{ block.settings.title }}</h3>
-                    {%- if block.settings.subtitle != blank -%}
-                      <p class="hers-labs-hero__panel-subtitle">{{ block.settings.subtitle }}</p>
-                    {%- endif -%}
+              {%- if block.type == 'sliding_image' -%}
+                {%- if block.settings.image != blank -%}
+                  <div class="hers-labs-hero__image-wrapper" {{ block.shopify_attributes }}>
+                    {{ block.settings.image | image_url: width: 400 | image_tag: loading: 'lazy', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
                   </div>
-                  {%- if block.settings.show_chart -%}
-                    <div class="hers-labs-hero__panel-chart">
-                      <div class="hers-labs-hero__chart-bar" style="--chart-value: {{ block.settings.chart_value | default: 75 }}%; --chart-color: {{ block.settings.chart_color | default: '#4fd1c7' }};">
-                        <div class="hers-labs-hero__chart-fill"></div>
-                      </div>
-                      {%- if block.settings.chart_label != blank -%}
-                        <span class="hers-labs-hero__chart-label">{{ block.settings.chart_label }}</span>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
-                  {%- if block.settings.description != blank -%}
-                    <p class="hers-labs-hero__panel-description">{{ block.settings.description }}</p>
-                  {%- endif -%}
-                </div>
+                {%- endif -%}
               {%- endif -%}
             {%- endfor -%}
           </div>
@@ -178,51 +162,19 @@
   ],
   "blocks": [
     {
-      "type": "data_panel",
-      "name": "Data Panel",
+      "type": "sliding_image",
+      "name": "Sliding Image",
       "settings": [
         {
-          "type": "text",
-          "id": "title",
-          "label": "Title",
-          "default": "Heart Health"
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
         },
         {
           "type": "text",
-          "id": "subtitle",
-          "label": "Subtitle"
-        },
-        {
-          "type": "textarea",
-          "id": "description",
-          "label": "Description"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_chart",
-          "label": "Show Chart",
-          "default": true
-        },
-        {
-          "type": "range",
-          "id": "chart_value",
-          "min": 0,
-          "max": 100,
-          "step": 5,
-          "unit": "%",
-          "label": "Chart Value",
-          "default": 75
-        },
-        {
-          "type": "color",
-          "id": "chart_color",
-          "label": "Chart Color",
-          "default": "#4fd1c7"
-        },
-        {
-          "type": "text",
-          "id": "chart_label",
-          "label": "Chart Label"
+          "id": "alt_text",
+          "label": "Alt Text",
+          "info": "Description of the image for accessibility"
         }
       ]
     }
@@ -232,44 +184,32 @@
       "name": "Hers Labs Hero",
       "blocks": [
         {
-          "type": "data_panel",
-          "settings": {
-            "title": "Heart Health",
-            "subtitle": "Cardiovascular",
-            "show_chart": true,
-            "chart_value": 85,
-            "chart_color": "#4fd1c7"
-          }
+          "type": "sliding_image",
+          "settings": {}
         },
         {
-          "type": "data_panel",
-          "settings": {
-            "title": "Nutrition",
-            "subtitle": "Vitamins & Minerals",
-            "show_chart": true,
-            "chart_value": 70,
-            "chart_color": "#ffb6c1"
-          }
+          "type": "sliding_image",
+          "settings": {}
         },
         {
-          "type": "data_panel",
-          "settings": {
-            "title": "Biological Age",
-            "subtitle": "Cellular Health",
-            "show_chart": true,
-            "chart_value": 70,
-            "chart_color": "#f0e68c"
-          }
+          "type": "sliding_image",
+          "settings": {}
         },
         {
-          "type": "data_panel",
-          "settings": {
-            "title": "Hormone Levels",
-            "subtitle": "Endocrine System",
-            "show_chart": true,
-            "chart_value": 80,
-            "chart_color": "#98d8c8"
-          }
+          "type": "sliding_image",
+          "settings": {}
+        },
+        {
+          "type": "sliding_image",
+          "settings": {}
+        },
+        {
+          "type": "sliding_image",
+          "settings": {}
+        },
+        {
+          "type": "sliding_image",
+          "settings": {}
         }
       ]
     }
