@@ -1,0 +1,279 @@
+{{ 'section-hers-labs-hero.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'hers-labs-hero.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .hers-labs-hero {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .hers-labs-hero {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  /* Full-width section */
+  #shopify-section-{{ section.id }} {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+{%- endstyle -%}
+
+<section class="hers-labs-hero" data-section-id="{{ section.id }}">
+  <div class="hers-labs-hero__background">
+    <div class="hers-labs-hero__gradient"></div>
+    
+    {%- if section.settings.woman_image != blank -%}
+      <div class="hers-labs-hero__woman-image-wrapper">
+        {{ section.settings.woman_image | image_url: width: 1200 | image_tag: loading: 'eager', alt: '', class: 'hers-labs-hero__woman-image' }}
+        <div class="hers-labs-hero__woman-mask-left"></div>
+        <div class="hers-labs-hero__woman-mask-right"></div>
+      </div>
+    {%- endif -%}
+
+    <div class="hers-labs-hero__sliding-panels">
+      <div class="hers-labs-hero__panels-track">
+        {%- for i in (1..2) -%}
+          <div class="hers-labs-hero__panels-set">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'data_panel' -%}
+                <div class="hers-labs-hero__panel" {{ block.shopify_attributes }}>
+                  <div class="hers-labs-hero__panel-header">
+                    <h3 class="hers-labs-hero__panel-title">{{ block.settings.title }}</h3>
+                    {%- if block.settings.subtitle != blank -%}
+                      <p class="hers-labs-hero__panel-subtitle">{{ block.settings.subtitle }}</p>
+                    {%- endif -%}
+                  </div>
+                  {%- if block.settings.show_chart -%}
+                    <div class="hers-labs-hero__panel-chart">
+                      <div class="hers-labs-hero__chart-bar" style="--chart-value: {{ block.settings.chart_value | default: 75 }}%; --chart-color: {{ block.settings.chart_color | default: '#4fd1c7' }};">
+                        <div class="hers-labs-hero__chart-fill"></div>
+                      </div>
+                      {%- if block.settings.chart_label != blank -%}
+                        <span class="hers-labs-hero__chart-label">{{ block.settings.chart_label }}</span>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                  {%- if block.settings.description != blank -%}
+                    <p class="hers-labs-hero__panel-description">{{ block.settings.description }}</p>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="hers-labs-hero__content">
+    <div class="hers-labs-hero__container">
+      {%- if section.settings.label != blank -%}
+        <p class="hers-labs-hero__label">{{ section.settings.label }}</p>
+      {%- endif -%}
+      
+      {%- if section.settings.headline != blank -%}
+        <h2 class="hers-labs-hero__headline">{{ section.settings.headline }}</h2>
+      {%- endif -%}
+
+      <div class="hers-labs-hero__buttons">
+        {%- if section.settings.primary_button_label != blank -%}
+          <a
+            href="{{ section.settings.primary_button_link }}"
+            class="hers-labs-hero__button hers-labs-hero__button--primary"
+            aria-label="{{ section.settings.primary_button_label | escape }}"
+          >
+            {{ section.settings.primary_button_label }}
+          </a>
+        {%- endif -%}
+        
+        {%- if section.settings.secondary_button_label != blank -%}
+          <a
+            href="{{ section.settings.secondary_button_link }}"
+            class="hers-labs-hero__button hers-labs-hero__button--secondary"
+            aria-label="{{ section.settings.secondary_button_label | escape }}"
+          >
+            {{ section.settings.secondary_button_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hers Labs Hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "labs by hers"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Test what your body's been telling you"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Primary Button Label",
+      "default": "Start my labs"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Secondary Button Label",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Secondary Button Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "woman_image",
+      "label": "Woman Image",
+      "info": "Half-body photo of a woman facing slightly sideways"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "data_panel",
+      "name": "Data Panel",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Heart Health"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_chart",
+          "label": "Show Chart",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "chart_value",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Chart Value",
+          "default": 75
+        },
+        {
+          "type": "color",
+          "id": "chart_color",
+          "label": "Chart Color",
+          "default": "#4fd1c7"
+        },
+        {
+          "type": "text",
+          "id": "chart_label",
+          "label": "Chart Label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hers Labs Hero",
+      "blocks": [
+        {
+          "type": "data_panel",
+          "settings": {
+            "title": "Heart Health",
+            "subtitle": "Cardiovascular",
+            "show_chart": true,
+            "chart_value": 85,
+            "chart_color": "#4fd1c7"
+          }
+        },
+        {
+          "type": "data_panel",
+          "settings": {
+            "title": "Nutrition",
+            "subtitle": "Vitamins & Minerals",
+            "show_chart": true,
+            "chart_value": 72,
+            "chart_color": "#ffb6c1"
+          }
+        },
+        {
+          "type": "data_panel",
+          "settings": {
+            "title": "Biological Age",
+            "subtitle": "Cellular Health",
+            "show_chart": true,
+            "chart_value": 68,
+            "chart_color": "#f0e68c"
+          }
+        },
+        {
+          "type": "data_panel",
+          "settings": {
+            "title": "Hormone Levels",
+            "subtitle": "Endocrine System",
+            "show_chart": true,
+            "chart_value": 79,
+            "chart_color": "#98d8c8"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+

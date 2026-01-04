@@ -1,0 +1,359 @@
+/* Hers Labs Hero Section Styles */
+.hers-labs-hero {
+  position: relative;
+  width: 100%;
+  min-height: 60rem;
+  overflow: hidden;
+  border-radius: 2.4rem 2.4rem 0 0;
+  margin-top: 0;
+}
+
+.hers-labs-hero__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hers-labs-hero__gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0a0e1c 0%, #101a2d 100%);
+  z-index: 0;
+}
+
+.hers-labs-hero__woman-image-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 60rem;
+  height: 100%;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hers-labs-hero__woman-image {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: brightness(0.95) contrast(1.05);
+}
+
+.hers-labs-hero__woman-mask-left,
+.hers-labs-hero__woman-mask-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hers-labs-hero__woman-mask-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(10, 14, 28, 0.9) 0%, transparent 100%);
+}
+
+.hers-labs-hero__woman-mask-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(10, 14, 28, 0.9) 0%, transparent 100%);
+}
+
+/* Sliding Panels */
+.hers-labs-hero__sliding-panels {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  height: 20rem;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hers-labs-hero__panels-track {
+  display: flex;
+  width: fit-content;
+  height: 100%;
+  will-change: transform;
+  animation: slidePanels 20s linear infinite;
+}
+
+.hers-labs-hero__panels-set {
+  display: flex;
+  gap: 2rem;
+  height: 100%;
+  padding: 0 2rem;
+}
+
+.hers-labs-hero__panel {
+  width: 28rem;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.6rem;
+  padding: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hers-labs-hero__panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hers-labs-hero__panel-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hers-labs-hero__panel-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.hers-labs-hero__panel-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.hers-labs-hero__chart-bar {
+  width: 100%;
+  height: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hers-labs-hero__chart-fill {
+  width: var(--chart-value);
+  height: 100%;
+  background: var(--chart-color);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+  box-shadow: 0 0 12px var(--chart-color);
+}
+
+.hers-labs-hero__chart-label {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.hers-labs-hero__panel-description {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Content Overlay */
+.hers-labs-hero__content {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  min-height: 60rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 2rem;
+}
+
+.hers-labs-hero__container {
+  text-align: center;
+  max-width: 80rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.hers-labs-hero__label {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1.6rem 0;
+}
+
+.hers-labs-hero__headline {
+  font-size: clamp(3.2rem, 6vw, 6.4rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+  margin: 0 0 3.2rem 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
+}
+
+.hers-labs-hero__buttons {
+  display: flex;
+  gap: 1.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hers-labs-hero__button {
+  display: inline-block;
+  padding: 1.4rem 3.2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  white-space: nowrap;
+  border: 2px solid transparent;
+}
+
+.hers-labs-hero__button--primary {
+  background-color: #dfeede;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.hers-labs-hero__button--primary:hover,
+.hers-labs-hero__button--primary:focus-visible {
+  background-color: #c8e0c7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(223, 238, 222, 0.3);
+  outline: 2px solid rgba(223, 238, 222, 0.5);
+  outline-offset: 2px;
+}
+
+.hers-labs-hero__button--secondary {
+  background-color: transparent;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hers-labs-hero__button--secondary:hover,
+.hers-labs-hero__button--secondary:focus-visible {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+}
+
+/* Animation */
+@keyframes slidePanels {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 989px) {
+  .hers-labs-hero {
+    min-height: 50rem;
+  }
+
+  .hers-labs-hero__content {
+    min-height: 50rem;
+    padding: 6rem 2rem;
+  }
+
+  .hers-labs-hero__woman-image-wrapper {
+    max-width: 50rem;
+  }
+
+  .hers-labs-hero__sliding-panels {
+    height: 18rem;
+  }
+
+  .hers-labs-hero__panel {
+    width: 24rem;
+    padding: 2rem;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .hers-labs-hero {
+    min-height: 45rem;
+    border-radius: 1.8rem 1.8rem 0 0;
+  }
+
+  .hers-labs-hero__content {
+    min-height: 45rem;
+    padding: 4rem 1.6rem;
+  }
+
+  .hers-labs-hero__woman-image-wrapper {
+    max-width: 100%;
+  }
+
+  .hers-labs-hero__sliding-panels {
+    height: 16rem;
+  }
+
+  .hers-labs-hero__panel {
+    width: 20rem;
+    padding: 1.6rem;
+  }
+
+  .hers-labs-hero__panel-title {
+    font-size: 1.6rem;
+  }
+
+  .hers-labs-hero__panel-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hers-labs-hero__buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hers-labs-hero__button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .hers-labs-hero__panels-track {
+    animation: none;
+  }
+
+  .hers-labs-hero__button {
+    transition: none;
+  }
+
+  .hers-labs-hero__button--primary:hover,
+  .hers-labs-hero__button--primary:focus-visible,
+  .hers-labs-hero__button--secondary:hover,
+  .hers-labs-hero__button--secondary:focus-visible {
+    transform: none;
+  }
+}
+
