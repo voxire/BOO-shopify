@@ -35,26 +35,6 @@
         {%- endif -%}
       {%- endfor -%}
     </div>
-    <div class="hers-top-bar__actions">
-      <a
-        href="{{ routes.account_login_url }}"
-        class="hers-top-bar__login-button"
-        aria-label="{{ 'customer.log_in' | t }}"
-      >
-        {{ 'customer.log_in' | t }}
-      </a>
-      <a
-        href="{{ routes.cart_url }}"
-        class="hers-top-bar__cart-button"
-        aria-label="{{ 'templates.cart.cart' | t }}"
-      >
-        <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-        {%- if cart != empty -%}
-          <span class="hers-top-bar__cart-badge" aria-hidden="true">{{ cart.item_count }}</span>
-        {%- endif -%}
-        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-      </a>
-    </div>
   </div>
 </div>
 

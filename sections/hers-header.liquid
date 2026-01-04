@@ -1,0 +1,120 @@
+{{ 'section-hers-header.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .hers-header {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .hers-header {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<hers-header-wrapper class="hers-header-wrapper">
+  <div class="hers-header color-{{ section.settings.color_scheme }} gradient">
+    <div class="hers-header__container page-width">
+      <div class="hers-header__logo">
+        {%- if section.settings.logo != blank -%}
+          {%- if request.page_type == 'index' -%}
+            <h1 class="hers-header__heading">
+          {%- endif -%}
+          <a href="{{ routes.root_url }}" class="hers-header__logo-link">
+            {%- assign logo_alt = section.settings.logo.alt | default: shop.name | escape -%}
+            {{ section.settings.logo | image_url: width: 200 | image_tag: loading: 'eager', alt: logo_alt, class: 'hers-header__logo-image' }}
+          </a>
+          {%- if request.page_type == 'index' -%}
+            </h1>
+          {%- endif -%}
+        {%- else -%}
+          {%- if request.page_type == 'index' -%}
+            <h1 class="hers-header__heading">
+          {%- endif -%}
+          <a href="{{ routes.root_url }}" class="hers-header__logo-link">
+            <span class="hers-header__logo-text">{{ shop.name }}</span>
+          </a>
+          {%- if request.page_type == 'index' -%}
+            </h1>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+
+      <div class="hers-header__actions">
+        <a
+          href="{{ routes.account_login_url }}"
+          class="hers-header__login-button"
+          aria-label="{{ 'customer.log_in' | t }}"
+        >
+          {{ 'customer.log_in' | t }}
+        </a>
+        <a
+          href="{{ routes.cart_url }}"
+          class="hers-header__cart-button"
+          aria-label="{{ 'templates.cart.cart' | t }}"
+        >
+          <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
+          {%- if cart != empty -%}
+            <span class="hers-header__cart-badge" aria-hidden="true">{{ cart.item_count }}</span>
+          {%- endif -%}
+          <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</hers-header-wrapper>
+
+<script src="{{ 'hers-header.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Hers Header",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hers Header"
+    }
+  ]
+}
+{% endschema %}
+
