@@ -692,12 +692,14 @@
         "sliding_image_AN943A": {
           "type": "sliding_image",
           "settings": {
+            "image": "shopify://shop_images/FoxBoo.png",
             "alt_text": ""
           }
         },
         "sliding_image_qJNpCh": {
           "type": "sliding_image",
           "settings": {
+            "image": "shopify://shop_images/GriBoo.png",
             "alt_text": ""
           }
         },
