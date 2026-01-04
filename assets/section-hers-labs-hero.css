@@ -90,6 +90,9 @@
   height: 100%;
   will-change: transform;
   animation: slideImages 20s linear infinite;
+  gap: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .hers-labs-hero__images-set {
@@ -98,6 +101,8 @@
   height: 100%;
   padding: 0 2rem;
   align-items: center;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 .hers-labs-hero__image-wrapper {
@@ -213,7 +218,7 @@
   outline-offset: 2px;
 }
 
-/* Animation */
+/* Animation - Seamless infinite loop */
 @keyframes slideImages {
   0% {
     transform: translateX(0);
@@ -221,6 +226,19 @@
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* Ensure no gaps or white space during animation */
+.hers-labs-hero__sliding-images {
+  background: transparent;
+  overflow: hidden;
+}
+
+.hers-labs-hero__images-track {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 /* Responsive Design */
