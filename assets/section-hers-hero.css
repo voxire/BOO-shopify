@@ -72,7 +72,7 @@
 
 .hers-hero__card {
   grid-column: span 3;
-  background-color: #ffffff;
+  background-color: #4fd1c7;
   border-radius: 2.4rem;
   padding: 3.2rem 2.4rem;
   text-decoration: none;
@@ -95,7 +95,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(223, 238, 222, 0.1) 0%, rgba(255, 182, 193, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(45, 157, 148, 0.2) 0%, rgba(77, 209, 199, 0.1) 100%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -103,6 +103,7 @@
 
 .hers-hero__card:hover,
 .hers-hero__card:focus-visible {
+  background-color: #2d9d94;
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.08);
   outline: 2px solid rgba(0, 0, 0, 0.1);
@@ -114,7 +115,12 @@
 }
 
 .hers-hero__card--new {
-  background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #4fd1c7 0%, #5dd5cc 100%);
+}
+
+.hers-hero__card--new:hover,
+.hers-hero__card--new:focus-visible {
+  background: linear-gradient(135deg, #2d9d94 0%, #3aa89f 100%);
 }
 
 .hers-hero__badge {
@@ -186,7 +192,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.7);
   transition: transform 0.3s ease, color 0.3s ease;
   z-index: 1;
 }
@@ -194,7 +200,7 @@
 .hers-hero__card:hover .hers-hero__card-arrow,
 .hers-hero__card:focus-visible .hers-hero__card-arrow {
   transform: translateX(4px);
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.9);
 }
 
 .hers-hero__card-arrow svg {
