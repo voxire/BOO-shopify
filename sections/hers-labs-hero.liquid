@@ -1,10 +1,18 @@
 {{ 'section-hers-labs-hero.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'hers-labs-hero.js' | asset_url }}" defer="defer"></script>
 
-{%- comment -%} Preload first image for faster display {%- endcomment -%}
+{%- comment -%} Preload all images for faster display {%- endcomment -%}
 {%- assign image_blocks = section.blocks | where: 'type', 'sliding_image' -%}
-{%- if image_blocks.size > 0 and image_blocks.first.settings.image != blank -%}
-  <link rel="preload" as="image" href="{{ image_blocks.first.settings.image | image_url: width: 600 }}" fetchpriority="high">
+{%- if image_blocks.size > 0 -%}
+  {%- for block in image_blocks -%}
+    {%- if block.settings.image != blank -%}
+      {%- if forloop.first -%}
+        <link rel="preload" as="image" href="{{ block.settings.image | image_url: width: 500 }}" fetchpriority="high">
+      {%- else -%}
+        <link rel="preload" as="image" href="{{ block.settings.image | image_url: width: 500 }}">
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
 {%- endif -%}
 
 {%- style -%}
@@ -42,18 +50,19 @@
     {%- endif -%}
 
     <div class="hers-labs-hero__sliding-images">
-      <div class="hers-labs-hero__images-track">
+      <div class="hers-labs-hero__images-track" data-images-loaded="false">
         {%- assign image_blocks = section.blocks | where: 'type', 'sliding_image' -%}
         {%- if image_blocks.size > 0 -%}
-          {%- for i in (1..2) -%}
+          {%- comment -%} Create 3 sets for seamless looping {%- endcomment -%}
+          {%- for i in (1..3) -%}
             <div class="hers-labs-hero__images-set">
               {%- for block in image_blocks -%}
                 {%- if block.settings.image != blank -%}
                   <div class="hers-labs-hero__image-wrapper" {{ block.shopify_attributes }}>
                     {%- if forloop.first and i == 1 -%}
-                      {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'eager', fetchpriority: 'high', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
+                      {{ block.settings.image | image_url: width: 500 | image_tag: loading: 'eager', fetchpriority: 'high', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image', decoding: 'async' }}
                     {%- else -%}
-                      {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'eager', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
+                      {{ block.settings.image | image_url: width: 500 | image_tag: loading: 'eager', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image', decoding: 'async' }}
                     {%- endif -%}
                   </div>
                 {%- endif -%}
