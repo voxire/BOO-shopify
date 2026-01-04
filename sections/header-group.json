@@ -1,0 +1,44 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.header.name",
+  "type": "header",
+  "sections": {
+    "header": {
+      "type": "header",
+      "custom_css": [
+        ".header-wrapper,.header,.section-header {background: transparent !important; border: 0 !important;}",
+        ".header__inline-menu {background: rgba(10, 30, 15, 0.55); backdrop-filter: blur(18px); border-radius: 999px; padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.12);}",
+        ".header__menu-item {padding: 8px 14px; border-radius: 999px;}",
+        ".header__menu-item--active,.header__menu-item:hover {background: rgba(255, 255, 255, 0.15);}",
+        ".header__heading,.header__icons {background: transparent !important;}"
+      ],
+      "settings": {
+        "logo_position": "middle-left",
+        "mobile_logo_position": "center",
+        "menu": "main-menu",
+        "menu_type_desktop": "mega",
+        "sticky_header_type": "none",
+        "show_line_separator": false,
+        "color_scheme": "scheme-4",
+        "menu_color_scheme": "scheme-97a670a1-3a6e-4c2c-b7cd-1956809b9ee4",
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "enable_customer_avatar": false,
+        "margin_bottom": 0,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    }
+  },
+  "order": [
+    "header"
+  ]
+}

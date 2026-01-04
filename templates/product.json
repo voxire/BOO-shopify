@@ -1,0 +1,382 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "product_glass_card_emPGMm": {
+      "type": "product-glass-card",
+      "name": "Product glass card 1st dinaboo",
+      "settings": {
+        "min_height": 880,
+        "container_width": 1300,
+        "section_padding": 90,
+        "side_padding": 80,
+        "middle_text": "",
+        "middle_width": 260,
+        "middle_text_shift": 100,
+        "inside_text_shift": 100,
+        "middle_text_color": "#f5f5f7",
+        "middle_text_opacity": 100,
+        "middle_text_size": 140,
+        "middle_letter_spacing": 0,
+        "middle_text_blur": 0,
+        "word_left_cut": 0,
+        "word_right_cut": 0,
+        "word_inside_opacity": 55,
+        "word_inside_blur": 4,
+        "image_border_radius": 8,
+        "glass_border_radius": 18,
+        "glass_opacity": 65,
+        "glass_blur": 14,
+        "glass_border_width": 0,
+        "glass_border_opacity": 0,
+        "text_color": "#dddfe3",
+        "title_size": 52,
+        "price_size": 18,
+        "button_text": "Add to cart",
+        "button_bg_color": "#000000",
+        "button_hover_bg_color": "#333333",
+        "button_text_color": "#f5f5f7",
+        "button_border_radius": 40
+      }
+    },
+    "17672968382ad3b9cf": {
+      "type": "apps",
+      "blocks": {
+        "trustoo_io_reviews_review_widget_Yp3pPN": {
+          "type": "shopify://apps/trustoo-io-reviews/blocks/review-widget/c8f15077-6475-4e86-ad06-b66038d5ba2c",
+          "settings": {
+            "product": ""
+          }
+        }
+      },
+      "block_order": [
+        "trustoo_io_reviews_review_widget_Yp3pPN"
+      ],
+      "settings": {
+        "include_margins": true
+      }
+    },
+    "17672965157e4e587e": {
+      "type": "apps",
+      "settings": {
+        "include_margins": true
+      }
+    },
+    "product_glass_card_Ry4WQM": {
+      "type": "product-glass-card",
+      "name": "Product glass card",
+      "settings": {
+        "min_height": 880,
+        "container_width": 1300,
+        "section_padding": 90,
+        "side_padding": 80,
+        "middle_text": "",
+        "middle_width": 260,
+        "middle_text_shift": 100,
+        "inside_text_shift": 100,
+        "middle_text_color": "#f5f5f7",
+        "middle_text_opacity": 100,
+        "middle_text_size": 140,
+        "middle_letter_spacing": 0,
+        "middle_text_blur": 0,
+        "word_left_cut": 0,
+        "word_right_cut": 0,
+        "word_inside_opacity": 55,
+        "word_inside_blur": 4,
+        "image_border_radius": 8,
+        "glass_border_radius": 18,
+        "glass_opacity": 65,
+        "glass_blur": 14,
+        "glass_border_width": 0,
+        "glass_border_opacity": 0,
+        "text_color": "#dddfe3",
+        "title_size": 52,
+        "price_size": 18,
+        "button_text": "Add to cart",
+        "button_bg_color": "#000000",
+        "button_hover_bg_color": "#333333",
+        "button_text_color": "#f5f5f7",
+        "button_border_radius": 40
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": {
+          "type": "text",
+          "settings": {
+            "text": "{{ product.vendor }}",
+            "text_style": "uppercase"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector",
+          "settings": {}
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {}
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
+        }
+      },
+      "block_order": [
+        "vendor",
+        "title",
+        "price",
+        "variant_picker",
+        "quantity_selector",
+        "buy_buttons",
+        "description",
+        "share"
+      ],
+      "disabled": true,
+      "settings": {
+        "enable_sticky_info": true,
+        "color_scheme": "scheme-1",
+        "media_size": "large",
+        "constrain_to_viewport": true,
+        "media_fit": "contain",
+        "gallery_layout": "stacked",
+        "mobile_thumbnails": "hide",
+        "media_position": "left",
+        "image_zoom": "lightbox",
+        "hide_variants": true,
+        "enable_video_looping": false,
+        "padding_top": 36,
+        "padding_bottom": 12
+      }
+    },
+    "related-products": {
+      "type": "related-products",
+      "disabled": true,
+      "settings": {
+        "heading": "You may also like",
+        "heading_size": "h2",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "color_scheme": "scheme-1",
+        "image_ratio": "square",
+        "image_shape": "default",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": false,
+        "padding_top": 36,
+        "padding_bottom": 28
+      }
+    },
+    "17661676631c74cce8": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "176616999306489daa": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "176617255127c4ddb3": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "1766191069f701efb3": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "you_may_also_like_L4cyEY": {
+      "type": "you-may-also-like",
+      "name": "You might also like",
+      "settings": {
+        "title": "You might also like",
+        "sub": "More options you may want to check.",
+        "bg": "#0b0b0b",
+        "title_color": "#ffffff",
+        "sub_color": "#d9d9d9",
+        "max_width": 1400,
+        "columns": 4,
+        "gap": 16,
+        "radius": 22,
+        "blur": 10,
+        "card_height": 260,
+        "limit": 4,
+        "show_badge": false,
+        "badge_text": "More"
+      }
+    },
+    "product_hotspot_5swap_BwcTBk": {
+      "type": "product-hotspot-5swap",
+      "name": "Product hotspots (5 swap)",
+      "settings": {
+        "section_bg": "#ffffff",
+        "max_width": 1400,
+        "pad_x": 24,
+        "pad_y": 20,
+        "height_desktop": 520,
+        "height_mobile": 360,
+        "radius": 22,
+        "radius_mobile": 18,
+        "card_bg": "#ffffff",
+        "image_fit": "cover",
+        "image_scale": 100,
+        "pos_x": 50,
+        "pos_y": 50,
+        "overlay_opacity": 0,
+        "btn_size": 44,
+        "btn_text_size": 13,
+        "btn_bg": "#ffffffd9",
+        "btn_color": "#111111",
+        "btn_border": "#0000001a"
+      }
+    },
+    "product_hotspot_5swap_7RqYm6": {
+      "type": "product-hotspot-5swap",
+      "name": "Product hotspots (5 swap)",
+      "settings": {
+        "section_bg": "#ffffff",
+        "max_width": 1400,
+        "pad_x": 24,
+        "pad_y": 20,
+        "height_desktop": 520,
+        "height_mobile": 360,
+        "radius": 22,
+        "radius_mobile": 18,
+        "card_bg": "#ffffff",
+        "image_fit": "cover",
+        "image_scale": 100,
+        "pos_x": 50,
+        "pos_y": 50,
+        "overlay_opacity": 0,
+        "btn_size": 44,
+        "btn_text_size": 13,
+        "btn_bg": "#ffffffd9",
+        "btn_color": "#111111",
+        "btn_border": "#0000001a"
+      }
+    },
+    "1767117953f6e8a3e1": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_eb4d840_mttAtd": {
+          "type": "ai_gen_block_eb4d840",
+          "settings": {
+            "max_width": 1000,
+            "section_padding": 60,
+            "column_gap": 60,
+            "content_gap": 20,
+            "gradient_top": "#0d4c07",
+            "gradient_bottom": "#1a7a10",
+            "show_bg_text": true,
+            "bg_text_size": 140,
+            "bg_text_color": "#ffffff",
+            "bg_text_opacity": 10,
+            "media_max_width": 550,
+            "media_padding": 30,
+            "media_radius": 25,
+            "glass_bg": "#0d4c0766",
+            "glass_bg_fallback": "#0d4c07d9",
+            "glass_border": "#ffffff33",
+            "glass_shadow": "#00000033",
+            "glass_blur": 15,
+            "glass_radius": 35,
+            "glass_padding": 40,
+            "text_color": "#ffffff",
+            "title_size": 36,
+            "price_size": 22,
+            "label_size": 14,
+            "description_size": 14,
+            "variant_label": "Size (Age)",
+            "quantity_label": "Quantity",
+            "input_bg": "#1a7a1080",
+            "input_border": "#ffffff33",
+            "input_radius": 20,
+            "button_label": "Add to cart",
+            "button_bg": "#000000",
+            "button_text_color": "#ffffff",
+            "button_radius": 30,
+            "button_font_size": 16,
+            "divider_color": "#ffffff",
+            "divider_spacing": 15
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_eb4d840_mttAtd"
+      ],
+      "settings": {}
+    },
+    "17671199805efa083a": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "1767125007fa1243d3": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "1767125175860dbe57": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "176712676756f0026c": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "17671382213814a023": {
+      "type": "_blocks",
+      "settings": {}
+    }
+  },
+  "order": [
+    "product_glass_card_emPGMm",
+    "17672968382ad3b9cf",
+    "17672965157e4e587e",
+    "product_glass_card_Ry4WQM",
+    "main",
+    "related-products",
+    "17661676631c74cce8",
+    "176616999306489daa",
+    "176617255127c4ddb3",
+    "1766191069f701efb3",
+    "you_may_also_like_L4cyEY",
+    "product_hotspot_5swap_BwcTBk",
+    "product_hotspot_5swap_7RqYm6",
+    "1767117953f6e8a3e1",
+    "17671199805efa083a",
+    "1767125007fa1243d3",
+    "1767125175860dbe57",
+    "176712676756f0026c",
+    "17671382213814a023"
+  ]
+}

@@ -1,0 +1,625 @@
+{% comment %}
+  Product Glass Panel + Left Carousel
+
+  ALWAYS use the per-product fallback product (Product reference metafield):
+  product.metafields.custom.pgc_fallback_product
+
+  Background via metafield on the ACTIVE product_obj:
+  product_obj.metafields.custom.pgc_background
+
+  Middle word via metafield on the ACTIVE product_obj:
+  product_obj.metafields.custom.pgc_middle_text
+
+  Glass color via metafield on the ACTIVE product_obj (type: Color):
+  product_obj.metafields.custom.pgc_glass_color
+{% endcomment %}
+
+{% assign section_id = section.id | replace: '_', '' | downcase %}
+
+{% assign context_product = product %}
+
+{% assign per_product_fallback = blank %}
+{% if context_product and context_product.metafields.custom.pgc_fallback_product and context_product.metafields.custom.pgc_fallback_product.value != blank %}
+  {% assign per_product_fallback = context_product.metafields.custom.pgc_fallback_product.value %}
+{% endif %}
+
+{% assign product_obj = per_product_fallback | default: context_product %}
+
+{% assign bg = blank %}
+{% if product_obj and product_obj.metafields.custom.pgc_background and product_obj.metafields.custom.pgc_background.value != blank %}
+  {% assign bg = product_obj.metafields.custom.pgc_background.value %}
+{% endif %}
+
+{% assign mid_text = blank %}
+{% if product_obj and product_obj.metafields.custom.pgc_middle_text and product_obj.metafields.custom.pgc_middle_text.value != blank %}
+  {% assign mid_text = product_obj.metafields.custom.pgc_middle_text.value %}
+{% endif %}
+{% if mid_text == blank %}
+  {% assign mid_text = section.settings.middle_text %}
+{% endif %}
+{% if mid_text == blank and product_obj %}
+  {% assign mid_text = product_obj.title %}
+{% endif %}
+
+{% assign glass_color = '#ffffff' %}
+{% if product_obj and product_obj.metafields.custom.pgc_glass_color and product_obj.metafields.custom.pgc_glass_color.value != blank %}
+  {% assign glass_color = product_obj.metafields.custom.pgc_glass_color.value %}
+{% endif %}
+
+{% style %}
+  .pgc-{{ section_id }}{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    min-height: {{ section.settings.min_height }}px;
+  }
+
+  .pgc-{{ section_id }}__bg{ position:absolute; inset:0; z-index:0; }
+  .pgc-{{ section_id }}__bg img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pgc-{{ section_id }}__bgPlaceholder{ width:100%; height:100%; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
+
+  .pgc-{{ section_id }}__container{ position:relative; z-index:1; max-width:100%; margin:0; padding:0; }
+
+  .pgc-{{ section_id }}__grid{
+    display:grid;
+    grid-template-columns: 1fr {{ section.settings.middle_width }}px 1fr;
+    align-items:stretch;
+    min-height: {{ section.settings.min_height }}px;
+    position:relative;
+  }
+
+  .pgc-{{ section_id }}__left{
+    padding: {{ section.settings.section_padding }}px {{ section.settings.side_padding }}px;
+    width:100%;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    position:relative;
+    z-index:2;
+  }
+
+  .pgc-{{ section_id }}__leftInner{
+    width:100%;
+    max-width: {{ section.settings.container_width }}px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+
+  .pgc-{{ section_id }}__middle{
+    position:relative;
+    pointer-events:none;
+    z-index:3;
+  }
+
+  .pgc-{{ section_id }}__word{
+    position:absolute;
+    top:50%;
+    left: calc(50% + {{ section.settings.middle_text_shift }}px);
+    transform: translate(-50%,-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    font-size: {{ section.settings.middle_text_size }}px;
+    font-weight: 900;
+    letter-spacing: {{ section.settings.middle_letter_spacing }}px;
+    line-height: .9;
+    white-space: nowrap;
+    color: {{ section.settings.middle_text_color }};
+  }
+
+  .pgc-{{ section_id }}__word--left{
+    z-index:5;
+    opacity: {{ section.settings.middle_text_opacity | divided_by: 100.0 }};
+    filter: blur({{ section.settings.middle_text_blur }}px);
+    clip-path: inset(0 {{ section.settings.word_right_cut }}% 0 0);
+  }
+
+  .pgc-{{ section_id }}__word--right{
+    z-index:1;
+    opacity: {{ section.settings.word_inside_opacity | divided_by: 100.0 }};
+    filter: blur({{ section.settings.word_inside_blur }}px);
+    clip-path: inset(0 0 0 {{ section.settings.word_left_cut }}%);
+  }
+
+  .pgc-{{ section_id }}__carousel{
+    position:relative;
+    overflow:hidden;
+    border-radius: {{ section.settings.image_border_radius }}px;
+    aspect-ratio: 1;
+    background: rgba(255,255,255,.06);
+  }
+  .pgc-{{ section_id }}__track{
+    display:flex;
+    height:100%;
+    will-change: transform;
+    transition: transform .4s ease;
+  }
+  .pgc-{{ section_id }}__slide{ min-width:100%; height:100%; }
+  .pgc-{{ section_id }}__slide img,
+  .pgc-{{ section_id }}__slide video,
+  .pgc-{{ section_id }}__slide iframe,
+  .pgc-{{ section_id }}__slide model-viewer{
+    width:100%; height:100%;
+    object-fit:cover; display:block;
+  }
+
+  /* arrows: NO circle */
+  .pgc-{{ section_id }}__navBtn{
+    position:absolute; top:50%;
+    transform: translateY(-50%);
+    width:auto; height:auto;
+    padding:0;
+    border:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    z-index:2;
+    background: transparent;
+    box-shadow:none;
+    border-radius:0;
+  }
+  .pgc-{{ section_id }}__navPrev{ left:  14px; }
+  .pgc-{{ section_id }}__navNext{ right: 14px; }
+
+  .pgc-{{ section_id }}__navBtn svg{ width:30px; height:30px; }
+  .pgc-{{ section_id }}__navBtn svg{ color:ED1B1B; }
+  .pgc-{{ section_id }}__navBtn svg path{ stroke:currentColor; }
+
+
+  .pgc-{{ section_id }}__navBtn:hover{ opacity:.85; }
+
+  /* remove dots + thumbs */
+  .pgc-{{ section_id }}__dots{ display:none !important; }
+  .pgc-{{ section_id }}__thumbs{ display:none !important; }
+
+  .pgc-{{ section_id }}__panel{
+    position:relative;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    z-index:4;
+  }
+
+  .pgc-{{ section_id }}__card{
+    width:100%;
+    height:100%;
+    background: rgba(
+      {{ glass_color | color_extract: 'red' }},
+      {{ glass_color | color_extract: 'green' }},
+      {{ glass_color | color_extract: 'blue' }},
+      {{ section.settings.glass_opacity | divided_by: 100.0 }}
+    );
+    backdrop-filter: blur({{ section.settings.glass_blur }}px) saturate(180%) contrast(120%);
+    -webkit-backdrop-filter: blur({{ section.settings.glass_blur }}px) saturate(180%) contrast(120%);
+    border-left: {{ section.settings.glass_border_width }}px solid rgba(255,255,255,{{ section.settings.glass_border_opacity | divided_by: 100.0 }});
+    border-top:0; border-right:0; border-bottom:0;
+    box-shadow:
+      -30px 0 85px rgba(0,0,0,.25),
+      inset 1px 0 0 rgba(255,255,255,.22),
+      inset 0 1px 0 rgba(255,255,255,.10);
+    border-radius: {{ section.settings.glass_border_radius }}px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .pgc-{{ section_id }}__card .pgc-{{ section_id }}__word--right{
+    position:absolute;
+    top:50%;
+    left: calc(-1 * ({{ section.settings.middle_width }}px / 2) + {{ section.settings.inside_text_shift }}px);
+    transform: translate(-50%,-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    pointer-events:none;
+  }
+
+  .pgc-{{ section_id }}__cardInner{
+    padding: 56px;
+    max-width: 560px;
+    width:100%;
+    position:relative;
+    z-index:2;
+  }
+
+  .pgc-{{ section_id }}__title{
+    margin:0 0 18px;
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: 800;
+    line-height:1.15;
+  }
+
+  .pgc-{{ section_id }}__price{
+    margin:0 0 28px;
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.price_size }}px;
+    font-weight: 750;
+  }
+
+  .pgc-{{ section_id }}__label{
+    display:block;
+    margin: 22px 0 10px;
+    color: {{ section.settings.text_color }};
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .pgc-{{ section_id }}__select{
+    width:100%;
+    padding:12px 14px;
+    border-radius: 12px;
+    border:1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.10);
+    color: {{ section.settings.text_color }};
+    margin-bottom: 18px;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  .pgc-{{ section_id }}__qtyRow{ display:flex; align-items:center; gap:12px; margin: 0 0 30px; }
+
+  .pgc-{{ section_id }}__qtyBtn{
+    width:42px; height:42px;
+    border-radius: 12px;
+    border:1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.10);
+    color: {{ section.settings.text_color }};
+    font-size:20px;
+    cursor:pointer;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  .pgc-{{ section_id }}__qtyInput{
+    width:78px; height:42px;
+    text-align:center;
+    border-radius: 12px;
+    border:1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.10);
+    color: {{ section.settings.text_color }};
+    font-size:16px;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  .pgc-{{ section_id }}__cta{
+    width:100%;
+    margin: 10px 0 26px;
+    padding:16px 22px;
+    border:0;
+    border-radius: {{ section.settings.button_border_radius }}px;
+    cursor:pointer;
+    background: {{ section.settings.button_bg_color }};
+    color: {{ section.settings.button_text_color }};
+    font-weight: 800;
+    font-size: 16px;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .pgc-{{ section_id }}__cta:hover{
+    background: {{ section.settings.button_hover_bg_color }};
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  }
+
+  .pgc-{{ section_id }}__desc{
+    margin:0;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,.15);
+    color: {{ section.settings.text_color }};
+    font-size: 14px;
+    line-height:1.6;
+    opacity: .95;
+  }
+
+  @media (max-width: 900px){
+    .pgc-{{ section_id }}{ min-height: auto; }
+    .pgc-{{ section_id }}__grid{ grid-template-columns: 1fr; min-height:auto; }
+    .pgc-{{ section_id }}__middle{ display:none; }
+    .pgc-{{ section_id }}__word--left{ display:none; }
+    .pgc-{{ section_id }}__left{ justify-content:center; padding: {{ section.settings.section_padding }}px {{ section.settings.side_padding }}px; }
+    .pgc-{{ section_id }}__card{
+      border-left:0;
+      border-top: {{ section.settings.glass_border_width }}px solid rgba(255,255,255,{{ section.settings.glass_border_opacity | divided_by: 100.0 }});
+    }
+    .pgc-{{ section_id }}__cardInner{ padding: 34px 22px; max-width: 640px; }
+
+    /* Tablet: 750px - 989px */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .product-glass-card-wrapper {
+    padding: 2rem 1.5rem;
+  }
+  
+  .product-glass-card-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .product-glass-card-image,
+  .product-glass-card-content {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .product-glass-card-content {
+    padding: 2rem;
+  }
+}
+
+/* Mobile: < 750px */
+@media screen and (max-width: 749px) {
+  .product-glass-card-wrapper {
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+  
+  .product-glass-card-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .product-glass-card-image,
+  .product-glass-card-content {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .product-glass-card-content {
+    padding: 1.5rem;
+  }
+  
+  .product-glass-card-title {
+    font-size: 1.5rem;
+  }
+  
+  .product-glass-card-price {
+    font-size: 1.25rem;
+  }
+  
+  .product-glass-card-button {
+    width: 100%;
+  }
+}
+
+  }
+{% endstyle %}
+
+{% if product_obj %}
+<section class="pgc-{{ section_id }}">
+  <div class="pgc-{{ section_id }}__bg" aria-hidden="true">
+    {% if bg %}
+      <img src="{{ bg | image_url: width: 2400 }}" alt="" loading="lazy">
+    {% else %}
+      <div class="pgc-{{ section_id }}__bgPlaceholder"></div>
+    {% endif %}
+  </div>
+
+  <div class="pgc-{{ section_id }}__container">
+    <div class="pgc-{{ section_id }}__grid">
+
+      <div class="pgc-{{ section_id }}__left">
+        <div class="pgc-{{ section_id }}__leftInner">
+
+          <div class="pgc-{{ section_id }}__carousel" data-carousel>
+            <div class="pgc-{{ section_id }}__track" data-track>
+              {% assign media_list = product_obj.media %}
+              {% if media_list and media_list.size > 0 %}
+                {% for m in media_list %}
+                  <div class="pgc-{{ section_id }}__slide" data-slide>
+                    {% case m.media_type %}
+                      {% when 'image' %}
+                        <img src="{{ m | image_url: width: 1600 }}" alt="{{ m.alt | escape }}" loading="lazy">
+                      {% when 'video' %}
+                        {{ m | video_tag: controls: true, playsinline: true, preload: 'metadata' }}
+                      {% when 'external_video' %}
+                        {{ m | external_video_tag }}
+                      {% when 'model' %}
+                        {{ m | model_viewer_tag }}
+                      {% else %}
+                        {{ 'product-1' | placeholder_svg_tag }}
+                    {% endcase %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="pgc-{{ section_id }}__slide" data-slide>
+                  {% if product_obj.featured_image %}
+                    <img
+                      src="{{ product_obj.featured_image | image_url: width: 1600 }}"
+                      alt="{{ product_obj.title | escape }}"
+                      loading="lazy"
+                      width="{{ product_obj.featured_image.width }}"
+                      height="{{ product_obj.featured_image.height }}"
+                    >
+                  {% else %}
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+
+            <button type="button" class="pgc-{{ section_id }}__navBtn pgc-{{ section_id }}__navPrev" aria-label="Previous" data-prev>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button" class="pgc-{{ section_id }}__navBtn pgc-{{ section_id }}__navNext" aria-label="Next" data-next>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <div class="pgc-{{ section_id }}__dots" data-dots></div>
+          <div class="pgc-{{ section_id }}__thumbs" data-thumbs></div>
+
+        </div>
+      </div>
+
+      <div class="pgc-{{ section_id }}__middle" aria-hidden="true">
+        <div class="pgc-{{ section_id }}__word pgc-{{ section_id }}__word--left">
+          {{ mid_text }}
+        </div>
+      </div>
+
+      <div class="pgc-{{ section_id }}__panel">
+        <div class="pgc-{{ section_id }}__card">
+          <div class="pgc-{{ section_id }}__word pgc-{{ section_id }}__word--right" aria-hidden="true">
+            {{ mid_text }}
+          </div>
+
+          <div class="pgc-{{ section_id }}__cardInner">
+            <h1 class="pgc-{{ section_id }}__title">{{ product_obj.title }}</h1>
+
+            <div class="pgc-{{ section_id }}__price">
+              {{ product_obj.selected_or_first_available_variant.price | money }}
+            </div>
+
+            {% form 'product', product_obj %}
+              {% if product_obj.has_only_default_variant == false %}
+                {% for option in product_obj.options_with_values %}
+                  <label class="pgc-{{ section_id }}__label">{{ option.name }}</label>
+                  <select class="pgc-{{ section_id }}__select" name="options[{{ option.name | escape }}]">
+                    {% for value in option.values %}
+                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                  </select>
+                {% endfor %}
+              {% endif %}
+
+              <label class="pgc-{{ section_id }}__label">Quantity</label>
+              <div class="pgc-{{ section_id }}__qtyRow">
+                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="dec" aria-label="Decrease">−</button>
+                <input class="pgc-{{ section_id }}__qtyInput" type="number" name="quantity" value="1" min="1">
+                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="inc" aria-label="Increase">+</button>
+              </div>
+
+              <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}">
+
+              <button class="pgc-{{ section_id }}__cta" type="submit">
+                {{ section.settings.button_text }}
+              </button>
+            {% endform %}
+
+            {% if product_obj.description != blank %}
+              <div class="pgc-{{ section_id }}__desc">
+                {{ product_obj.description }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script>
+  (function(){
+    const root = document.querySelector('.pgc-{{ section_id }}');
+    if(!root) return;
+
+    const track = root.querySelector('[data-track]');
+    const slides = track ? Array.from(track.querySelectorAll('[data-slide]')) : [];
+    const prev = root.querySelector('[data-prev]');
+    const next = root.querySelector('[data-next]');
+    const dots = root.querySelector('[data-dots]');
+    const thumbs = root.querySelector('[data-thumbs]');
+
+    let i = 0;
+
+    function pauseAllMedia() {
+      slides.forEach(s => {
+        const v = s.querySelector('video');
+        if (v && !v.paused) v.pause();
+        const f = s.querySelector('iframe');
+        if (f && f.src) { const src = f.src; f.src = src; }
+      });
+    }
+
+    function setSlide(n){
+      if(!track || slides.length <= 1) return;
+      i = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(${-i * 100}%)`;
+      pauseAllMedia();
+    }
+
+    function buildDots(){
+      if(!track || slides.length <= 1){
+        if(prev) prev.style.display = 'none';
+        if(next) next.style.display = 'none';
+        if(dots) dots.style.display = 'none';
+        return;
+      }
+      if(prev) prev.addEventListener('click', ()=> setSlide(i - 1));
+      if(next) next.addEventListener('click', ()=> setSlide(i + 1));
+    }
+
+    function buildThumbs(){
+      if(thumbs) thumbs.style.display = 'none';
+    }
+
+    root.querySelectorAll('[data-qty]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const input = btn.closest('form')?.querySelector('input[name="quantity"]') || root.querySelector('input[name="quantity"]');
+        const v = parseInt(input.value, 10) || 1;
+        input.value = btn.dataset.qty === 'inc' ? v + 1 : Math.max(1, v - 1);
+      });
+    });
+
+    buildDots();
+    buildThumbs();
+    setSlide(0);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product glass card",
+  "tag": "section",
+  "settings": [
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "min_height", "min": 300, "max": 1200, "step": 20, "unit": "px", "label": "Section min height", "default": 700 },
+    { "type": "range", "id": "container_width", "min": 600, "max": 1400, "step": 50, "unit": "px", "label": "Left content max width", "default": 1100 },
+    { "type": "range", "id": "section_padding", "min": 20, "max": 140, "step": 10, "unit": "px", "label": "Top/bottom padding", "default": 60 },
+    { "type": "range", "id": "side_padding", "min": 10, "max": 120, "step": 10, "unit": "px", "label": "Left/right padding", "default": 40 },
+
+    { "type": "header", "content": "Middle word (fallback)" },
+    { "type": "text", "id": "middle_text", "label": "Default middle text", "default": "DinoBoo" },
+    { "type": "range", "id": "middle_width", "min": 0, "max": 260, "step": 10, "unit": "px", "label": "Middle space width", "default": 140 },
+    { "type": "range", "id": "middle_text_shift", "min": -100, "max": 100, "step": 2, "unit": "px", "label": "Middle word shift (left/right)", "default": 0 },
+    { "type": "range", "id": "inside_text_shift", "min": -100, "max": 100, "step": 2, "unit": "px", "label": "Inside word shift (left/right)", "default": 0 },
+    { "type": "color", "id": "middle_text_color", "label": "Middle text color", "default": "#ffffff" },
+    { "type": "range", "id": "middle_text_opacity", "min": 10, "max": 100, "step": 5, "unit": "%", "label": "Left opacity", "default": 90 },
+    { "type": "range", "id": "middle_text_size", "min": 80, "max": 260, "step": 10, "unit": "px", "label": "Text size", "default": 200 },
+    { "type": "range", "id": "middle_letter_spacing", "min": 0, "max": 12, "step": 1, "unit": "px", "label": "Letter spacing", "default": 2 },
+    { "type": "range", "id": "middle_text_blur", "min": 0, "max": 8, "step": 1, "unit": "px", "label": "Left blur", "default": 0 },
+
+    { "type": "range", "id": "word_left_cut", "min": 0, "max": 60, "step": 1, "unit": "%", "label": "Right part start (0-60)", "default": 25 },
+    { "type": "range", "id": "word_right_cut", "min": 0, "max": 60, "step": 1, "unit": "%", "label": "Left part end (0-60)", "default": 25 },
+    { "type": "range", "id": "word_inside_opacity", "min": 5, "max": 100, "step": 5, "unit": "%", "label": "Inside opacity", "default": 60 },
+    { "type": "range", "id": "word_inside_blur", "min": 0, "max": 12, "step": 1, "unit": "px", "label": "Inside blur", "default": 4 },
+
+    { "type": "header", "content": "Gallery" },
+    { "type": "range", "id": "image_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Image border radius", "default": 22 },
+
+    { "type": "header", "content": "Glass card" },
+    { "type": "range", "id": "glass_border_radius", "min": 0, "max": 60, "step": 2, "unit": "px", "label": "Glass border radius", "default": 0 },
+    { "type": "range", "id": "glass_opacity", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Glass opacity", "default": 12 },
+    { "type": "range", "id": "glass_blur", "min": 0, "max": 40, "step": 1, "unit": "px", "label": "Glass blur", "default": 26 },
+    { "type": "range", "id": "glass_border_width", "min": 0, "max": 6, "step": 1, "unit": "px", "label": "Glass border width", "default": 2 },
+    { "type": "range", "id": "glass_border_opacity", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Glass border opacity", "default": 60 },
+
+    { "type": "header", "content": "Typography" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#0a0a0a" },
+    { "type": "range", "id": "title_size", "min": 20, "max": 52, "step": 2, "unit": "px", "label": "Title size", "default": 32 },
+    { "type": "range", "id": "price_size", "min": 16, "max": 44, "step": 2, "unit": "px", "label": "Price size", "default": 22 },
+
+    { "type": "header", "content": "Button" },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Add to cart" },
+    { "type": "color", "id": "button_bg_color", "label": "Button background color", "default": "#000000" },
+    { "type": "color", "id": "button_hover_bg_color", "label": "Button hover color", "default": "#333333" },
+    { "type": "color", "id": "button_text_color", "label": "Button text color", "default": "#ffffff" },
+    { "type": "range", "id": "button_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Button border radius", "default": 12 }
+  ],
+  "presets": [
+    { "name": "Product glass card" }
+  ]
+}
+{% endschema %}

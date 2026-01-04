@@ -1,0 +1,345 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "banner": {
+      "type": "main-collection-banner",
+      "disabled": true,
+      "settings": {
+        "show_collection_description": true,
+        "show_collection_image": false,
+        "color_scheme": "scheme-1"
+      }
+    },
+    "product-grid": {
+      "type": "main-collection-product-grid",
+      "disabled": true,
+      "settings": {
+        "products_per_page": 16,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "color_scheme": "scheme-1",
+        "image_ratio": "adapt",
+        "image_shape": "default",
+        "show_secondary_image": false,
+        "show_vendor": false,
+        "show_rating": false,
+        "quick_add": "none",
+        "enable_filtering": true,
+        "filter_type": "horizontal",
+        "enable_sorting": true,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "1766198384ec95d504": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "17661987485ac72ce4": {
+      "type": "_blocks",
+      "settings": {}
+    },
+    "shop_color_grid_HyVwhd": {
+      "type": "shop-color-grid",
+      "blocks": {
+        "tile_KVLHJE": {
+          "type": "tile",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/greenpng.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_Wj7did": {
+          "type": "tile",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/pinkbunny.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_LHUyy7": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/blue.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_M34eBP": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/red.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_4jkKf7": {
+          "type": "tile",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/grey.png",
+            "text_color": "#ffffff"
+          }
+        }
+      },
+      "block_order": [
+        "tile_KVLHJE",
+        "tile_Wj7did",
+        "tile_LHUyy7",
+        "tile_M34eBP",
+        "tile_4jkKf7"
+      ],
+      "custom_css": [],
+      "name": "Shop color grid (full screen)",
+      "settings": {
+        "section_bg": "#ffffff",
+        "max_width": 1500,
+        "outer_padding": 64,
+        "gap": 26,
+        "columns": 5,
+        "height_vh": 95,
+        "tile_h": 540,
+        "tile_h_mobile": 240,
+        "tile_bg": "#ffffff",
+        "image_fit": "cover",
+        "image_scale": 100,
+        "image_pos_x": 50,
+        "image_pos_y": 50,
+        "hover_zoom": 106,
+        "radius": 12,
+        "overlay_opacity": 35,
+        "overlay_hover_opacity": 33
+      }
+    },
+    "shop_color_grid_mytb9M": {
+      "type": "shop-color-grid",
+      "blocks": {
+        "tile_iBHdYW": {
+          "type": "tile",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/greenpng.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_GVynen": {
+          "type": "tile",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/pinkbunny.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_MBTBfD": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/blue.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_ViQ7GJ": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/red.png",
+            "text_color": "#ffffff"
+          }
+        },
+        "tile_3dYtDP": {
+          "type": "tile",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/grey.png",
+            "text_color": "#ffffff"
+          }
+        }
+      },
+      "block_order": [
+        "tile_iBHdYW",
+        "tile_GVynen",
+        "tile_MBTBfD",
+        "tile_ViQ7GJ",
+        "tile_3dYtDP"
+      ],
+      "custom_css": [],
+      "name": "Shop color grid (full screen)",
+      "settings": {
+        "section_bg": "#ffffff",
+        "max_width": 1500,
+        "outer_padding": 64,
+        "gap": 26,
+        "columns": 5,
+        "height_vh": 95,
+        "tile_h": 540,
+        "tile_h_mobile": 240,
+        "tile_bg": "#ffffff",
+        "image_fit": "cover",
+        "image_scale": 100,
+        "image_pos_x": 50,
+        "image_pos_y": 50,
+        "hover_zoom": 106,
+        "radius": 12,
+        "overlay_opacity": 35,
+        "overlay_hover_opacity": 33
+      }
+    },
+    "1767114833c9c201eb": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_da32be5_RpgUkX": {
+          "type": "ai_gen_block_da32be5",
+          "settings": {
+            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "tile_height": 670,
+            "tile_gap": 32,
+            "top_padding": 80,
+            "bottom_padding": 80,
+            "side_margin": 60,
+            "border_radius": 20,
+            "shadow_x": 0,
+            "shadow_y": 4,
+            "shadow_blur": 20,
+            "shadow_opacity": 0.1,
+            "blur_amount": 6,
+            "fade_opacity": 0.5,
+            "hover_scale": 1,
+            "show_overlay": true,
+            "title_size": 18,
+            "price_size": 16
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_da32be5_RpgUkX"
+      ],
+      "settings": {}
+    },
+    "1767115431d2365970": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_690f344_BUJGTT": {
+          "type": "ai_gen_block_690f344",
+          "settings": {
+            "section_padding": 40,
+            "tile_gap": 8,
+            "transition_speed": 0.3,
+            "tile_1_product": "",
+            "tile_1_blur": 50,
+            "tile_2_product": "",
+            "tile_2_blur": 50,
+            "tile_3_product": "",
+            "tile_3_blur": 50,
+            "tile_4_product": "",
+            "tile_4_blur": 50,
+            "tile_5_product": "",
+            "tile_5_blur": 50
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_690f344_BUJGTT"
+      ],
+      "settings": {}
+    },
+    "1767115924e3e1520e": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_3d9aa66_RUi9hf": {
+          "type": "ai_gen_block_3d9aa66",
+          "settings": {
+            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image_1": "shopify://shop_images/greenpng.png",
+            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image_2": "shopify://shop_images/pinkbunny.png",
+            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image_3": "shopify://shop_images/blue.png",
+            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image_4": "shopify://shop_images/red.png",
+            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image_5": "shopify://shop_images/grey.png",
+            "padding_top": 90,
+            "padding_bottom": 90,
+            "padding_horizontal": 80,
+            "tile_gap": 32,
+            "border_radius": 20,
+            "shadow_vertical": 4,
+            "shadow_blur": 15,
+            "shadow_opacity": 15,
+            "hover_blur": 6,
+            "hover_opacity": 50,
+            "label_color": "#ffffff",
+            "label_font_size": 16,
+            "label_font_weight": 600
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_3d9aa66_ptKNrn": {
+          "type": "ai_gen_block_3d9aa66",
+          "settings": {
+            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image_1": "shopify://shop_images/greenpng.png",
+            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image_2": "shopify://shop_images/pinkbunny.png",
+            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image_3": "shopify://shop_images/blue.png",
+            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image_4": "shopify://shop_images/red.png",
+            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image_5": "shopify://shop_images/grey.png",
+            "padding_top": 90,
+            "padding_bottom": 90,
+            "padding_horizontal": 80,
+            "tile_gap": 32,
+            "border_radius": 20,
+            "shadow_vertical": 4,
+            "shadow_blur": 15,
+            "shadow_opacity": 15,
+            "hover_blur": 10,
+            "hover_opacity": 50,
+            "label_color": "#ffffff",
+            "label_font_size": 16,
+            "label_font_weight": 600
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_3d9aa66_RUi9hf",
+        "ai_gen_block_3d9aa66_ptKNrn"
+      ],
+      "settings": {}
+    },
+    "1767117382e575a2c4": {
+      "type": "_blocks",
+      "settings": {}
+    }
+  },
+  "order": [
+    "banner",
+    "product-grid",
+    "1766198384ec95d504",
+    "17661987485ac72ce4",
+    "shop_color_grid_HyVwhd",
+    "shop_color_grid_mytb9M",
+    "1767114833c9c201eb",
+    "1767115431d2365970",
+    "1767115924e3e1520e",
+    "1767117382e575a2c4"
+  ]
+}
