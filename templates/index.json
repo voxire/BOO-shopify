@@ -99,6 +99,9 @@
       "settings": {
         "headline_line_1": "Glowing skin",
         "headline_line_2": "personalized to you",
+        "headline_line_1_alt": "hello",
+        "headline_line_2_alt": "how are you",
+        "rotation_interval": 5,
         "tagline": "Customized care starts here",
         "color_scheme": "",
         "padding_top": 36,
