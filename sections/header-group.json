@@ -129,10 +129,20 @@
         "padding_top": 12,
         "padding_bottom": 12
       }
+    },
+    "hers_header_gmk6nL": {
+      "type": "hers-header",
+      "name": "Hers Header",
+      "settings": {
+        "color_scheme": "",
+        "padding_top": 20,
+        "padding_bottom": 20
+      }
     }
   },
   "order": [
     "header",
-    "hers_top_bar_9wzAfT"
+    "hers_top_bar_9wzAfT",
+    "hers_header_gmk6nL"
   ]
 }
