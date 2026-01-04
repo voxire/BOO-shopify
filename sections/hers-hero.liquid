@@ -15,7 +15,7 @@
   }
 {%- endstyle -%}
 
-<section class="hers-hero color-{{ section.settings.color_scheme }} gradient">
+<section class="hers-hero color-{{ section.settings.color_scheme }} gradient" data-rotation-interval="{{ section.settings.rotation_interval | default: 5 }}">
   <div class="hers-hero__container page-width">
     {%- if section.settings.logo != blank -%}
       <div class="hers-hero__logo">
@@ -28,8 +28,18 @@
 
     <div class="hers-hero__content">
       <h1 class="hers-hero__headline">
-        <span class="hers-hero__headline-line hers-hero__headline-line--green">{{ section.settings.headline_line_1 }}</span>
-        <span class="hers-hero__headline-line hers-hero__headline-line--black">{{ section.settings.headline_line_2 }}</span>
+        <div class="hers-hero__headline-rotator">
+          <div class="hers-hero__headline-item hers-hero__headline-item--active">
+            <span class="hers-hero__headline-line hers-hero__headline-line--green">{{ section.settings.headline_line_1 }}</span>
+            <span class="hers-hero__headline-line hers-hero__headline-line--black">{{ section.settings.headline_line_2 }}</span>
+          </div>
+          {%- if section.settings.headline_line_1_alt != blank and section.settings.headline_line_2_alt != blank -%}
+            <div class="hers-hero__headline-item">
+              <span class="hers-hero__headline-line hers-hero__headline-line--green">{{ section.settings.headline_line_1_alt }}</span>
+              <span class="hers-hero__headline-line hers-hero__headline-line--black">{{ section.settings.headline_line_2_alt }}</span>
+            </div>
+          {%- endif -%}
+        </div>
       </h1>
       {%- if section.settings.tagline != blank -%}
         <p class="hers-hero__tagline">{{ section.settings.tagline }}</p>
@@ -108,6 +118,29 @@
       "id": "headline_line_2",
       "label": "Headline Line 2",
       "default": "personalized to you"
+    },
+    {
+      "type": "text",
+      "id": "headline_line_1_alt",
+      "label": "Alternate Headline Line 1",
+      "info": "Second headline to rotate with"
+    },
+    {
+      "type": "text",
+      "id": "headline_line_2_alt",
+      "label": "Alternate Headline Line 2",
+      "info": "Second headline to rotate with"
+    },
+    {
+      "type": "range",
+      "id": "rotation_interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Rotation Interval (seconds)",
+      "default": 5,
+      "info": "Time between headline rotations"
     },
     {
       "type": "text",

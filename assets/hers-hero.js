@@ -7,7 +7,10 @@ class HersHero extends HTMLElement {
   constructor() {
     super();
     this.cards = this.querySelectorAll('.hers-hero__card');
+    this.headlineItems = this.querySelectorAll('.hers-hero__headline-item');
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.rotationInterval = null;
+    this.currentHeadlineIndex = 0;
     this.init();
   }
 
@@ -18,9 +21,16 @@ class HersHero extends HTMLElement {
         card.style.opacity = '1';
         card.style.transform = 'none';
       });
+      // Show first headline only
+      if (this.headlineItems.length > 0) {
+        this.headlineItems[0].classList.add('hers-hero__headline-item--active');
+      }
       return;
     }
 
+    // Initialize headline rotation
+    this.initHeadlineRotation();
+    
     // Initialize scroll animations
     this.initScrollAnimations();
     
@@ -29,6 +39,47 @@ class HersHero extends HTMLElement {
     
     // Initialize card interactions
     this.initCardInteractions();
+  }
+
+  initHeadlineRotation() {
+    if (this.headlineItems.length < 2) {
+      // If only one headline, just make it active
+      if (this.headlineItems.length === 1) {
+        this.headlineItems[0].classList.add('hers-hero__headline-item--active');
+      }
+      return;
+    }
+
+    // Ensure first headline is active on load
+    this.headlineItems[0].classList.add('hers-hero__headline-item--active');
+
+    const section = this.closest('.hers-hero');
+    const intervalSetting = section?.dataset?.rotationInterval || '5';
+    const intervalSeconds = parseInt(intervalSetting, 10) * 1000;
+
+    const rotateHeadlines = () => {
+      // Remove active class from current headline
+      const currentItem = this.headlineItems[this.currentHeadlineIndex];
+      currentItem.classList.remove('hers-hero__headline-item--active');
+      
+      // Move to next headline
+      this.currentHeadlineIndex = (this.currentHeadlineIndex + 1) % this.headlineItems.length;
+      
+      // Add active class to new headline after a brief delay for smooth transition
+      setTimeout(() => {
+        const nextItem = this.headlineItems[this.currentHeadlineIndex];
+        nextItem.classList.add('hers-hero__headline-item--active');
+      }, 100);
+    };
+
+    // Start rotation after initial delay
+    this.rotationInterval = setInterval(rotateHeadlines, intervalSeconds);
+  }
+
+  disconnectedCallback() {
+    if (this.rotationInterval) {
+      clearInterval(this.rotationInterval);
+    }
   }
 
   initScrollAnimations() {
@@ -124,25 +175,26 @@ if (!customElements.get('hers-hero')) {
 }
 
 // Initialize on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const heroElements = document.querySelectorAll('.hers-hero');
-    heroElements.forEach(hero => {
-      if (!hero.querySelector('hers-hero')) {
-        const wrapper = document.createElement('hers-hero');
-        hero.parentNode.insertBefore(wrapper, hero);
-        wrapper.appendChild(hero);
-      }
-    });
-  });
-} else {
+function initializeHersHero() {
   const heroElements = document.querySelectorAll('.hers-hero');
   heroElements.forEach(hero => {
-    if (!hero.querySelector('hers-hero')) {
-      const wrapper = document.createElement('hers-hero');
-      hero.parentNode.insertBefore(wrapper, hero);
-      wrapper.appendChild(hero);
-    }
+    // Check if already initialized
+    if (hero.dataset.initialized === 'true') return;
+    
+    // Create wrapper and initialize
+    const wrapper = document.createElement('hers-hero');
+    hero.parentNode.insertBefore(wrapper, hero);
+    wrapper.appendChild(hero);
+    hero.dataset.initialized = 'true';
   });
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHersHero);
+} else {
+  initializeHersHero();
+}
+
+// Re-initialize on section load (for theme editor)
+document.addEventListener('shopify:section:load', initializeHersHero);
 
