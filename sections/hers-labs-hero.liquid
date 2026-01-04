@@ -1,6 +1,12 @@
 {{ 'section-hers-labs-hero.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'hers-labs-hero.js' | asset_url }}" defer="defer"></script>
 
+{%- comment -%} Preload first image for faster display {%- endcomment -%}
+{%- assign image_blocks = section.blocks | where: 'type', 'sliding_image' -%}
+{%- if image_blocks.size > 0 and image_blocks.first.settings.image != blank -%}
+  <link rel="preload" as="image" href="{{ image_blocks.first.settings.image | image_url: width: 600 }}" fetchpriority="high">
+{%- endif -%}
+
 {%- style -%}
   .hers-labs-hero {
     padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
@@ -44,7 +50,11 @@
               {%- for block in image_blocks -%}
                 {%- if block.settings.image != blank -%}
                   <div class="hers-labs-hero__image-wrapper" {{ block.shopify_attributes }}>
-                    {{ block.settings.image | image_url: width: 400 | image_tag: loading: 'lazy', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
+                    {%- if forloop.first and i == 1 -%}
+                      {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'eager', fetchpriority: 'high', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
+                    {%- else -%}
+                      {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'eager', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__sliding-image' }}
+                    {%- endif -%}
                   </div>
                 {%- endif -%}
               {%- endfor -%}

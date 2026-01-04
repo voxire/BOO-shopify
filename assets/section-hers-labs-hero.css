@@ -93,6 +93,8 @@
   gap: 0;
   margin: 0;
   padding: 0;
+  /* Preload optimization */
+  content-visibility: auto;
 }
 
 .hers-labs-hero__images-set {
@@ -127,6 +129,12 @@
   object-fit: cover;
   object-position: center;
   filter: brightness(0.9) contrast(1.1);
+  /* Faster loading and rendering */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Content Overlay */
