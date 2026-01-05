@@ -172,7 +172,18 @@
 }
 
 /* Explicit image styling to override any global rules */
-.hers-labs-hero__image-wrapper img,
+/* Target ALL images inside image-wrapper, regardless of class */
+.hers-labs-hero__image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  object-fit: cover !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
 .hers-labs-hero__image-wrapper .hers-labs-hero__sliding-image {
   width: 100% !important;
   height: 100% !important;
