@@ -20,10 +20,44 @@ class HersLabsHero extends HTMLElement {
       if (track) {
         track.style.animation = 'none';
       }
+      return;
     }
+
+    // Verify and fix marquee animation
+    this.verifyMarqueeAnimation();
 
     // Initialize button interactions
     this.initButtonInteractions();
+  }
+
+  verifyMarqueeAnimation() {
+    const track = this.section.querySelector('.hers-labs-hero__images-track');
+    if (!track) return;
+
+    const sets = track.querySelectorAll('.hers-labs-hero__images-set');
+    if (sets.length < 2) {
+      console.warn('Marquee requires at least 2 sets for seamless looping');
+      return;
+    }
+
+    // Ensure animation is applied
+    const computedStyle = window.getComputedStyle(track);
+    if (!computedStyle.animationName || computedStyle.animationName === 'none') {
+      track.style.animation = 'slideImages 20s linear infinite';
+    }
+
+    // Verify both sets have identical content
+    const firstSet = sets[0];
+    const secondSet = sets[1];
+    
+    // Ensure no gaps between sets
+    if (secondSet) {
+      secondSet.style.marginLeft = '0';
+      secondSet.style.paddingLeft = '0';
+    }
+
+    // Force reflow to ensure width calculation
+    track.offsetHeight;
   }
 
   initButtonInteractions() {
