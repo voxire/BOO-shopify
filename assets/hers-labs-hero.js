@@ -146,11 +146,13 @@ class HersLabsHero extends HTMLElement {
       console.log('✅ Width verification passed!');
     }
     
-    // Add gap between sets to match internal gap (2.4rem) for seamless loop
-    if (secondSet) {
-      secondSet.style.marginLeft = '2.4rem';
-      secondSet.style.paddingLeft = '0';
-    }
+    // Add gap between ALL sets to match internal gap (2.4rem) for seamless loop
+    sets.forEach((set, index) => {
+      if (index > 0) {
+        set.style.marginLeft = '2.4rem';
+        set.style.paddingLeft = '0';
+      }
+    });
 
     console.log('✅ Marquee animation verified and initialized');
   }

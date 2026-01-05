@@ -149,10 +149,10 @@
   outline: none !important;
 }
 
-/* Add gap between sets to match internal gap (2.4rem) for seamless loop */
-/* This ensures the gap between Set 1's last box and Set 2's first box matches */
-/* the gap between boxes within each set - creating a visually seamless loop */
-.hers-labs-hero__images-set + .hers-labs-hero__images-set {
+/* Add gap between ALL sets to match internal gap (2.4rem) for seamless loop */
+/* This ensures the gap between any set's last box and the next set's first box */
+/* matches the gap between boxes within each set - creating a visually seamless loop */
+.hers-labs-hero__images-set:not(:first-child) {
   margin-left: 2.4rem !important;
   margin-right: 0 !important;
   padding-left: 0 !important;
@@ -329,15 +329,10 @@
 }
 
 /* Animation - Seamless infinite loop */
-/* The track contains [Set A][Set B], both identical */
-/* We animate from 0 to -50%, which moves Set A completely off-screen */
-/* When it loops back to 0%, Set B is in Set A's original position = seamless */
-/* Animation - Seamless infinite loop */
-/* Track structure: [Set A][2.4rem gap][Set B] - both sets identical */
-/* Total width = Set A + 2.4rem + Set B = 2×Set A + 2.4rem */
-/* We need to move exactly: Set A width + 2.4rem gap */
-/* This equals: (Total width) / 2 = 50% of total */
-/* So -50% still works because the gap is included in the total width calculation */
+/* Track structure: [Set 1][gap][Set 2][gap][Set 3][gap][Set 4] - all sets identical */
+/* With 4 sets, we move exactly 50% (2 sets) so Set 3&4 replace Set 1&2 seamlessly */
+/* Total width = 4×Set + 3×gap, animation moves -50% = 2×Set + 1.5×gap */
+/* When it loops, Set 3&4 are in Set 1&2's original position = seamless */
 @keyframes slideImages {
   from {
     transform: translateX(0);
