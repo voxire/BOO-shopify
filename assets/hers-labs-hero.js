@@ -32,23 +32,49 @@ class HersLabsHero extends HTMLElement {
 
   verifyMarqueeAnimation() {
     const track = this.section.querySelector('.hers-labs-hero__images-track');
-    if (!track) return;
+    if (!track) {
+      console.error('❌ .hers-labs-hero__images-track not found!');
+      console.log('Section element:', this.section);
+      console.log('Section HTML:', this.section.innerHTML.substring(0, 500));
+      // Try alternative selector
+      const altTrack = this.section.querySelector('[data-marquee-track]');
+      if (altTrack) {
+        console.log('✅ Found track using data-marquee-track attribute');
+        return this.verifyMarqueeAnimationForTrack(altTrack);
+      }
+      return;
+    }
 
+    this.verifyMarqueeAnimationForTrack(track);
+  }
+
+  verifyMarqueeAnimationForTrack(track) {
+    console.log('✅ Track found:', track);
+    
     const sets = track.querySelectorAll('.hers-labs-hero__images-set');
+    console.log('✅ Found', sets.length, 'image sets');
+    
     if (sets.length < 2) {
-      console.warn('Marquee requires at least 2 sets for seamless looping');
+      console.warn('⚠️ Marquee requires at least 2 sets for seamless looping. Found:', sets.length);
       return;
     }
 
     // Ensure animation is applied
     const computedStyle = window.getComputedStyle(track);
     if (!computedStyle.animationName || computedStyle.animationName === 'none') {
+      console.log('🔧 Applying animation manually');
       track.style.animation = 'slideImages 20s linear infinite';
+    } else {
+      console.log('✅ Animation already applied:', computedStyle.animationName);
     }
 
     // Verify both sets have identical content
     const firstSet = sets[0];
     const secondSet = sets[1];
+    
+    console.log('✅ First set width:', firstSet.offsetWidth);
+    console.log('✅ Second set width:', secondSet.offsetWidth);
+    console.log('✅ Track width:', track.offsetWidth);
     
     // Ensure no gaps between sets
     if (secondSet) {
@@ -58,6 +84,8 @@ class HersLabsHero extends HTMLElement {
 
     // Force reflow to ensure width calculation
     track.offsetHeight;
+    
+    console.log('✅ Marquee animation verified and initialized');
   }
 
   initButtonInteractions() {

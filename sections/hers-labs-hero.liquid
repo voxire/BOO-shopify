@@ -42,11 +42,11 @@
     {%- endif -%}
 
     <div class="hers-labs-hero__sliding-images">
-      <div class="hers-labs-hero__images-track">
+      <div class="hers-labs-hero__images-track" data-marquee-track>
         {%- assign image_blocks = section.blocks | where: 'type', 'sliding_image' -%}
         {%- if image_blocks.size > 0 -%}
           {%- for i in (1..2) -%}
-            <div class="hers-labs-hero__images-set">
+            <div class="hers-labs-hero__images-set" data-marquee-set="{{ i }}">
               {%- for block in image_blocks -%}
                 {%- if block.settings.image != blank -%}
                   <div class="hers-labs-hero__image-wrapper" {{ block.shopify_attributes }}>
@@ -60,6 +60,10 @@
               {%- endfor -%}
             </div>
           {%- endfor -%}
+        {%- else -%}
+          {%- comment -%} Placeholder to ensure track exists even when no images {%- endcomment -%}
+          <div class="hers-labs-hero__images-set" data-marquee-set="1" style="min-width: 1px; min-height: 1px;"></div>
+          <div class="hers-labs-hero__images-set" data-marquee-set="2" style="min-width: 1px; min-height: 1px;"></div>
         {%- endif -%}
       </div>
     </div>

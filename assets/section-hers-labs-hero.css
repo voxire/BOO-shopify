@@ -86,12 +86,15 @@
   /* Ensure container doesn't cut off images */
   clip-path: inset(0);
   -webkit-clip-path: inset(0);
+  /* Ensure it's always visible for debugging */
+  min-height: 25rem;
 }
 
 .hers-labs-hero__images-track {
-  display: flex;
+  display: flex !important;
   width: max-content;
   height: 100%;
+  min-height: 25rem;
   will-change: transform;
   /* Explicit animation declaration for seamless loop */
   animation-name: slideImages;
@@ -109,6 +112,9 @@
   /* Ensure smooth continuous animation */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Ensure track is always visible */
+  visibility: visible;
+  opacity: 1;
 }
 
 .hers-labs-hero__images-set {
