@@ -102,8 +102,6 @@
   /* Ensure smooth continuous animation */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  perspective: 1000px;
-  -webkit-perspective: 1000px;
 }
 
 .hers-labs-hero__images-set {
@@ -117,13 +115,19 @@
   width: max-content;
   /* Ensure sets connect seamlessly */
   position: relative;
+  /* Prevent any spacing between sets */
+  box-sizing: border-box;
 }
 
 /* Remove any gap between sets - ensure seamless connection */
+/* The second set must start immediately after the first set with ZERO spacing */
 .hers-labs-hero__images-set + .hers-labs-hero__images-set {
-  margin-left: 0;
-  padding-left: 0;
-  gap: 0;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+  /* Ensure no visual gap */
+  position: relative;
+  left: 0;
 }
 
 .hers-labs-hero__image-wrapper {
@@ -246,6 +250,9 @@
 }
 
 /* Animation - Seamless infinite loop */
+/* The track contains [Set A][Set B], both identical */
+/* We animate from 0 to -50%, which moves Set A completely off-screen */
+/* When it loops back to 0%, Set B is in Set A's original position = seamless */
 @keyframes slideImages {
   0% {
     transform: translateX(0);
@@ -255,19 +262,15 @@
   }
 }
 
-/* Ensure animation is smooth and continuous */
-.hers-labs-hero__images-track {
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  /* Prevent any jank or stutter */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
 /* Ensure perfect seamless loop - no gaps or cutoffs */
 .hers-labs-hero__images-track {
   /* Track must be exactly 2x the width of one set for perfect loop */
+  /* max-content ensures the track width = Set A width + Set B width (no gaps) */
   width: max-content;
+  /* Animation properties - already set above, but ensure they're here too */
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
 }
 
 /* Ensure sets are identical and connect seamlessly */
@@ -282,25 +285,16 @@
   padding-left: 0;
 }
 
-.hers-labs-hero__images-set:last-child {
-  margin-right: 0;
-  padding-right: 0;
-  /* Ensure no gap between first and second set */
-  margin-left: 0;
-  padding-left: 0;
+.hers-labs-hero__images-set:nth-child(2) {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  /* Ensure second set starts immediately after first set with no gap */
 }
 
 /* Ensure no gaps or white space during animation */
 .hers-labs-hero__sliding-images {
   background: transparent;
   overflow: hidden;
-}
-
-.hers-labs-hero__images-track {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
 }
 
 /* Responsive Design */
