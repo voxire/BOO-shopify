@@ -59,6 +59,37 @@ class HersLabsHero extends HTMLElement {
       return;
     }
 
+    // Find and verify all images
+    const images = track.querySelectorAll('.hers-labs-hero__sliding-image, .hers-labs-hero__image-wrapper img');
+    console.log('✅ Found', images.length, 'images');
+    
+    images.forEach((img, index) => {
+      // Force images to display
+      img.style.display = 'block';
+      img.style.visibility = 'visible';
+      img.style.opacity = '1';
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      
+      // Check if image loaded
+      if (img.complete && img.naturalHeight !== 0) {
+        console.log(`✅ Image ${index + 1} loaded:`, img.src.substring(0, 50));
+      } else {
+        console.warn(`⚠️ Image ${index + 1} not loaded yet:`, img.src.substring(0, 50));
+        // Force reload
+        img.loading = 'eager';
+        if (img.src) {
+          const newImg = new Image();
+          newImg.src = img.src;
+          newImg.onload = () => {
+            img.src = newImg.src;
+            console.log(`✅ Image ${index + 1} reloaded successfully`);
+          };
+        }
+      }
+    });
+
     // Ensure animation is applied
     const computedStyle = window.getComputedStyle(track);
     if (!computedStyle.animationName || computedStyle.animationName === 'none') {

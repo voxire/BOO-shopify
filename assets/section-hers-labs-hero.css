@@ -171,13 +171,26 @@
   min-height: 20rem;
 }
 
+/* Explicit image styling to override any global rules */
+.hers-labs-hero__image-wrapper img,
+.hers-labs-hero__image-wrapper .hers-labs-hero__sliding-image {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  object-fit: cover !important;
+}
+
 .hers-labs-hero__sliding-image {
   width: 100% !important;
   height: 100% !important;
+  min-width: 30rem !important;
+  min-height: 20rem !important;
   max-width: 100% !important;
   max-height: 100% !important;
-  object-fit: cover;
-  object-position: center;
+  object-fit: cover !important;
+  object-position: center !important;
   filter: brightness(0.9) contrast(1.1);
   /* Faster loading and rendering */
   image-rendering: -webkit-optimize-contrast;
@@ -189,8 +202,10 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  position: relative;
+  position: relative !important;
   z-index: 1;
+  /* Force image to render */
+  background-color: transparent;
 }
 
 /* Content Overlay */
