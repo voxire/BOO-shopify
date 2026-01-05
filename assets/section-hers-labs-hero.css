@@ -90,7 +90,7 @@
 
 .hers-labs-hero__images-track {
   display: flex;
-  width: fit-content;
+  width: max-content;
   height: 100%;
   will-change: transform;
   animation: slideImages 20s linear infinite;
@@ -114,15 +114,16 @@
   align-items: center;
   flex-shrink: 0;
   margin: 0;
-  width: auto;
+  width: max-content;
   /* Ensure sets connect seamlessly */
   position: relative;
 }
 
-/* Remove any gap between sets */
+/* Remove any gap between sets - ensure seamless connection */
 .hers-labs-hero__images-set + .hers-labs-hero__images-set {
   margin-left: 0;
   padding-left: 0;
+  gap: 0;
 }
 
 .hers-labs-hero__image-wrapper {
@@ -266,13 +267,13 @@
 /* Ensure perfect seamless loop - no gaps or cutoffs */
 .hers-labs-hero__images-track {
   /* Track must be exactly 2x the width of one set for perfect loop */
-  width: fit-content;
+  width: max-content;
 }
 
 /* Ensure sets are identical and connect seamlessly */
 .hers-labs-hero__images-set {
   /* Each set must have identical width */
-  width: auto;
+  width: max-content;
   min-width: 0;
 }
 
@@ -286,6 +287,7 @@
   padding-right: 0;
   /* Ensure no gap between first and second set */
   margin-left: 0;
+  padding-left: 0;
 }
 
 /* Ensure no gaps or white space during animation */
