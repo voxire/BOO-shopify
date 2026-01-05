@@ -146,7 +146,7 @@ class HersLabsHero extends HTMLElement {
       console.log('✅ Width verification passed!');
     }
     
-    // Ensure gap between sets matches internal gap (2.4rem) for seamless loop
+    // Add gap between sets to match internal gap (2.4rem) for seamless loop
     if (secondSet) {
       secondSet.style.marginLeft = '2.4rem';
       secondSet.style.paddingLeft = '0';

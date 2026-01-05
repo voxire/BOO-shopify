@@ -104,7 +104,7 @@
   /* Explicit animation declaration for seamless loop */
   /* Animation moves -50% which is exactly one set width */
   animation: slideImages 20s linear infinite;
-  gap: 0;
+  gap: 0 !important;
   margin: 0;
   padding: 0;
   /* Prevent track from being constrained by parent */
@@ -131,27 +131,37 @@
   align-items: center;
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
-  margin: 0;
+  margin: 0 !important;
   width: max-content !important;
   min-width: max-content !important;
   /* Ensure sets connect seamlessly */
   position: relative;
-  /* Prevent any spacing between sets */
   box-sizing: border-box;
   /* Ensure visibility */
   visibility: visible !important;
   opacity: 1 !important;
   /* Force both sets to contribute width - prevent collapse */
   overflow: visible;
+  /* No borders, backgrounds, or shadows on sets - only on individual boxes */
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-/* Add gap between sets to match internal gap between boxes */
-/* The gap between sets should match the gap within sets (2.4rem) for seamless loop */
+/* Add gap between sets to match internal gap (2.4rem) for seamless loop */
+/* This ensures the gap between Set 1's last box and Set 2's first box matches */
+/* the gap between boxes within each set - creating a visually seamless loop */
 .hers-labs-hero__images-set + .hers-labs-hero__images-set {
   margin-left: 2.4rem !important;
+  margin-right: 0 !important;
   padding-left: 0 !important;
+  padding-right: 0 !important;
   border-left: none !important;
+  border-right: none !important;
   position: relative;
+  /* Ensure no visual artifacts between sets */
+  background: transparent;
 }
 
 .hers-labs-hero__image-wrapper {
@@ -323,9 +333,11 @@
 /* We animate from 0 to -50%, which moves Set A completely off-screen */
 /* When it loops back to 0%, Set B is in Set A's original position = seamless */
 /* Animation - Seamless infinite loop */
-/* Track structure: [Set A][Set B] - both identical */
-/* Animation moves exactly -50% (half the total width = one set width) */
-/* When Set A exits left, Set B is in Set A's original position = seamless */
+/* Track structure: [Set A][2.4rem gap][Set B] - both sets identical */
+/* Total width = Set A + 2.4rem + Set B = 2×Set A + 2.4rem */
+/* We need to move exactly: Set A width + 2.4rem gap */
+/* This equals: (Total width) / 2 = 50% of total */
+/* So -50% still works because the gap is included in the total width calculation */
 @keyframes slideImages {
   from {
     transform: translateX(0);
