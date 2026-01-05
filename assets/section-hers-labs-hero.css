@@ -89,33 +89,37 @@
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: none;
+  /* Allow track to extend beyond viewport */
+  clip-path: none;
+  -webkit-clip-path: none;
 }
 
 .hers-labs-hero__images-track {
   display: flex !important;
-  width: max-content;
+  width: max-content !important;
+  min-width: max-content !important;
   height: 100%;
   min-height: 25rem;
   will-change: transform;
   /* Explicit animation declaration for seamless loop */
-  animation-name: slideImages;
-  animation-duration: 20s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-direction: normal;
-  animation-fill-mode: both;
-  animation-play-state: running;
+  /* Animation moves -50% which is exactly one set width */
+  animation: slideImages 20s linear infinite;
   gap: 0;
   margin: 0;
   padding: 0;
+  /* Prevent track from being constrained by parent */
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
   /* Preload optimization */
   content-visibility: auto;
   /* Ensure smooth continuous animation */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   /* Ensure track is always visible */
-  visibility: visible;
-  opacity: 1;
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* Force track to respect max-content width */
+  overflow: visible;
 }
 
 .hers-labs-hero__images-set {
@@ -125,9 +129,11 @@
   min-height: 20rem;
   padding: 0;
   align-items: center;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
   margin: 0;
-  width: max-content;
+  width: max-content !important;
+  min-width: max-content !important;
   /* Ensure sets connect seamlessly */
   position: relative;
   /* Prevent any spacing between sets */
@@ -135,6 +141,8 @@
   /* Ensure visibility */
   visibility: visible !important;
   opacity: 1 !important;
+  /* Force both sets to contribute width - prevent collapse */
+  overflow: visible;
 }
 
 /* Remove any gap between sets - ensure seamless connection */
@@ -149,9 +157,10 @@
 }
 
 .hers-labs-hero__image-wrapper {
-  width: 30rem;
-  height: 20rem;
-  flex-shrink: 0;
+  width: 30rem !important;
+  height: 20rem !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -166,9 +175,12 @@
   visibility: visible !important;
   opacity: 1 !important;
   position: relative;
-  /* Ensure minimum size */
-  min-width: 30rem;
-  min-height: 20rem;
+  /* Ensure minimum size - prevent collapse */
+  min-width: 30rem !important;
+  min-height: 20rem !important;
+  max-width: 30rem !important;
+  /* Force wrapper to contribute width */
+  box-sizing: border-box;
 }
 
 /* Explicit image styling to override any global rules */
@@ -312,11 +324,15 @@
 /* The track contains [Set A][Set B], both identical */
 /* We animate from 0 to -50%, which moves Set A completely off-screen */
 /* When it loops back to 0%, Set B is in Set A's original position = seamless */
+/* Animation - Seamless infinite loop */
+/* Track structure: [Set A][Set B] - both identical */
+/* Animation moves exactly -50% (half the total width = one set width) */
+/* When Set A exits left, Set B is in Set A's original position = seamless */
 @keyframes slideImages {
-  0% {
+  from {
     transform: translateX(0);
   }
-  100% {
+  to {
     transform: translateX(-50%);
   }
 }

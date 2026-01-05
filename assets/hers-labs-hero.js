@@ -59,6 +59,29 @@ class HersLabsHero extends HTMLElement {
       return;
     }
 
+    const firstSet = sets[0];
+    const secondSet = sets[1];
+    
+    // CRITICAL: Force both sets to have width
+    // Apply explicit flex properties to prevent collapse
+    sets.forEach((set, index) => {
+      set.style.display = 'flex';
+      set.style.flexShrink = '0';
+      set.style.flexGrow = '0';
+      set.style.width = 'max-content';
+      set.style.minWidth = 'max-content';
+      set.style.overflow = 'visible';
+    });
+
+    // Force image wrappers to maintain width
+    const wrappers = track.querySelectorAll('.hers-labs-hero__image-wrapper');
+    wrappers.forEach(wrapper => {
+      wrapper.style.flexShrink = '0';
+      wrapper.style.flexGrow = '0';
+      wrapper.style.minWidth = '30rem';
+      wrapper.style.width = '30rem';
+    });
+
     // Find and verify all images
     const images = track.querySelectorAll('.hers-labs-hero__sliding-image, .hers-labs-hero__image-wrapper img');
     console.log('✅ Found', images.length, 'images');
@@ -77,18 +100,16 @@ class HersLabsHero extends HTMLElement {
         console.log(`✅ Image ${index + 1} loaded:`, img.src.substring(0, 50));
       } else {
         console.warn(`⚠️ Image ${index + 1} not loaded yet:`, img.src.substring(0, 50));
-        // Force reload
         img.loading = 'eager';
-        if (img.src) {
-          const newImg = new Image();
-          newImg.src = img.src;
-          newImg.onload = () => {
-            img.src = newImg.src;
-            console.log(`✅ Image ${index + 1} reloaded successfully`);
-          };
-        }
       }
     });
+
+    // Force track to respect max-content
+    track.style.display = 'flex';
+    track.style.flexShrink = '0';
+    track.style.flexGrow = '0';
+    track.style.width = 'max-content';
+    track.style.minWidth = 'max-content';
 
     // Ensure animation is applied
     const computedStyle = window.getComputedStyle(track);
@@ -98,14 +119,32 @@ class HersLabsHero extends HTMLElement {
     } else {
       console.log('✅ Animation already applied:', computedStyle.animationName);
     }
-
-    // Verify both sets have identical content
-    const firstSet = sets[0];
-    const secondSet = sets[1];
     
-    console.log('✅ First set width:', firstSet.offsetWidth);
-    console.log('✅ Second set width:', secondSet.offsetWidth);
-    console.log('✅ Track width:', track.offsetWidth);
+    // CRITICAL: Verify both sets have width after forcing layout
+    // Force a reflow to ensure width calculation
+    track.offsetHeight;
+    firstSet.offsetHeight;
+    secondSet.offsetHeight;
+    
+    const firstSetWidth = firstSet.offsetWidth;
+    const secondSetWidth = secondSet.offsetWidth;
+    const trackWidth = track.offsetWidth;
+    
+    console.log('📏 First set width:', firstSetWidth, 'px');
+    console.log('📏 Second set width:', secondSetWidth, 'px');
+    console.log('📏 Track width:', trackWidth, 'px');
+    console.log('📏 Expected track width (set1 + set2):', firstSetWidth + secondSetWidth, 'px');
+    
+    if (secondSetWidth === 0) {
+      console.error('❌ CRITICAL: Second set has zero width!');
+      console.log('Second set computed styles:', window.getComputedStyle(secondSet));
+      console.log('Second set children:', secondSet.children.length);
+      console.log('Second set innerHTML length:', secondSet.innerHTML.length);
+    } else if (Math.abs(trackWidth - (firstSetWidth + secondSetWidth)) > 10) {
+      console.warn('⚠️ Track width mismatch! Expected:', firstSetWidth + secondSetWidth, 'Got:', trackWidth);
+    } else {
+      console.log('✅ Width verification passed!');
+    }
     
     // Ensure no gaps between sets
     if (secondSet) {
@@ -113,9 +152,6 @@ class HersLabsHero extends HTMLElement {
       secondSet.style.paddingLeft = '0';
     }
 
-    // Force reflow to ensure width calculation
-    track.offsetHeight;
-    
     console.log('✅ Marquee animation verified and initialized');
   }
 
