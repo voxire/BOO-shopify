@@ -145,15 +145,13 @@
   overflow: visible;
 }
 
-/* Remove any gap between sets - ensure seamless connection */
-/* The second set must start immediately after the first set with ZERO spacing */
+/* Add gap between sets to match internal gap between boxes */
+/* The gap between sets should match the gap within sets (2.4rem) for seamless loop */
 .hers-labs-hero__images-set + .hers-labs-hero__images-set {
-  margin-left: 0 !important;
+  margin-left: 2.4rem !important;
   padding-left: 0 !important;
   border-left: none !important;
-  /* Ensure no visual gap */
   position: relative;
-  left: 0;
 }
 
 .hers-labs-hero__image-wrapper {
