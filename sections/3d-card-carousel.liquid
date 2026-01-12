@@ -52,7 +52,6 @@
       height: 100%;
       transform-style: preserve-3d;
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
       user-select: none;
     }
 
@@ -70,6 +69,9 @@
       pointer-events: auto;
       cursor: grab;
       isolation: isolate;
+      overflow: hidden;
+      backface-visibility: hidden;
+      border-radius: {{ card_radius }}px;
     }
 
     .card-carousel-{{ section_id }}__card:active {
@@ -87,6 +89,23 @@
       backface-visibility: hidden;
       transform-style: preserve-3d;
       isolation: isolate;
+    }
+    
+    /* Fix: Center Card Isolation - highest z-index and proper overflow */
+    .card-carousel-{{ section_id }}__card[data-is-center="true"] {
+      position: relative !important;
+      z-index: 10 !important;
+      overflow: visible; /* Allow shadow to show */
+    }
+    
+    .card-carousel-{{ section_id }}__card[data-is-center="true"] .card-carousel-{{ section_id }}__card-inner {
+      overflow: hidden; /* Clip content but allow shadow */
+    }
+    
+    /* Fix: Side cards - prevent edge bleed with overflow clipping */
+    .card-carousel-{{ section_id }}__card:not([data-is-center="true"]) {
+      overflow: hidden;
+      position: absolute;
     }
 
     .card-carousel-{{ section_id }}__card-image {
@@ -459,12 +478,29 @@
         // Calculate wrapped difference for infinite loop
         const diff = getWrappedDiff(index, currentIndex, totalSlides);
         const absDiff = Math.abs(diff);
+        const isCenter = absDiff === 0;
+        
+        // Mark center card for CSS targeting
+        if (isCenter) {
+          card.setAttribute('data-is-center', 'true');
+        } else {
+          card.removeAttribute('data-is-center');
+        }
         
         // Calculate position
         const baseX = centerOffset + (diff * (cardWidth * 0.85));
-        const zOffset = -Math.abs(diff) * 50;
+        // Fix: Round translateZ to avoid sub-pixel rendering issues
+        const zOffset = Math.round(-Math.abs(diff) * 50);
         const rotateY = diff * 25;
-        const scale = absDiff === 0 ? 1 : Math.max(0.7, 1 - absDiff * 0.15);
+        
+        // Fix: Edge bleed prevention - slightly reduce scale of side cards (NOT center)
+        let scale = 1;
+        if (isCenter) {
+          scale = 1; // Center card full size
+        } else {
+          scale = Math.max(0.7, 1 - absDiff * 0.15) * 0.98; // Side cards slightly smaller to prevent edge bleed
+        }
+        
         const opacity = absDiff <= 2 ? 1 : Math.max(0.3, 1 - (absDiff - 2) * 0.2);
         
         // Apply transform with offset from dragging
@@ -476,16 +512,34 @@
           scale(${scale})
         `;
         
-        // Set z-index based on distance - center card highest, then by distance
-        // Cards behind center should have lower z-index to prevent visual leak
-        if (absDiff === 0) {
+        // Fix: Center Card Isolation - ensure center card has highest z-index
+        if (isCenter) {
+          card.style.position = 'relative';
           card.style.zIndex = '10';
-        } else if (diff < 0) {
-          // Cards to the left (behind when rotated)
-          card.style.zIndex = String(5 - absDiff);
+          card.style.willChange = 'transform';
         } else {
-          // Cards to the right (in front when rotated)
-          card.style.zIndex = String(10 - absDiff);
+          card.style.position = 'absolute';
+          // Side cards - lower z-index, no will-change to prevent rendering issues
+          if (diff < 0) {
+            // Cards to the left (behind when rotated)
+            card.style.zIndex = String(Math.max(1, 5 - absDiff));
+          } else {
+            // Cards to the right (in front when rotated)
+            card.style.zIndex = String(Math.max(1, 10 - absDiff));
+          }
+          card.style.willChange = '';
+        }
+        
+        // Fix: Reduce shadow on side cards to prevent visual bleed
+        const cardInner = card.querySelector('.card-carousel-' + sectionId + '__card-inner');
+        if (cardInner) {
+          if (isCenter) {
+            // Center card - full shadow
+            cardInner.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.05)';
+          } else {
+            // Side cards - reduced shadow to prevent overlap
+            cardInner.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.03)';
+          }
         }
         
         card.style.opacity = opacity;
