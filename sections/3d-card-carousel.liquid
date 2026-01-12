@@ -185,6 +185,9 @@
 
     .card-carousel-{{ section_id }}__card {
       position: absolute;
+      left: 0;
+      top: 50%;
+      transform-origin: center center;
       width: {{ card_width_desktop }}px;
       flex-shrink: 0;
       transform-style: preserve-3d;
@@ -402,7 +405,13 @@
       }
     }
     
-    window.addEventListener('resize', updateMobileState);
+    window.addEventListener('resize', () => {
+      updateMobileState();
+      // Update layout on resize
+      requestAnimationFrame(() => {
+        updateCarousel();
+      });
+    });
     
     // Helper: Calculate wrapped difference for infinite loop
     function getWrappedDiff(index, centerIndex, total) {
@@ -460,16 +469,26 @@
     function updateDesktopLayout() {
       if (isMobile) return;
       
-      const cardWidth = cards[0]?.offsetWidth || 320;
+      // Wait for layout to be ready
+      if (!viewport || viewport.offsetWidth === 0) {
+        requestAnimationFrame(updateDesktopLayout);
+        return;
+      }
+      
+      const cardWidth = cards[0]?.offsetWidth || {{ card_width_desktop | json }};
       const cardSpacing = {{ card_spacing_desktop | json }};
-      const centerOffset = (viewport.offsetWidth - cardWidth) / 2;
+      
+      // Calculate center position - center of viewport minus half card width
+      const viewportCenter = viewport.offsetWidth / 2;
+      const cardCenter = cardWidth / 2;
+      const centerOffset = viewportCenter - cardCenter;
       
       cards.forEach((card, index) => {
         // Calculate wrapped difference for infinite loop
         const diff = getWrappedDiff(index, currentIndex, totalSlides);
         const absDiff = Math.abs(diff);
         
-        // Calculate base position
+        // Calculate base position relative to center
         const baseX = centerOffset + (diff * (cardWidth + cardSpacing));
         
         // Apply drag offset
@@ -478,15 +497,17 @@
         // Scale based on distance from center
         let scale = 1.1;
         if (absDiff === 0) {
-          scale = 1.1;
+          scale = 1.1; // Center card largest
         } else if (absDiff === 1) {
-          scale = 0.95;
+          scale = 0.95; // Adjacent cards
         } else {
-          scale = 0.9;
+          scale = 0.9; // Further cards
         }
         
-        // Apply transform
-        card.style.transform = `translateX(${finalX}px) scale(${scale})`;
+        // Apply transform - translateX from left edge
+        card.style.left = '0';
+        card.style.top = '50%';
+        card.style.transform = `translateX(${finalX}px) translateY(-50%) scale(${scale})`;
         card.style.zIndex = String(10 - absDiff);
         card.style.opacity = absDiff <= 3 ? '1' : '0.7';
         card.style.pointerEvents = 'auto';
@@ -633,11 +654,30 @@
       }
     }
     
-    // Initialize
-    updateCarousel();
+    // Initialize - ensure layout is ready
+    function initializeCarousel() {
+      // Force layout calculation
+      if (viewport) {
+        viewport.offsetHeight; // Force reflow
+      }
+      updateCarousel();
+      
+      if (isMobile && autoplayEnabled && !prefersReducedMotion) {
+        startAutoplay();
+      }
+    }
     
-    if (isMobile && autoplayEnabled && !prefersReducedMotion) {
-      startAutoplay();
+    // Initialize with proper timing
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(initializeCarousel);
+        });
+      });
+    } else {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(initializeCarousel);
+      });
     }
     
     // Pause autoplay on hover (mobile)
