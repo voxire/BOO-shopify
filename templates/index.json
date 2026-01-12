@@ -81,6 +81,59 @@
         "padding_bottom": 0
       }
     },
+    "section_editorial_story_mtfY8i": {
+      "type": "section-editorial-story",
+      "name": "Editorial Brand Story",
+      "settings": {
+        "heading": "Made for little moments",
+        "rich_text": "<p>Childhood is built from quiet details — soft mornings, messy afternoons, and everything in between.<br/><br/>We design clothes that feel gentle on the skin and easy to live in, so kids can move freely and be themselves.</p><p>Thoughtfully made, carefully chosen, and created to grow with your everyday moments.</p>",
+        "image": "shopify://shop_images/grey.png",
+        "image_position": "right",
+        "text_color": "#000000",
+        "background_color": "#ffffff",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "section_featured_collections_c34kVp": {
+      "type": "section-featured-collections",
+      "blocks": {
+        "collection_LC9xCA": {
+          "type": "collection",
+          "settings": {
+            "collection": "frontpage"
+          }
+        },
+        "collection_QHYmPf": {
+          "type": "collection",
+          "settings": {
+            "collection": "frontpage"
+          }
+        },
+        "collection_3AHJB8": {
+          "type": "collection",
+          "settings": {
+            "collection": "frontpage"
+          }
+        }
+      },
+      "block_order": [
+        "collection_LC9xCA",
+        "collection_QHYmPf",
+        "collection_3AHJB8"
+      ],
+      "name": "Featured Collections Grid",
+      "settings": {
+        "heading": "",
+        "text_color": "#000000",
+        "background_color": "#ffffff",
+        "card_radius": 16,
+        "overlay_opacity": 60,
+        "hover_animation": true,
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
     "3d_card_carousel_x3rUgj": {
       "type": "3d-card-carousel",
       "blocks": {
@@ -845,24 +898,12 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
-    },
-    "section_editorial_story_mtfY8i": {
-      "type": "section-editorial-story",
-      "name": "Editorial Brand Story",
-      "settings": {
-        "heading": "Made for little moments",
-        "rich_text": "<p>Childhood is built from quiet details — soft mornings, messy afternoons, and everything in between.<br/><br/>We design clothes that feel gentle on the skin and easy to live in, so kids can move freely and be themselves.</p><p>Thoughtfully made, carefully chosen, and created to grow with your everyday moments.</p>",
-        "image": "shopify://shop_images/grey.png",
-        "image_position": "right",
-        "text_color": "#000000",
-        "background_color": "#ffffff",
-        "padding_top": 80,
-        "padding_bottom": 80
-      }
     }
   },
   "order": [
     "hers_labs_hero_e6yQVT",
+    "section_editorial_story_mtfY8i",
+    "section_featured_collections_c34kVp",
     "3d_card_carousel_x3rUgj",
     "hers_labs_CrKF3y",
     "hers_hero_UPRkeg",
@@ -873,7 +914,6 @@
     "glassmorphism_2cards_XF4fCC",
     "bunny_glass_6QfaDx",
     "foxy_6EKM7w",
-    "multirow_7Gc4Bh",
-    "section_editorial_story_mtfY8i"
+    "multirow_7Gc4Bh"
   ]
 }
