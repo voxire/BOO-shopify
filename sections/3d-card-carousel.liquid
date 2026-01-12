@@ -69,6 +69,7 @@
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: auto;
       cursor: grab;
+      isolation: isolate;
     }
 
     .card-carousel-{{ section_id }}__card:active {
@@ -85,6 +86,7 @@
       overflow: hidden;
       backface-visibility: hidden;
       transform-style: preserve-3d;
+      isolation: isolate;
     }
 
     .card-carousel-{{ section_id }}__card-image {
@@ -473,8 +475,28 @@
           rotateY(${rotateY}deg)
           scale(${scale})
         `;
+        
+        // Set z-index based on distance - center card highest, then by distance
+        // Cards behind center should have lower z-index to prevent visual leak
+        if (absDiff === 0) {
+          card.style.zIndex = '10';
+        } else if (diff < 0) {
+          // Cards to the left (behind when rotated)
+          card.style.zIndex = String(5 - absDiff);
+        } else {
+          // Cards to the right (in front when rotated)
+          card.style.zIndex = String(10 - absDiff);
+        }
+        
         card.style.opacity = opacity;
-        card.style.pointerEvents = absDiff <= 2 ? 'auto' : 'none';
+        card.style.pointerEvents = absDiff <= 1 ? 'auto' : 'none';
+        
+        // Hide cards that are too far behind to prevent visual leak
+        if (absDiff > 2 && diff < 0) {
+          card.style.visibility = 'hidden';
+        } else {
+          card.style.visibility = 'visible';
+        }
       });
     }
     
