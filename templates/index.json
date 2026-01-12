@@ -196,6 +196,16 @@
     "3d_card_carousel_x3rUgj": {
       "type": "3d-card-carousel",
       "blocks": {
+        "slide_AP4MpW": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/BunBoo.png",
+            "title": "Card",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
         "slide_PULJjE": {
           "type": "slide",
           "settings": {
@@ -258,6 +268,7 @@
         }
       },
       "block_order": [
+        "slide_AP4MpW",
         "slide_PULJjE",
         "slide_tNbrzN",
         "slide_Q9JNJq",
