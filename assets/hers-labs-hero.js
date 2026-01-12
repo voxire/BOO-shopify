@@ -1,6 +1,6 @@
 /**
  * Hers Labs Hero Section JavaScript
- * Handles animations and interactions
+ * Handles seamless infinite marquee animation
  */
 
 class HersLabsHero extends HTMLElement {
@@ -8,6 +8,12 @@ class HersLabsHero extends HTMLElement {
     super();
     this.section = document.querySelector(`[data-section-id="${this.getAttribute('data-section-id')}"]`);
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.animationFrameId = null;
+    this.currentTranslateX = 0;
+    this.setWidth = 0;
+    this.speed = 0.5; // pixels per frame (adjust for speed)
+    this.resizeTimeout = null;
+    this.imagesLoaded = false;
     this.init();
   }
 
@@ -19,142 +25,181 @@ class HersLabsHero extends HTMLElement {
       const track = this.section.querySelector('.hers-labs-hero__images-track');
       if (track) {
         track.style.animation = 'none';
+        track.style.transform = 'translate3d(0, 0, 0)';
       }
       return;
     }
 
-    // Verify and fix marquee animation
-    this.verifyMarqueeAnimation();
+    // Wait for images to load, then initialize marquee
+    this.waitForImagesToLoad().then(() => {
+      this.imagesLoaded = true;
+      this.initSeamlessMarquee();
+    });
 
     // Initialize button interactions
     this.initButtonInteractions();
+
+    // Handle resize with debouncing
+    window.addEventListener('resize', () => {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        if (this.imagesLoaded) {
+          this.initSeamlessMarquee();
+        }
+      }, 250);
+    });
   }
 
-  verifyMarqueeAnimation() {
-    const track = this.section.querySelector('.hers-labs-hero__images-track');
-    if (!track) {
-      console.error('❌ .hers-labs-hero__images-track not found!');
-      console.log('Section element:', this.section);
-      console.log('Section HTML:', this.section.innerHTML.substring(0, 500));
-      // Try alternative selector
-      const altTrack = this.section.querySelector('[data-marquee-track]');
-      if (altTrack) {
-        console.log('✅ Found track using data-marquee-track attribute');
-        return this.verifyMarqueeAnimationForTrack(altTrack);
+  /**
+   * Wait for all images in the track to load before measuring widths
+   */
+  waitForImagesToLoad() {
+    const track = this.section?.querySelector('[data-marquee-track]') || 
+                  this.section?.querySelector('.hers-labs-hero__images-track');
+    if (!track) return Promise.resolve();
+
+    const images = track.querySelectorAll('img');
+    if (images.length === 0) return Promise.resolve();
+
+    const imagePromises = Array.from(images).map(img => {
+      if (img.complete && img.naturalHeight !== 0) {
+        return Promise.resolve();
       }
-      return;
-    }
+      return new Promise((resolve) => {
+        const onLoad = () => {
+          img.removeEventListener('load', onLoad);
+          img.removeEventListener('error', onLoad);
+          resolve();
+        };
+        img.addEventListener('load', onLoad);
+        img.addEventListener('error', onLoad);
+        // Fallback timeout
+        setTimeout(resolve, 3000);
+      });
+    });
 
-    this.verifyMarqueeAnimationForTrack(track);
+    return Promise.all(imagePromises);
   }
 
-  verifyMarqueeAnimationForTrack(track) {
-    console.log('✅ Track found:', track);
-    
-    const sets = track.querySelectorAll('.hers-labs-hero__images-set');
-    console.log('✅ Found', sets.length, 'image sets');
-    
-    if (sets.length < 2) {
-      console.warn('⚠️ Marquee requires at least 2 sets for seamless looping. Found:', sets.length);
-      return;
+  /**
+   * Initialize seamless marquee animation using requestAnimationFrame
+   * KEY CHANGE: Uses exact pixel measurements and continuous animation
+   */
+  initSeamlessMarquee() {
+    const track = this.section?.querySelector('[data-marquee-track]') || 
+                  this.section?.querySelector('.hers-labs-hero__images-track');
+    if (!track) return;
+
+    // Stop any existing animation
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
 
-    const firstSet = sets[0];
-    const secondSet = sets[1];
-    
-    // CRITICAL: Force both sets to have width
-    // Apply explicit flex properties to prevent collapse
-    sets.forEach((set, index) => {
+    // Remove CSS animation (we'll use JS instead)
+    track.style.animation = 'none';
+
+    // Get all sets
+    const sets = track.querySelectorAll('.hers-labs-hero__images-set');
+    if (sets.length === 0) return;
+
+    // Ensure sets are properly displayed
+    sets.forEach(set => {
       set.style.display = 'flex';
       set.style.flexShrink = '0';
       set.style.flexGrow = '0';
       set.style.width = 'max-content';
       set.style.minWidth = 'max-content';
-      set.style.overflow = 'visible';
     });
 
-    // Force image wrappers to maintain width
-    const wrappers = track.querySelectorAll('.hers-labs-hero__image-wrapper');
-    wrappers.forEach(wrapper => {
-      wrapper.style.flexShrink = '0';
-      wrapper.style.flexGrow = '0';
-      wrapper.style.minWidth = '30rem';
-      wrapper.style.width = '30rem';
-    });
-
-    // Find and verify all images
-    const images = track.querySelectorAll('.hers-labs-hero__sliding-image, .hers-labs-hero__image-wrapper img');
-    console.log('✅ Found', images.length, 'images');
-    
-    images.forEach((img, index) => {
-      // Force images to display
-      img.style.display = 'block';
-      img.style.visibility = 'visible';
-      img.style.opacity = '1';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'cover';
-      
-      // Check if image loaded
-      if (img.complete && img.naturalHeight !== 0) {
-        console.log(`✅ Image ${index + 1} loaded:`, img.src.substring(0, 50));
-      } else {
-        console.warn(`⚠️ Image ${index + 1} not loaded yet:`, img.src.substring(0, 50));
-        img.loading = 'eager';
-      }
-    });
-
-    // Force track to respect max-content
-    track.style.display = 'flex';
-    track.style.flexShrink = '0';
-    track.style.flexGrow = '0';
-    track.style.width = 'max-content';
-    track.style.minWidth = 'max-content';
-
-    // Ensure animation is applied
-    const computedStyle = window.getComputedStyle(track);
-    if (!computedStyle.animationName || computedStyle.animationName === 'none') {
-      console.log('🔧 Applying animation manually');
-      track.style.animation = 'slideImages 20s linear infinite';
-    } else {
-      console.log('✅ Animation already applied:', computedStyle.animationName);
-    }
-    
-    // CRITICAL: Verify both sets have width after forcing layout
-    // Force a reflow to ensure width calculation
+    // Force a reflow to ensure accurate measurements
     track.offsetHeight;
-    firstSet.offsetHeight;
-    secondSet.offsetHeight;
-    
-    const firstSetWidth = firstSet.offsetWidth;
-    const secondSetWidth = secondSet.offsetWidth;
-    const trackWidth = track.offsetWidth;
-    
-    console.log('📏 First set width:', firstSetWidth, 'px');
-    console.log('📏 Second set width:', secondSetWidth, 'px');
-    console.log('📏 Track width:', trackWidth, 'px');
-    console.log('📏 Expected track width (set1 + set2):', firstSetWidth + secondSetWidth, 'px');
-    
-    if (secondSetWidth === 0) {
-      console.error('❌ CRITICAL: Second set has zero width!');
-      console.log('Second set computed styles:', window.getComputedStyle(secondSet));
-      console.log('Second set children:', secondSet.children.length);
-      console.log('Second set innerHTML length:', secondSet.innerHTML.length);
-    } else if (Math.abs(trackWidth - (firstSetWidth + secondSetWidth)) > 10) {
-      console.warn('⚠️ Track width mismatch! Expected:', firstSetWidth + secondSetWidth, 'Got:', trackWidth);
-    } else {
-      console.log('✅ Width verification passed!');
-    }
-    
-    // Add gap between ALL sets to match internal gap (2.4rem) for seamless loop
-    sets.forEach((set, index) => {
-      if (index > 0) {
-        set.style.marginLeft = '2.4rem';
-        set.style.paddingLeft = '0';
-      }
-    });
 
-    console.log('✅ Marquee animation verified and initialized');
+    // Measure the width of the first set (this is our "one complete set" width)
+    const firstSet = sets[0];
+    const firstSetWidth = firstSet.offsetWidth;
+    
+    if (firstSetWidth === 0) {
+      console.warn('⚠️ First set has zero width, retrying after delay');
+      setTimeout(() => this.initSeamlessMarquee(), 100);
+      return;
+    }
+
+    // KEY FIX: Store the exact width of one set
+    this.setWidth = firstSetWidth;
+
+    // Ensure we have at least 2 sets for seamless looping
+    // If we only have 1 set, duplicate it
+    if (sets.length < 2) {
+      const firstSetClone = firstSet.cloneNode(true);
+      firstSetClone.setAttribute('data-marquee-set', '2');
+      track.appendChild(firstSetClone);
+    }
+
+    // Ensure we have enough sets to cover viewport + buffer
+    // Duplicate sets until we have at least 3 total (original + 2 duplicates)
+    // This ensures seamless looping even on wide screens
+    const viewportWidth = window.innerWidth;
+    const minSetsNeeded = Math.ceil((viewportWidth * 2) / this.setWidth) + 2;
+    
+    // KEY FIX: Re-query sets after cloning to get updated NodeList
+    let currentSets = track.querySelectorAll('.hers-labs-hero__images-set');
+    while (currentSets.length < minSetsNeeded && currentSets.length < 10) {
+      const lastSet = track.lastElementChild;
+      const newSet = lastSet.cloneNode(true);
+      newSet.setAttribute('data-marquee-set', String(currentSets.length + 1));
+      track.appendChild(newSet);
+      // Re-query to get updated count
+      currentSets = track.querySelectorAll('.hers-labs-hero__images-set');
+    }
+
+    // Reset animation position
+    this.currentTranslateX = 0;
+    track.style.transform = 'translate3d(0, 0, 0)';
+    track.style.willChange = 'transform';
+
+    // Start the animation loop
+    this.animate();
+  }
+
+  /**
+   * Continuous animation loop using requestAnimationFrame
+   * KEY CHANGE: Wraps position seamlessly when reaching setWidth
+   */
+  animate() {
+    if (this.reducedMotion) return;
+
+    const track = this.section?.querySelector('[data-marquee-track]') || 
+                  this.section?.querySelector('.hers-labs-hero__images-track');
+    if (!track || this.setWidth === 0) return;
+
+    // Move the track
+    this.currentTranslateX -= this.speed;
+
+    // KEY FIX: When we've moved exactly one set width, wrap back seamlessly
+    // This creates the illusion of infinite scrolling with no visible reset
+    if (this.currentTranslateX <= -this.setWidth) {
+      this.currentTranslateX += this.setWidth;
+    }
+
+    // Apply the transform using translate3d for hardware acceleration
+    track.style.transform = `translate3d(${this.currentTranslateX}px, 0, 0)`;
+
+    // Continue animation
+    this.animationFrameId = requestAnimationFrame(() => this.animate());
+  }
+
+  /**
+   * Clean up animation on disconnect
+   */
+  disconnectedCallback() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
   }
 
   initButtonInteractions() {
@@ -200,4 +245,3 @@ if (document.readyState === 'loading') {
 
 // Re-initialize on section load (for theme editor)
 document.addEventListener('shopify:section:load', initializeHersLabsHero);
-

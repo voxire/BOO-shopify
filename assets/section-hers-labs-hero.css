@@ -101,9 +101,8 @@
   height: 100%;
   min-height: 25rem;
   will-change: transform;
-  /* Explicit animation declaration for seamless loop */
-  /* Animation moves -50% which is exactly one set width */
-  animation: slideImages 20s linear infinite;
+  /* KEY CHANGE: Animation now handled by JS for seamless pixel-perfect looping */
+  /* CSS animation removed - JS uses requestAnimationFrame for seamless loop */
   gap: 0 !important;
   margin: 0;
   padding: 0;
@@ -115,6 +114,7 @@
   /* Ensure smooth continuous animation */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
   /* Ensure track is always visible */
   visibility: visible !important;
   opacity: 1 !important;
@@ -149,7 +149,7 @@
   outline: none !important;
 }
 
-/* Add gap between ALL sets to match internal gap (2.4rem) for seamless loop */
+/* KEY CHANGE: Gap between sets to match internal gap (2.4rem) for seamless loop */
 /* This ensures the gap between any set's last box and the next set's first box */
 /* matches the gap between boxes within each set - creating a visually seamless loop */
 .hers-labs-hero__images-set:not(:first-child) {
@@ -328,26 +328,10 @@
   outline-offset: 2px;
 }
 
-/* Animation - Seamless infinite loop */
-/* Track structure: [Set 1][gap][Set 2][gap][Set 3][gap][Set 4] - all sets identical */
-/* With 4 sets, we move exactly 50% (2 sets) so Set 3&4 replace Set 1&2 seamlessly */
-/* Total width = 4×Set + 3×gap, animation moves -50% = 2×Set + 1.5×gap */
-/* When it loops, Set 3&4 are in Set 1&2's original position = seamless */
-@keyframes slideImages {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* Ensure perfect seamless loop - no gaps or cutoffs */
-.hers-labs-hero__images-track {
-  /* Track must be exactly 2x the width of one set for perfect loop */
-  /* max-content ensures the track width = Set A width + Set B width (no gaps) */
-  width: max-content;
-}
+/* KEY CHANGE: Animation now handled by JavaScript for pixel-perfect seamless looping */
+/* The JS measures exact set width and uses requestAnimationFrame to continuously animate */
+/* When translateX reaches -setWidth, it wraps by adding setWidth (no visible snap) */
+/* This ensures zero white space and zero visible reset */
 
 /* Ensure sets are identical and connect seamlessly */
 .hers-labs-hero__images-set {
@@ -359,12 +343,6 @@
 .hers-labs-hero__images-set:first-child {
   margin-left: 0;
   padding-left: 0;
-}
-
-.hers-labs-hero__images-set:nth-child(2) {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  /* Ensure second set starts immediately after first set with no gap */
 }
 
 /* Ensure no gaps or white space during animation */
@@ -438,9 +416,11 @@
 }
 
 /* Reduced Motion */
+/* KEY CHANGE: JS also checks prefers-reduced-motion and stops animation */
 @media (prefers-reduced-motion: reduce) {
   .hers-labs-hero__images-track {
     animation: none;
+    transform: translate3d(0, 0, 0) !important;
   }
 
   .hers-labs-hero__button {
