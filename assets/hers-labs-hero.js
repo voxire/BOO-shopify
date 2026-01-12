@@ -6,33 +6,43 @@
 class HersLabsHero extends HTMLElement {
   constructor() {
     super();
-    this.section = document.querySelector(`[data-section-id="${this.getAttribute('data-section-id')}"]`);
-    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.animationFrameId = null;
     this.currentTranslateX = 0;
     this.setWidth = 0;
-    // FIX: Set speed based on reduced motion preference (0 if reduced, otherwise 0.5)
-    this.speed = this.reducedMotion ? 0 : 0.5; // pixels per frame
+    this.speed = 0.5; // pixels per frame
     this.resizeTimeout = null;
     this.imagesLoaded = false;
-    this.track = null; // Cache track reference
-    this.init();
+    this.track = null;
+    this.section = null;
+    this.isInitialized = false;
   }
 
-  init() {
-    if (!this.section) return;
+  // FIX: Use connectedCallback instead of constructor init - ensures DOM is ready
+  connectedCallback() {
+    if (this.isInitialized) return;
+    this.isInitialized = true;
 
-    // FIX: Always initialize marquee, but set speed = 0 if reduced motion
-    // Do NOT return early - animation loop must still initialize and render
+    // Find section - it should be a child of this custom element
+    this.section = this.querySelector('.hers-labs-hero') || 
+                   document.querySelector(`[data-section-id="${this.getAttribute('data-section-id')}"]`);
+    
+    if (!this.section) {
+      console.warn('⚠️ Hers Labs Hero section not found');
+      return;
+    }
+
+    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.speed = this.reducedMotion ? 0 : 0.5;
 
     // Wait for images to load, then initialize marquee
     this.waitForImagesToLoad().then(() => {
       this.imagesLoaded = true;
       this.initSeamlessMarquee();
-    }).catch(() => {
-      // Even if images fail to load, try to initialize
+    }).catch((err) => {
+      console.warn('⚠️ Image loading error, initializing anyway:', err);
       this.imagesLoaded = true;
-      this.initSeamlessMarquee();
+      // Try to initialize even if images fail
+      setTimeout(() => this.initSeamlessMarquee(), 100);
     });
 
     // Initialize button interactions
@@ -43,7 +53,6 @@ class HersLabsHero extends HTMLElement {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         if (this.imagesLoaded && this.track) {
-          // FIX: On resize, cancel animation, re-measure, reset position, restart loop
           if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
@@ -56,24 +65,27 @@ class HersLabsHero extends HTMLElement {
 
   /**
    * Wait for all images in the track to load before measuring widths
-   * FIX: Use img.decode() for proper image loading detection
    */
   waitForImagesToLoad() {
     this.track = this.section?.querySelector('[data-marquee-track]') || 
                   this.section?.querySelector('.hers-labs-hero__images-track');
-    if (!this.track) return Promise.resolve();
+    
+    if (!this.track) {
+      console.warn('⚠️ Track not found');
+      return Promise.resolve();
+    }
 
     const images = this.track.querySelectorAll('img');
-    if (images.length === 0) return Promise.resolve();
+    if (images.length === 0) {
+      console.warn('⚠️ No images found in track');
+      return Promise.resolve();
+    }
 
-    // FIX: Use Promise.all with img.decode() as requested
     const imagePromises = Array.from(images).map(img => {
       if (img.complete && img.naturalHeight !== 0) {
         return Promise.resolve();
       }
-      // Use decode() method for better image loading detection
       return img.decode().catch(() => {
-        // If decode fails, wait for load event
         return new Promise((resolve) => {
           const onLoad = () => {
             img.removeEventListener('load', onLoad);
@@ -82,7 +94,6 @@ class HersLabsHero extends HTMLElement {
           };
           img.addEventListener('load', onLoad);
           img.addEventListener('error', onLoad);
-          // Fallback timeout
           setTimeout(resolve, 3000);
         });
       });
@@ -93,12 +104,15 @@ class HersLabsHero extends HTMLElement {
 
   /**
    * Initialize seamless marquee animation using requestAnimationFrame
-   * FIX: Explicitly start requestAnimationFrame loop AFTER images load and widths measured
    */
   initSeamlessMarquee() {
     this.track = this.section?.querySelector('[data-marquee-track]') || 
                   this.section?.querySelector('.hers-labs-hero__images-track');
-    if (!this.track) return;
+    
+    if (!this.track) {
+      console.error('❌ Track not found in initSeamlessMarquee');
+      return;
+    }
 
     // Stop any existing animation
     if (this.animationFrameId) {
@@ -106,13 +120,16 @@ class HersLabsHero extends HTMLElement {
       this.animationFrameId = null;
     }
 
-    // FIX: Remove CSS animation and ensure no transform override
+    // Remove CSS animation
     this.track.style.animation = 'none';
     this.track.style.willChange = 'transform';
 
     // Get all sets
     const sets = this.track.querySelectorAll('.hers-labs-hero__images-set');
-    if (sets.length === 0) return;
+    if (sets.length === 0) {
+      console.error('❌ No image sets found');
+      return;
+    }
 
     // Ensure sets are properly displayed
     sets.forEach(set => {
@@ -123,30 +140,30 @@ class HersLabsHero extends HTMLElement {
       set.style.minWidth = 'max-content';
     });
 
-    // Force a reflow to ensure accurate measurements
-    this.track.offsetHeight;
+    // Force a reflow
+    void this.track.offsetHeight;
 
-    // Measure the width of the first set (this is our "one complete set" width)
+    // Measure the width of the first set
     const firstSet = sets[0];
     const firstSetWidth = firstSet.offsetWidth;
     
     if (firstSetWidth === 0) {
-      console.warn('⚠️ First set has zero width, retrying after delay');
+      console.warn('⚠️ First set has zero width, retrying...');
       setTimeout(() => this.initSeamlessMarquee(), 100);
       return;
     }
 
-    // FIX: Store the exact width of one set
     this.setWidth = firstSetWidth;
+    console.log('✅ Set width measured:', this.setWidth, 'px');
 
-    // Ensure we have at least 2 sets for seamless looping
+    // Ensure we have at least 2 sets
     if (sets.length < 2) {
       const firstSetClone = firstSet.cloneNode(true);
       firstSetClone.setAttribute('data-marquee-set', '2');
       this.track.appendChild(firstSetClone);
     }
 
-    // Ensure we have enough sets to cover viewport + buffer
+    // Ensure we have enough sets to cover viewport
     const viewportWidth = window.innerWidth;
     const minSetsNeeded = Math.ceil((viewportWidth * 2) / this.setWidth) + 2;
     
@@ -159,56 +176,68 @@ class HersLabsHero extends HTMLElement {
       currentSets = this.track.querySelectorAll('.hers-labs-hero__images-set');
     }
 
-    // FIX: Reset animation position to 0
+    // Reset animation position
     this.currentTranslateX = 0;
     this.track.style.transform = 'translate3d(0, 0, 0)';
 
-    // FIX: Update speed based on current reduced motion preference
+    // Update speed
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.speed = this.reducedMotion ? 0 : 0.5;
 
-    // FIX: EXPLICITLY start the requestAnimationFrame loop AFTER images load and widths measured
-    // This is the critical fix - the loop must be explicitly started here
+    console.log('✅ Starting animation loop, speed:', this.speed, 'px/frame');
+
+    // CRITICAL: Start the animation loop
     this.startAnimationLoop();
   }
 
   /**
-   * FIX: Separate method to explicitly start the animation loop
-   * Uses the exact pattern requested: loop() function that continuously calls requestAnimationFrame
+   * Start the animation loop - this MUST be called explicitly
    */
   startAnimationLoop() {
-    // Stop any existing loop first
+    // Stop any existing loop
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
 
-    // FIX: Use the exact loop pattern requested - NO early returns that stop the loop
+    // Validate prerequisites
+    if (!this.track) {
+      console.error('❌ Cannot start loop: track is null');
+      return;
+    }
+    if (this.setWidth === 0) {
+      console.error('❌ Cannot start loop: setWidth is 0');
+      return;
+    }
+
+    console.log('✅ Starting requestAnimationFrame loop');
+
+    // CRITICAL: The loop function - this runs every frame
     const loop = () => {
-      // FIX: Ensure translateX advances every frame
+      // Update position
       this.currentTranslateX -= this.speed;
 
-      // FIX: Wrap seamlessly when reaching setWidth
+      // Wrap seamlessly
       if (this.currentTranslateX <= -this.setWidth) {
         this.currentTranslateX += this.setWidth;
       }
 
-      // FIX: Apply transform using translate3d
+      // Apply transform - CRITICAL: This must happen every frame
       if (this.track && this.setWidth > 0) {
         this.track.style.transform = `translate3d(${this.currentTranslateX}px, 0, 0)`;
       }
 
-      // FIX: Continue loop - NO conditions that stop it unless section is destroyed
+      // Continue loop - NO conditions that stop it
       this.animationFrameId = requestAnimationFrame(loop);
     };
 
-    // FIX: EXPLICITLY start the loop - this was missing or broken before
-    // The loop must start here, not in a separate animate() method with early returns
+    // CRITICAL: Start the loop immediately
     this.animationFrameId = requestAnimationFrame(loop);
+    console.log('✅ requestAnimationFrame called, ID:', this.animationFrameId);
   }
 
   /**
-   * Clean up animation on disconnect
+   * Clean up on disconnect
    */
   disconnectedCallback() {
     if (this.animationFrameId) {
@@ -218,6 +247,7 @@ class HersLabsHero extends HTMLElement {
     if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
     }
+    this.isInitialized = false;
   }
 
   initButtonInteractions() {
