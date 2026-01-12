@@ -21,12 +21,12 @@
         "cta_link": "",
         "text_color": "#000000",
         "font_size": 17,
-        "background_color": "#ffffff",
+        "background_color": "#0d4c07",
         "background_opacity": 0,
         "glass_enabled": true,
         "glass_blur": 20,
-        "glass_bg_opacity": 30,
-        "glass_border_opacity": 20,
+        "glass_bg_opacity": 50,
+        "glass_border_opacity": 35,
         "sticky_enabled": true
       }
     },
