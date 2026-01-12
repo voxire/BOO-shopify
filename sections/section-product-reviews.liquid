@@ -25,9 +25,14 @@
     padding: 0 2rem;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .product-reviews-{{ section_id }}__container {
       padding: 0 1rem;
+    }
+
+    .product-reviews-{{ section_id }}__heading {
+      font-size: 1.75rem;
+      margin-bottom: 2rem;
     }
 
     .product-reviews-{{ section_id }}__placeholder {
@@ -48,12 +53,6 @@
     color: {{ section.settings.text_color }};
   }
 
-  @media screen and (max-width: 749px) {
-    .product-reviews-{{ section_id }}__heading {
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-  }
 
   .product-reviews-{{ section_id }}__wrapper {
     min-height: 200px;

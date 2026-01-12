@@ -18,16 +18,6 @@
     padding: 0 2rem;
   }
 
-  @media screen and (max-width: 749px) {
-    .clickable-lookbook-{{ section_id }} {
-      padding: 2rem 0;
-    }
-
-    .clickable-lookbook-{{ section_id }}__container {
-      padding: 0 1rem;
-    }
-  }
-
   .clickable-lookbook-{{ section_id }}__wrapper {
     position: relative;
     width: 100%;
@@ -154,13 +144,22 @@
     }
   {% endif %}
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
+    .clickable-lookbook-{{ section_id }} {
+      padding: 2rem 0;
+    }
+
+    .clickable-lookbook-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+
     .clickable-lookbook-{{ section_id }}__hotspot {
       width: 44px;
       height: 44px;
       border-width: 2px;
       min-width: 44px;
       min-height: 44px;
+      touch-action: manipulation;
     }
 
     .clickable-lookbook-{{ section_id }}__hotspot::before {

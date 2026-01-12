@@ -26,12 +26,6 @@
     padding: 0 2rem;
   }
 
-  @media screen and (max-width: 749px) {
-    .trust-badges-{{ section_id }}__container {
-      padding: 0 1rem;
-    }
-  }
-
   {%- if heading != blank -%}
     .trust-badges-{{ section_id }}__heading {
       margin: 0 0 3rem 0;
@@ -41,12 +35,6 @@
       color: {{ section.settings.text_color }};
     }
 
-    @media screen and (max-width: 749px) {
-      .trust-badges-{{ section_id }}__heading {
-        font-size: 1.75rem;
-        margin-bottom: 2rem;
-      }
-    }
   {%- endif -%}
 
   .trust-badges-{{ section_id }}__grid {
@@ -113,7 +101,18 @@
     opacity: 0.8;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
+    .trust-badges-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+
+    {%- if heading != blank -%}
+      .trust-badges-{{ section_id }}__heading {
+        font-size: 1.75rem;
+        margin-bottom: 2rem;
+      }
+    {%- endif -%}
+
     .trust-badges-{{ section_id }}__grid {
       gap: 1.5rem;
     }

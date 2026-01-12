@@ -29,12 +29,6 @@
     padding: 0 2rem;
   }
 
-  @media screen and (max-width: 749px) {
-    .editorial-story-{{ section_id }}__container {
-      padding: 0 1.5rem;
-    }
-  }
-
   .editorial-story-{{ section_id }}__grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -42,7 +36,11 @@
     align-items: center;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
+    .editorial-story-{{ section_id }}__container {
+      padding: 0 1.5rem;
+    }
+
     .editorial-story-{{ section_id }}__grid {
       gap: 2rem;
     }
@@ -78,12 +76,6 @@
     color: {{ section.settings.text_color }};
   }
 
-  @media screen and (max-width: 749px) {
-    .editorial-story-{{ section_id }}__heading {
-      font-size: 2rem;
-    }
-  }
-
   .editorial-story-{{ section_id }}__text {
     font-size: 1.125rem;
     line-height: 1.7;
@@ -91,7 +83,12 @@
     opacity: 0.85;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
+    .editorial-story-{{ section_id }}__heading {
+      font-size: 1.75rem;
+      line-height: 1.25;
+    }
+
     .editorial-story-{{ section_id }}__text {
       font-size: 1rem;
       line-height: 1.6;

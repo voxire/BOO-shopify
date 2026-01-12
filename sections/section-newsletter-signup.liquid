@@ -48,12 +48,6 @@
     z-index: 2;
   }
 
-  @media screen and (max-width: 749px) {
-    .newsletter-signup-{{ section_id }}__container {
-      padding: 0 1rem;
-    }
-  }
-
   {% if glass_enabled %}
     .newsletter-signup-{{ section_id }}__content {
       background: rgba(255, 255, 255, {{ glass_bg_opacity }});
@@ -151,23 +145,31 @@
     display: block;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
+    .newsletter-signup-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+
     {% if glass_enabled %}
       .newsletter-signup-{{ section_id }}__content {
         padding: 2rem 1.5rem;
+        border-radius: 16px;
       }
     {% else %}
       .newsletter-signup-{{ section_id }}__content {
         padding: 2rem 1.5rem;
+        border-radius: 16px;
       }
     {% endif %}
 
     .newsletter-signup-{{ section_id }}__heading {
-      font-size: 2rem;
+      font-size: 1.75rem;
+      line-height: 1.25;
     }
 
     .newsletter-signup-{{ section_id }}__subtext {
       font-size: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .newsletter-signup-{{ section_id }}__form {
@@ -179,6 +181,9 @@
       padding: 0.875rem 1.25rem;
       font-size: 16px;
       min-height: 48px;
+      width: 100%;
+      -webkit-appearance: none;
+      border-radius: 8px;
     }
 
     .newsletter-signup-{{ section_id }}__button {
@@ -186,6 +191,7 @@
       padding: 0.875rem 1.5rem;
       min-height: 48px;
       font-size: 1rem;
+      touch-action: manipulation;
     }
   }
 {%- endstyle -%}
