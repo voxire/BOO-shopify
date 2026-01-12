@@ -338,9 +338,12 @@
     
     {%- if slides.size > 1 -%}
       <div class="card-carousel-{{ section_id }}__pagination" data-pagination>
+        {%- liquid
+          assign center_index = slides.size | divided_by: 2
+        -%}
         {%- for block in slides -%}
           <button
-            class="card-carousel-{{ section_id }}__dot{% if forloop.first %} card-carousel-{{ section_id }}__dot--active{% endif %}"
+            class="card-carousel-{{ section_id }}__dot{% if forloop.index0 == center_index %} card-carousel-{{ section_id }}__dot--active{% endif %}"
             data-dot
             data-index="{{ forloop.index0 }}"
             aria-label="Go to slide {{ forloop.index }}"
@@ -373,7 +376,8 @@
     // Mobile breakpoint
     const MOBILE_BREAKPOINT = 768;
     let isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-    let currentIndex = 0;
+    // Start at center card for balanced initial view
+    let currentIndex = Math.floor(totalSlides / 2);
     let isDragging = false;
     let startX = 0;
     let currentX = 0;
@@ -400,7 +404,21 @@
     
     window.addEventListener('resize', updateMobileState);
     
-    // Mobile: Calculate card positions with 3D transforms
+    // Helper: Calculate wrapped difference for infinite loop
+    function getWrappedDiff(index, centerIndex, total) {
+      let diff = index - centerIndex;
+      
+      // Find shortest path (forward or backward)
+      if (diff > total / 2) {
+        diff = diff - total;
+      } else if (diff < -total / 2) {
+        diff = diff + total;
+      }
+      
+      return diff;
+    }
+    
+    // Mobile: Calculate card positions with 3D transforms (infinite loop)
     function updateMobileLayout() {
       if (!isMobile || prefersReducedMotion) {
         cards.forEach((card, index) => {
@@ -414,7 +432,8 @@
       const centerOffset = (viewport.offsetWidth - cardWidth) / 2;
       
       cards.forEach((card, index) => {
-        const diff = index - currentIndex;
+        // Calculate wrapped difference for infinite loop
+        const diff = getWrappedDiff(index, currentIndex, totalSlides);
         const absDiff = Math.abs(diff);
         
         // Calculate position
@@ -422,7 +441,7 @@
         const zOffset = -Math.abs(diff) * 50;
         const rotateY = diff * 25;
         const scale = absDiff === 0 ? 1 : Math.max(0.7, 1 - absDiff * 0.15);
-        const opacity = absDiff <= 1 ? 1 : Math.max(0.3, 1 - absDiff * 0.3);
+        const opacity = absDiff <= 2 ? 1 : Math.max(0.3, 1 - (absDiff - 2) * 0.2);
         
         // Apply transform with offset from dragging
         const finalX = baseX + offsetX;
@@ -433,11 +452,11 @@
           scale(${scale})
         `;
         card.style.opacity = opacity;
-        card.style.pointerEvents = absDiff <= 1 ? 'auto' : 'none';
+        card.style.pointerEvents = absDiff <= 2 ? 'auto' : 'none';
       });
     }
     
-    // Desktop: Calculate fan layout with drag support
+    // Desktop: Calculate fan layout with drag support (infinite loop)
     function updateDesktopLayout() {
       if (isMobile) return;
       
@@ -446,7 +465,8 @@
       const centerOffset = (viewport.offsetWidth - cardWidth) / 2;
       
       cards.forEach((card, index) => {
-        const diff = index - currentIndex;
+        // Calculate wrapped difference for infinite loop
+        const diff = getWrappedDiff(index, currentIndex, totalSlides);
         const absDiff = Math.abs(diff);
         
         // Calculate base position
@@ -468,7 +488,7 @@
         // Apply transform
         card.style.transform = `translateX(${finalX}px) scale(${scale})`;
         card.style.zIndex = String(10 - absDiff);
-        card.style.opacity = '1';
+        card.style.opacity = absDiff <= 3 ? '1' : '0.7';
         card.style.pointerEvents = 'auto';
       });
     }
@@ -496,7 +516,7 @@
       });
     }
     
-    // Snap to nearest card (works for both mobile and desktop)
+    // Snap to nearest card with infinite loop (works for both mobile and desktop)
     function snapToCard() {
       if (prefersReducedMotion) return;
       
@@ -504,10 +524,12 @@
       const threshold = cardWidth * 0.3;
       
       if (Math.abs(offsetX) > threshold) {
-        if (offsetX > 0 && currentIndex > 0) {
-          currentIndex--;
-        } else if (offsetX < 0 && currentIndex < totalSlides - 1) {
-          currentIndex++;
+        if (offsetX > 0) {
+          // Move to previous (loop to end if at start)
+          currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        } else {
+          // Move to next (loop to start if at end)
+          currentIndex = (currentIndex + 1) % totalSlides;
         }
       }
       
@@ -597,6 +619,7 @@
       
       stopAutoplay();
       autoplayTimer = setInterval(() => {
+        // Loop infinitely
         currentIndex = (currentIndex + 1) % totalSlides;
         offsetX = 0;
         updateCarousel();
