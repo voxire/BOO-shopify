@@ -12,6 +12,7 @@
   assign glass_bg_opacity = section.settings.glass_bg_opacity | divided_by: 100.0
   assign glass_border_opacity = section.settings.glass_border_opacity | divided_by: 100.0
   assign sticky_enabled = section.settings.sticky_enabled
+  assign font_size = section.settings.font_size
 -%}
 
 {%- style -%}
@@ -87,7 +88,7 @@
   .embedded-header-{{ section_id }}__menu-link {
     color: {{ text_color }};
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: {{ font_size }}px;
     font-weight: 500;
     letter-spacing: 0.02em;
     transition: opacity 0.2s ease;
@@ -109,7 +110,7 @@
     color: {{ bg_color }};
     text-decoration: none;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: {{ font_size | times: 0.95 | round }}px;
     font-weight: 600;
     transition: transform 0.2s ease, opacity 0.2s ease;
     border: none;
@@ -138,12 +139,15 @@
 
     .embedded-header-{{ section_id }}__menu {
       gap: 1rem;
-      font-size: 0.85rem;
+    }
+
+    .embedded-header-{{ section_id }}__menu-link {
+      font-size: {{ font_size | times: 0.9 | round }}px;
     }
 
     .embedded-header-{{ section_id }}__cta-button {
       padding: 0.6rem 1.2rem;
-      font-size: 0.85rem;
+      font-size: {{ font_size | times: 0.85 | round }}px;
     }
   }
 
@@ -226,6 +230,17 @@
       "id": "text_color",
       "label": "Text Color",
       "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Menu Font Size",
+      "default": 16,
+      "info": "Font size for menu links"
     },
     {
       "type": "color",
