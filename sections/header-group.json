@@ -11,8 +11,27 @@
   "name": "t:sections.header.name",
   "type": "header",
   "sections": {
+    "section_embedded_header_RCtYjL": {
+      "type": "section-embedded-header",
+      "name": "Embedded Header",
+      "settings": {
+        "logo": "shopify://shop_images/logo_copy.png",
+        "menu": "main-menu",
+        "cta_label": "",
+        "cta_link": "",
+        "text_color": "#000000",
+        "background_color": "#ffffff",
+        "background_opacity": 0,
+        "glass_enabled": true,
+        "glass_blur": 20,
+        "glass_bg_opacity": 30,
+        "glass_border_opacity": 20,
+        "sticky_enabled": true
+      }
+    },
     "header": {
       "type": "header",
+      "disabled": true,
       "custom_css": [
         ".header-wrapper,.header,.section-header {background: transparent !important; border: 0 !important;}",
         ".header__inline-menu {background: rgba(10, 30, 15, 0.55); backdrop-filter: blur(18px); border-radius: 999px; padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.12);}",
@@ -123,6 +142,7 @@
         "proposition_AN8r6P",
         "proposition_qqk6gE"
       ],
+      "disabled": true,
       "name": "Hers Top Bar",
       "settings": {
         "color_scheme": "",
@@ -132,6 +152,7 @@
     },
     "hers_header_gmk6nL": {
       "type": "hers-header",
+      "disabled": true,
       "name": "Hers Header",
       "settings": {
         "color_scheme": "",
@@ -141,6 +162,7 @@
     }
   },
   "order": [
+    "section_embedded_header_RCtYjL",
     "header",
     "hers_top_bar_9wzAfT",
     "hers_header_gmk6nL"

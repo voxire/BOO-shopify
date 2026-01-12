@@ -9,6 +9,20 @@
  */
 {
   "sections": {
+    "hers_labs_CrKF3y": {
+      "type": "hers-labs",
+      "disabled": true,
+      "name": "Hers Labs",
+      "settings": {
+        "heading": "labs by hers",
+        "subheading": "Test what your body's been telling you",
+        "button_label": "hello",
+        "button_link": "",
+        "color_scheme": "",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
     "hers_hero_UPRkeg": {
       "type": "hers-hero",
       "blocks": {
@@ -95,6 +109,7 @@
         "treatment_card_irerXJ",
         "treatment_card_LCTd8D"
       ],
+      "disabled": true,
       "name": "Hers Hero",
       "settings": {
         "headline_line_1": "Glowing skin",
@@ -106,19 +121,6 @@
         "color_scheme": "",
         "padding_top": 36,
         "padding_bottom": 36
-      }
-    },
-    "hers_labs_CrKF3y": {
-      "type": "hers-labs",
-      "name": "Hers Labs",
-      "settings": {
-        "heading": "labs by hers",
-        "subheading": "Test what your body's been telling you",
-        "button_label": "hello",
-        "button_link": "",
-        "color_scheme": "",
-        "padding_top": 80,
-        "padding_bottom": 80
       }
     },
     "hers_labs_hero_e6yQVT": {
@@ -289,6 +291,7 @@
     },
     "glassmorphism_3cards_yE3YDd": {
       "type": "glassmorphism-3cards",
+      "disabled": true,
       "name": "Glassmorphism 3 cards",
       "settings": {
         "use_images_only": true,
@@ -476,6 +479,7 @@
     },
     "hero_2_grey_glass_Tz8jwi": {
       "type": "hero-2-grey-glass",
+      "disabled": true,
       "name": "Hero + 2 glass (new)",
       "settings": {
         "background_image": "shopify://shop_images/Background_with_tgrey_itle.png",
@@ -567,6 +571,7 @@
     },
     "slideshow_CfCDiB": {
       "type": "slideshow",
+      "disabled": true,
       "name": "t:sections.slideshow.presets.name",
       "settings": {
         "layout": "full_bleed",
@@ -581,6 +586,7 @@
     },
     "glassmorphism_2cards_XF4fCC": {
       "type": "glassmorphism-2cards",
+      "disabled": true,
       "name": "Hero + 2 glass cards",
       "settings": {
         "background_image": "shopify://shop_images/Background_with_blue_Title.png",
@@ -649,6 +655,7 @@
     },
     "bunny_glass_6QfaDx": {
       "type": "bunny-glass",
+      "disabled": true,
       "name": "bunny ",
       "settings": {
         "background_image": "shopify://shop_images/Background_with_pink_Title.png",
@@ -740,6 +747,7 @@
     },
     "foxy_6EKM7w": {
       "type": "foxy",
+      "disabled": true,
       "name": "Foxy (no boxes)",
       "settings": {
         "background_image": "shopify://shop_images/Background_With_Title.png",
@@ -840,10 +848,10 @@
     }
   },
   "order": [
-    "hers_hero_UPRkeg",
-    "hers_labs_CrKF3y",
     "hers_labs_hero_e6yQVT",
     "3d_card_carousel_x3rUgj",
+    "hers_labs_CrKF3y",
+    "hers_hero_UPRkeg",
     "glassmorphism_3cards_yE3YDd",
     "glassmorphism_3cards_cMkm9N",
     "hero_2_grey_glass_Tz8jwi",
