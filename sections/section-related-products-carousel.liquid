@@ -196,15 +196,16 @@
 
     <div class="related-products-{{ section_id }}__viewport">
       <div class="related-products-{{ section_id }}__track" data-carousel-track>
+        {%- assign product_image_class = 'related-products-' | append: section_id | append: '__image' -%}
         {%- if product_source == 'collection' and collection != blank -%}
           {%- for product in collection.products limit: 12 -%}
             <div class="related-products-{{ section_id }}__card">
               <a href="{{ product.url }}" class="related-products-{{ section_id }}__product-link">
                 <div class="related-products-{{ section_id }}__image-wrapper">
                   {%- if product.featured_media != blank -%}
-                    {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: 'related-products-{{ section_id }}__image' }}
+                    {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: product_image_class }}
                   {%- else -%}
-                    {{ 'product-1' | placeholder_svg_tag: 'related-products-{{ section_id }}__image' }}
+                    {{ 'product-1' | placeholder_svg_tag: product_image_class }}
                   {%- endif -%}
                 </div>
                 <div class="related-products-{{ section_id }}__info">
@@ -222,9 +223,9 @@
                 <a href="{{ product.url }}" class="related-products-{{ section_id }}__product-link">
                   <div class="related-products-{{ section_id }}__image-wrapper">
                     {%- if product.featured_media != blank -%}
-                      {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: 'related-products-{{ section_id }}__image' }}
+                      {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: product_image_class }}
                     {%- else -%}
-                      {{ 'product-1' | placeholder_svg_tag: 'related-products-{{ section_id }}__image' }}
+                      {{ 'product-1' | placeholder_svg_tag: product_image_class }}
                     {%- endif -%}
                   </div>
                   <div class="related-products-{{ section_id }}__info">
@@ -242,9 +243,9 @@
               <a href="{{ product.url }}" class="related-products-{{ section_id }}__product-link">
                 <div class="related-products-{{ section_id }}__image-wrapper">
                   {%- if product.featured_media != blank -%}
-                    {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: 'related-products-{{ section_id }}__image' }}
+                    {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title, class: product_image_class }}
                   {%- else -%}
-                    {{ 'product-1' | placeholder_svg_tag: 'related-products-{{ section_id }}__image' }}
+                    {{ 'product-1' | placeholder_svg_tag: product_image_class }}
                   {%- endif -%}
                 </div>
                 <div class="related-products-{{ section_id }}__info">
