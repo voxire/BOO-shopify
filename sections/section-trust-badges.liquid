@@ -134,7 +134,8 @@
               {%- if block.settings.icon contains '.svg' -%}
                 <img src="{{ block.settings.icon | image_url: width: 64 }}" alt="" class="trust-badges-{{ section_id }}__icon">
               {%- else -%}
-                {{ block.settings.icon | image_url: width: 64 | image_tag: alt: '', class: 'trust-badges-{{ section_id }}__icon' }}
+                {%- assign icon_class = 'trust-badges-' | append: section_id | append: '__icon' -%}
+                {{ block.settings.icon | image_url: width: 64 | image_tag: alt: '', class: icon_class }}
               {%- endif -%}
             </div>
           {%- endif -%}

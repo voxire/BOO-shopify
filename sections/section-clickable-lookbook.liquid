@@ -160,7 +160,8 @@
   <div class="clickable-lookbook-{{ section_id }}__container">
     {%- if main_image != blank -%}
       <div class="clickable-lookbook-{{ section_id }}__wrapper">
-        {{ main_image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: 'Lookbook image', class: 'clickable-lookbook-{{ section_id }}__image' }}
+        {%- assign image_class = 'clickable-lookbook-' | append: section_id | append: '__image' -%}
+        {{ main_image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: 'Lookbook image', class: image_class }}
 
         {%- for block in product_blocks -%}
           {%- assign product = all_products[block.settings.product] -%}

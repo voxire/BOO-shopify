@@ -128,7 +128,9 @@
 
       {%- if image != blank -%}
         <div class="editorial-story-{{ section_id }}__image-wrapper">
-          {{ image | image_url: width: 800 | image_tag: loading: 'lazy', alt: heading | default: 'Editorial story image', class: 'editorial-story-{{ section_id }}__image' }}
+          {%- assign image_class = 'editorial-story-' | append: section_id | append: '__image' -%}
+          {%- assign image_alt = heading | default: 'Editorial story image' -%}
+          {{ image | image_url: width: 800 | image_tag: loading: 'lazy', alt: image_alt, class: image_class }}
         </div>
       {%- endif -%}
     </div>
