@@ -143,12 +143,13 @@
         {%- if collection != blank -%}
           <a href="{{ collection.url }}" class="featured-collections-{{ section_id }}__card" {{ block.shopify_attributes }}>
             <div class="featured-collections-{{ section_id }}__image-wrapper">
+              {%- assign image_class = 'featured-collections-' | append: section_id | append: '__image' -%}
               {%- if block.settings.image != blank -%}
-                {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: collection.title, class: 'featured-collections-{{ section_id }}__image' }}
+                {{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: collection.title, class: image_class }}
               {%- elsif collection.featured_image != blank -%}
-                {{ collection.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: collection.title, class: 'featured-collections-{{ section_id }}__image' }}
+                {{ collection.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: collection.title, class: image_class }}
               {%- else -%}
-                {{ 'collection-1' | placeholder_svg_tag: 'featured-collections-{{ section_id }}__image' }}
+                {{ 'collection-1' | placeholder_svg_tag: image_class }}
               {%- endif -%}
               <div class="featured-collections-{{ section_id }}__overlay"></div>
             </div>
