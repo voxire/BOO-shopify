@@ -196,6 +196,16 @@
     "3d_card_carousel_x3rUgj": {
       "type": "3d-card-carousel",
       "blocks": {
+        "slide_PULJjE": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/469929757_2039844279795302_796628789368065247_n.jpg",
+            "title": "Card Title",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
         "slide_tNbrzN": {
           "type": "slide",
           "settings": {
@@ -248,6 +258,7 @@
         }
       },
       "block_order": [
+        "slide_PULJjE",
         "slide_tNbrzN",
         "slide_Q9JNJq",
         "slide_9XQN6P",
