@@ -64,6 +64,9 @@
       "next_slide": "Slide right",
       "previous_slide": "Slide left",
       "name": "Slider"
+    },
+    "newsletter_form": {
+      "email_placeholder": "Enter your email"
     }
   },
   "newsletter": {
