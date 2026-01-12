@@ -112,6 +112,7 @@
   }
 
   /* Tooltip for desktop hover */
+  /* Overflow fix: Added max-width and multi-line wrap to prevent text overflow */
   .clickable-lookbook-{{ section_id }}__tooltip {
     position: absolute;
     bottom: calc(100% + 12px);
@@ -122,11 +123,17 @@
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.875rem;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    max-width: 200px;
+    min-width: 80px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
     z-index: 20;
+    box-sizing: border-box;
   }
 
   .clickable-lookbook-{{ section_id }}__tooltip::after {
@@ -234,6 +241,13 @@
 
     .clickable-lookbook-{{ section_id }}__hotspot:hover {
       transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Mobile tooltip: Slightly smaller font and increased max-width for better readability */
+    .clickable-lookbook-{{ section_id }}__tooltip {
+      font-size: 0.8125rem;
+      max-width: 180px;
+      padding: 0.5rem 0.875rem;
     }
 
     .clickable-lookbook-{{ section_id }}__product-card {
