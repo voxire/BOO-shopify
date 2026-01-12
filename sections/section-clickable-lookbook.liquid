@@ -1,0 +1,313 @@
+{%- liquid
+  assign section_id = section.id
+  assign main_image = section.settings.main_image
+  assign overlay_style = section.settings.overlay_style
+  assign tooltip_enabled = section.settings.tooltip_enabled
+  assign product_blocks = section.blocks | where: 'type', 'product'
+-%}
+
+{%- style -%}
+  .clickable-lookbook-{{ section_id }} {
+    padding: 4rem 0;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .clickable-lookbook-{{ section_id }}__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .clickable-lookbook-{{ section_id }}__wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f5f5f5;
+  }
+
+  .clickable-lookbook-{{ section_id }}__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .clickable-lookbook-{{ section_id }}__hotspot {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: {{ section.settings.hotspot_color }};
+    border: 3px solid #ffffff;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 10;
+  }
+
+  .clickable-lookbook-{{ section_id }}__hotspot:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .clickable-lookbook-{{ section_id }}__hotspot:active {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .clickable-lookbook-{{ section_id }}__hotspot::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid {{ section.settings.hotspot_color }};
+    opacity: 0.3;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  {% if tooltip_enabled %}
+    .clickable-lookbook-{{ section_id }}__tooltip {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000000;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 20;
+    }
+
+    .clickable-lookbook-{{ section_id }}__tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #000000;
+    }
+
+    .clickable-lookbook-{{ section_id }}__hotspot:hover .clickable-lookbook-{{ section_id }}__tooltip {
+      opacity: 1;
+    }
+  {% endif %}
+
+  {% if overlay_style == 'card' %}
+    .clickable-lookbook-{{ section_id }}__product-card {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: none;
+      z-index: 15;
+    }
+
+    .clickable-lookbook-{{ section_id }}__product-card--active {
+      display: block;
+    }
+
+    .clickable-lookbook-{{ section_id }}__product-title {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .clickable-lookbook-{{ section_id }}__product-price {
+      margin: 0;
+      font-size: 1rem;
+      color: #666;
+    }
+  {% endif %}
+
+  @media screen and (max-width: 749px) {
+    .clickable-lookbook-{{ section_id }}__hotspot {
+      width: 40px;
+      height: 40px;
+    }
+
+    .clickable-lookbook-{{ section_id }}__wrapper {
+      aspect-ratio: 3 / 4;
+    }
+  }
+{%- endstyle -%}
+
+<section class="clickable-lookbook-{{ section_id }}" data-section-id="{{ section.id }}">
+  <div class="clickable-lookbook-{{ section_id }}__container">
+    {%- if main_image != blank -%}
+      <div class="clickable-lookbook-{{ section_id }}__wrapper">
+        {{ main_image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: 'Lookbook image', class: 'clickable-lookbook-{{ section_id }}__image' }}
+
+        {%- for block in product_blocks -%}
+          {%- assign product = all_products[block.settings.product] -%}
+          {%- if product != blank -%}
+            <a
+              href="{{ product.url }}"
+              class="clickable-lookbook-{{ section_id }}__hotspot"
+              style="left: {{ block.settings.position_x }}%; top: {{ block.settings.position_y }}%;"
+              aria-label="{{ product.title }}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if tooltip_enabled -%}
+                <span class="clickable-lookbook-{{ section_id }}__tooltip">{{ product.title }}</span>
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if overlay_style == 'card' -%}
+          {%- for block in product_blocks -%}
+            {%- assign product = all_products[block.settings.product] -%}
+            {%- if product != blank -%}
+              <div class="clickable-lookbook-{{ section_id }}__product-card" data-product-id="{{ product.id }}">
+                <h3 class="clickable-lookbook-{{ section_id }}__product-title">{{ product.title }}</h3>
+                <p class="clickable-lookbook-{{ section_id }}__product-price">{{ product.price | money }}</p>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- if overlay_style == 'card' -%}
+  <script>
+    (function() {
+      const section = document.querySelector('.clickable-lookbook-{{ section_id }}');
+      if (!section) return;
+
+      const hotspots = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__hotspot');
+      const cards = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__product-card');
+
+      hotspots.forEach((hotspot, index) => {
+        hotspot.addEventListener('click', function(e) {
+          e.preventDefault();
+          const productId = this.getAttribute('aria-label');
+          const card = Array.from(cards).find(c => c.dataset.productId === productId);
+          
+          cards.forEach(c => c.classList.remove('clickable-lookbook-{{ section_id }}__product-card--active'));
+          if (card) {
+            card.classList.add('clickable-lookbook-{{ section_id }}__product-card--active');
+            setTimeout(() => {
+              window.location.href = hotspot.href;
+            }, 300);
+          }
+        });
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Clickable Lookbook",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "Main Image"
+    },
+    {
+      "type": "select",
+      "id": "overlay_style",
+      "label": "Overlay Style",
+      "options": [
+        {
+          "value": "hotspot",
+          "label": "Hotspot Only"
+        },
+        {
+          "value": "card",
+          "label": "Product Card"
+        }
+      ],
+      "default": "hotspot"
+    },
+    {
+      "type": "checkbox",
+      "id": "tooltip_enabled",
+      "label": "Show Tooltip on Hover",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "hotspot_color",
+      "label": "Hotspot Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "range",
+          "id": "position_x",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal Position",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "position_y",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical Position",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Clickable Lookbook"
+    }
+  ]
+}
+{% endschema %}
+

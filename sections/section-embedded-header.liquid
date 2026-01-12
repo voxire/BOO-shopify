@@ -1,0 +1,300 @@
+{%- liquid
+  assign section_id = section.id
+  assign logo = section.settings.logo
+  assign menu = section.settings.menu
+  assign cta_label = section.settings.cta_label
+  assign cta_link = section.settings.cta_link
+  assign text_color = section.settings.text_color
+  assign bg_color = section.settings.background_color
+  assign bg_opacity = section.settings.background_opacity | divided_by: 100.0
+  assign glass_enabled = section.settings.glass_enabled
+  assign glass_blur = section.settings.glass_blur
+  assign glass_bg_opacity = section.settings.glass_bg_opacity | divided_by: 100.0
+  assign glass_border_opacity = section.settings.glass_border_opacity | divided_by: 100.0
+  assign sticky_enabled = section.settings.sticky_enabled
+-%}
+
+{%- style -%}
+  .embedded-header-{{ section_id }} {
+    position: {% if sticky_enabled %}sticky{% else %}relative{% endif %};
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    width: 100%;
+    padding: 1.5rem 2rem;
+    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+  }
+
+  {% if glass_enabled %}
+    .embedded-header-{{ section_id }}__inner {
+      background: {{ bg_color | color_modify: 'alpha', glass_bg_opacity }};
+      backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
+      -webkit-backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, {{ glass_border_opacity }});
+      border-radius: 16px;
+      padding: 1rem 2rem;
+    }
+  {% else %}
+    .embedded-header-{{ section_id }}__inner {
+      background: {{ bg_color | color_modify: 'alpha', bg_opacity }};
+      padding: 0;
+    }
+  {% endif %}
+
+  .embedded-header-{{ section_id }}__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .embedded-header-{{ section_id }}__logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .embedded-header-{{ section_id }}__logo img {
+    max-height: 40px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .embedded-header-{{ section_id }}__nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .embedded-header-{{ section_id }}__menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .embedded-header-{{ section_id }}__menu-item {
+    margin: 0;
+  }
+
+  .embedded-header-{{ section_id }}__menu-link {
+    color: {{ text_color }};
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s ease;
+    display: block;
+  }
+
+  .embedded-header-{{ section_id }}__menu-link:hover {
+    opacity: 0.7;
+  }
+
+  .embedded-header-{{ section_id }}__cta {
+    flex-shrink: 0;
+  }
+
+  .embedded-header-{{ section_id }}__cta-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: {{ text_color }};
+    color: {{ bg_color }};
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .embedded-header-{{ section_id }}__cta-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  @media screen and (max-width: 990px) {
+    .embedded-header-{{ section_id }} {
+      padding: 1rem 1.5rem;
+    }
+
+    {% if glass_enabled %}
+      .embedded-header-{{ section_id }}__inner {
+        padding: 0.75rem 1.5rem;
+      }
+    {% endif %}
+
+    .embedded-header-{{ section_id }}__container {
+      gap: 1rem;
+    }
+
+    .embedded-header-{{ section_id }}__menu {
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .embedded-header-{{ section_id }}__cta-button {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  @media screen and (max-width: 750px) {
+    .embedded-header-{{ section_id }}__nav {
+      display: none;
+    }
+
+    .embedded-header-{{ section_id }}__logo img {
+      max-height: 32px;
+    }
+  }
+{%- endstyle -%}
+
+<header class="embedded-header-{{ section_id }}" role="banner">
+  <div class="embedded-header-{{ section_id }}__inner">
+    <div class="embedded-header-{{ section_id }}__container">
+      {%- if logo != blank -%}
+        <div class="embedded-header-{{ section_id }}__logo">
+          <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+            {{ logo | image_url: width: 200 | image_tag: alt: shop.name, loading: 'eager' }}
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if menu != blank -%}
+        <nav class="embedded-header-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
+          <ul class="embedded-header-{{ section_id }}__menu">
+            {%- for link in linklists[menu].links -%}
+              <li class="embedded-header-{{ section_id }}__menu-item">
+                <a href="{{ link.url }}" class="embedded-header-{{ section_id }}__menu-link">
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      {%- if cta_label != blank and cta_link != blank -%}
+        <div class="embedded-header-{{ section_id }}__cta">
+          <a href="{{ cta_link }}" class="embedded-header-{{ section_id }}__cta-button">
+            {{ cta_label }}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Embedded Header",
+  "tag": "header",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Button Label"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "CTA Button Link"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "background_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background Opacity",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Glassmorphism"
+    },
+    {
+      "type": "checkbox",
+      "id": "glass_enabled",
+      "label": "Enable Glassmorphism",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "glass_blur",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Blur Amount",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "glass_bg_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background Opacity",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "glass_border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Border Opacity",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_enabled",
+      "label": "Enable Sticky Behavior",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Embedded Header"
+    }
+  ]
+}
+{% endschema %}
+
