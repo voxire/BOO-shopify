@@ -17,11 +17,22 @@
 
 {%- style -%}
   {% if sticky_enabled %}
+    /* Ensure #MainContent doesn't break sticky positioning */
+    #MainContent {
+      overflow: visible !important;
+    }
+
+    /* Apply sticky to section wrapper - this is the key */
     .shopify-section[data-section-id="{{ section.id }}"] {
+      position: -webkit-sticky !important;
       position: sticky !important;
-      top: 0;
-      z-index: 9999;
-      overflow: visible;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 9999 !important;
+      overflow: visible !important;
+      width: 100% !important;
+      margin: 0 !important;
     }
   {% else %}
     .shopify-section[data-section-id="{{ section.id }}"] {
@@ -29,11 +40,13 @@
     }
   {% endif %}
 
+  /* Ensure inner containers don't interfere with sticky */
   .embedded-header-{{ section_id }},
   .embedded-header-{{ section_id }}__inner,
   .embedded-header-{{ section_id }}__container {
-    overflow: visible;
-    transform: none;
+    overflow: visible !important;
+    transform: none !important;
+    position: relative;
   }
 
   .embedded-header-{{ section_id }} {
