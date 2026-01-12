@@ -4,10 +4,6 @@
   assign border_radius = section.settings.border_radius
   assign hotspot_color = section.settings.hotspot_color
   assign hotspot_size = section.settings.hotspot_size
-  assign glass_enabled = section.settings.glass_enabled
-  assign glass_blur = section.settings.glass_blur
-  assign glass_bg_opacity = section.settings.glass_bg_opacity | divided_by: 100.0
-  assign glass_border_opacity = section.settings.glass_border_opacity | divided_by: 100.0
   assign padding_top = section.settings.padding_top
   assign padding_bottom = section.settings.padding_bottom
   assign image_blocks = section.blocks | where: 'type', 'lookbook_image'
@@ -79,6 +75,7 @@
     min-width: {{ hotspot_size }}px;
     min-height: {{ hotspot_size }}px;
     touch-action: manipulation;
+    text-decoration: none;
   }
 
   .clickable-lookbook-{{ section_id }}__hotspot:hover {
@@ -88,6 +85,11 @@
 
   .clickable-lookbook-{{ section_id }}__hotspot:active {
     transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .clickable-lookbook-{{ section_id }}__hotspot:focus {
+    outline: 2px solid {{ hotspot_color }};
+    outline-offset: 2px;
   }
 
   .clickable-lookbook-{{ section_id }}__hotspot::before {
@@ -111,7 +113,9 @@
     }
   }
 
-  /* Tooltip for desktop hover */
+  /* ========================================
+     ENHANCED TOOLTIP - Shows product info preview
+     ======================================== */
   /* Overflow fix: Added max-width and multi-line wrap to prevent text overflow */
   .clickable-lookbook-{{ section_id }}__tooltip {
     position: absolute;
@@ -120,13 +124,13 @@
     transform: translateX(-50%);
     background: #000000;
     color: #ffffff;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 8px;
     font-size: 0.875rem;
     white-space: normal;
     text-align: center;
-    max-width: 200px;
-    min-width: 80px;
+    max-width: 220px;
+    min-width: 100px;
     word-wrap: break-word;
     overflow-wrap: break-word;
     opacity: 0;
@@ -134,6 +138,7 @@
     transition: opacity 0.2s ease;
     z-index: 20;
     box-sizing: border-box;
+    line-height: 1.4;
   }
 
   .clickable-lookbook-{{ section_id }}__tooltip::after {
@@ -146,63 +151,33 @@
     border-top-color: #000000;
   }
 
+  .clickable-lookbook-{{ section_id }}__tooltip-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .clickable-lookbook-{{ section_id }}__tooltip-price {
+    display: block;
+    font-size: 0.8125rem;
+    opacity: 0.9;
+    margin-bottom: 0.25rem;
+  }
+
+  .clickable-lookbook-{{ section_id }}__tooltip-cta {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 0.375rem;
+    font-style: italic;
+  }
+
+  /* Desktop: Show tooltip on hover */
   @media (hover: hover) {
     .clickable-lookbook-{{ section_id }}__hotspot:hover .clickable-lookbook-{{ section_id }}__tooltip {
       opacity: 1;
+      pointer-events: auto;
     }
-  }
-
-  /* ========================================
-     PRODUCT CARD (Mobile / Click behavior)
-     ======================================== */
-  .clickable-lookbook-{{ section_id }}__product-card {
-    display: none;
-    margin-top: 2rem;
-    padding: 1.5rem;
-    border-radius: {{ border_radius }}px;
-    {% if glass_enabled %}
-      background: rgba(255, 255, 255, {{ glass_bg_opacity }});
-      backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
-      -webkit-backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, {{ glass_border_opacity }});
-    {% else %}
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-    {% endif %}
-  }
-
-  .clickable-lookbook-{{ section_id }}__product-card--active {
-    display: block;
-  }
-
-  .clickable-lookbook-{{ section_id }}__product-title {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: {{ section.settings.text_color }};
-  }
-
-  .clickable-lookbook-{{ section_id }}__product-price {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    color: {{ section.settings.text_color }};
-    opacity: 0.7;
-  }
-
-  .clickable-lookbook-{{ section_id }}__product-link {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: {{ section.settings.button_color }};
-    color: {{ section.settings.button_text_color }};
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    transition: opacity 0.2s ease;
-  }
-
-  .clickable-lookbook-{{ section_id }}__product-link:hover {
-    opacity: 0.9;
   }
 
   /* ========================================
@@ -246,21 +221,20 @@
     /* Mobile tooltip: Slightly smaller font and increased max-width for better readability */
     .clickable-lookbook-{{ section_id }}__tooltip {
       font-size: 0.8125rem;
-      max-width: 180px;
-      padding: 0.5rem 0.875rem;
+      max-width: 200px;
+      padding: 0.625rem 0.875rem;
     }
 
-    .clickable-lookbook-{{ section_id }}__product-card {
-      margin-top: 1.5rem;
-      padding: 1rem;
+    .clickable-lookbook-{{ section_id }}__tooltip-title {
+      font-size: 0.875rem;
     }
 
-    .clickable-lookbook-{{ section_id }}__product-title {
-      font-size: 1rem;
+    .clickable-lookbook-{{ section_id }}__tooltip-price {
+      font-size: 0.75rem;
     }
 
-    .clickable-lookbook-{{ section_id }}__product-price {
-      font-size: 0.9rem;
+    .clickable-lookbook-{{ section_id }}__tooltip-cta {
+      font-size: 0.6875rem;
     }
   }
 {%- endstyle -%}
@@ -270,6 +244,7 @@
     {%- comment -%} 
       GRID LAYOUT: 2x2 grid replaces single large image wrapper
       Each grid item contains one image with one clickable dot
+      Navigation: Hotspot links directly to product.url - no inline panels
     {%- endcomment -%}
     <div class="clickable-lookbook-{{ section_id }}__grid">
       {%- for block in image_blocks limit: 4 -%}
@@ -286,16 +261,23 @@
               {%- assign dot_x = block.settings.dot_x | default: 50 -%}
               {%- assign dot_y = block.settings.dot_y | default: 50 -%}
               
+              {%- comment -%} Navigation restored: Hotspot is direct link to product.url {%- endcomment -%}
               <a
                 href="{{ product.url }}"
                 class="clickable-lookbook-{{ section_id }}__hotspot"
                 style="left: {{ dot_x }}%; top: {{ dot_y }}%;"
-                aria-label="{{ product.title }}"
-                role="button"
+                aria-label="View {{ product.title }}"
                 data-product-id="{{ product.id }}"
-                data-block-index="{{ forloop.index0 }}"
+                data-product-url="{{ product.url }}"
+                data-product-title="{{ product.title }}"
+                data-product-price="{{ product.price | money }}"
               >
-                <span class="clickable-lookbook-{{ section_id }}__tooltip">{{ product.title }}</span>
+                {%- comment -%} Enhanced tooltip with product info preview {%- endcomment -%}
+                <span class="clickable-lookbook-{{ section_id }}__tooltip">
+                  <span class="clickable-lookbook-{{ section_id }}__tooltip-title">{{ product.title }}</span>
+                  <span class="clickable-lookbook-{{ section_id }}__tooltip-price">{{ product.price | money }}</span>
+                  <span class="clickable-lookbook-{{ section_id }}__tooltip-cta">View product</span>
+                </span>
               </a>
             {%- endif -%}
           </div>
@@ -309,13 +291,7 @@
         {%- endif -%}
       {%- endfor -%}
     </div>
-
-    {%- comment -%} Product card shown on mobile tap / desktop click {%- endcomment -%}
-    <div class="clickable-lookbook-{{ section_id }}__product-card" id="product-card-{{ section_id }}">
-      <h3 class="clickable-lookbook-{{ section_id }}__product-title" id="product-title-{{ section_id }}"></h3>
-      <p class="clickable-lookbook-{{ section_id }}__product-price" id="product-price-{{ section_id }}"></p>
-      <a href="#" class="clickable-lookbook-{{ section_id }}__product-link" id="product-link-{{ section_id }}">View Product</a>
-    </div>
+    {%- comment -%} Inline rendering removed: No product card below section {%- endcomment -%}
   </div>
 </section>
 
@@ -325,79 +301,70 @@
     if (!section) return;
 
     const hotspots = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__hotspot');
-    const productCard = document.getElementById('product-card-{{ section_id }}');
-    const productTitle = document.getElementById('product-title-{{ section_id }}');
-    const productPrice = document.getElementById('product-price-{{ section_id }}');
-    const productLink = document.getElementById('product-link-{{ section_id }}');
+    const isMobile = window.innerWidth <= 768;
 
-    if (!productCard || !productTitle || !productPrice || !productLink) return;
+    // Mobile: First tap shows tooltip, second tap navigates
+    if (isMobile) {
+      hotspots.forEach(function(hotspot) {
+        let tapCount = 0;
+        let tapTimer;
 
-    // Store product data
-    const productData = {};
-    hotspots.forEach(function(hotspot) {
-      const productId = hotspot.dataset.productId;
-      const productUrl = hotspot.href;
-      const productName = hotspot.getAttribute('aria-label');
-      
-      // Get price from product URL or use placeholder
-      productData[productId] = {
-        url: productUrl,
-        title: productName,
-        price: '—' // Will be populated if available
-      };
-    });
+        hotspot.addEventListener('click', function(e) {
+          const tooltip = hotspot.querySelector('.clickable-lookbook-{{ section_id }}__tooltip');
+          if (!tooltip) return;
 
-    function showProductCard(productId) {
-      const product = productData[productId];
-      if (!product) return;
+          tapCount++;
 
-      productTitle.textContent = product.title;
-      productPrice.textContent = product.price;
-      productLink.href = product.url;
+          if (tapCount === 1) {
+            // First tap: Show tooltip preview
+            e.preventDefault();
+            tooltip.style.opacity = '1';
+            tooltip.style.pointerEvents = 'auto';
 
-      // Hide all cards first
-      productCard.classList.remove('clickable-lookbook-{{ section_id }}__product-card--active');
-      
-      // Show the card
-      setTimeout(function() {
-        productCard.classList.add('clickable-lookbook-{{ section_id }}__product-card--active');
-      }, 10);
-    }
-
-    // Desktop: show card on click, navigate on second click
-    // Mobile: show card on tap, navigate via button
-    hotspots.forEach(function(hotspot) {
-      const productId = hotspot.dataset.productId;
-      let clickCount = 0;
-
-      hotspot.addEventListener('click', function(e) {
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-          // Mobile: show card, don't navigate immediately
-          e.preventDefault();
-          showProductCard(productId);
-        } else {
-          // Desktop: first click shows card, second click navigates
-          e.preventDefault();
-          clickCount++;
-          
-          if (clickCount === 1) {
-            showProductCard(productId);
-            setTimeout(function() {
-              clickCount = 0;
-            }, 300);
+            // Reset tap count after delay
+            tapTimer = setTimeout(function() {
+              tapCount = 0;
+              tooltip.style.opacity = '0';
+              tooltip.style.pointerEvents = 'none';
+            }, 2000);
           } else {
+            // Second tap: Navigate to product
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            // Allow default navigation
             window.location.href = hotspot.href;
           }
-        }
-      });
-    });
+        });
 
-    // Product link button click
-    productLink.addEventListener('click', function(e) {
-      // Allow default navigation
-    });
+        // Clicking tooltip also navigates
+        const tooltip = hotspot.querySelector('.clickable-lookbook-{{ section_id }}__tooltip');
+        if (tooltip) {
+          tooltip.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.location.href = hotspot.href;
+          });
+        }
+
+        // Close tooltip on tap outside
+        document.addEventListener('click', function(e) {
+          if (!hotspot.contains(e.target)) {
+            const tooltip = hotspot.querySelector('.clickable-lookbook-{{ section_id }}__tooltip');
+            if (tooltip) {
+              tooltip.style.opacity = '0';
+              tooltip.style.pointerEvents = 'none';
+            }
+            tapCount = 0;
+          }
+        });
+      });
+    } else {
+      // Desktop: Hover shows tooltip, click navigates directly
+      // No preventDefault() - navigation works normally
+      hotspots.forEach(function(hotspot) {
+        // Tooltip shows on hover (CSS handles this)
+        // Click navigates directly - no JS interference
+      });
+    }
   })();
 </script>
 
@@ -456,64 +423,6 @@
       "unit": "px",
       "label": "Hotspot Size",
       "default": 32
-    },
-    {
-      "type": "header",
-      "content": "Product Card"
-    },
-    {
-      "type": "checkbox",
-      "id": "glass_enabled",
-      "label": "Enable Glassmorphism",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "glass_blur",
-      "min": 0,
-      "max": 40,
-      "step": 1,
-      "unit": "px",
-      "label": "Blur Amount",
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "glass_bg_opacity",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "label": "Background Opacity",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "glass_border_opacity",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "label": "Border Opacity",
-      "default": 30
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text Color",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "Button Color",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Button Text Color",
-      "default": "#ffffff"
     },
     {
       "type": "header",
