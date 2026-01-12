@@ -9,120 +9,6 @@
  */
 {
   "sections": {
-    "hers_labs_CrKF3y": {
-      "type": "hers-labs",
-      "disabled": true,
-      "name": "Hers Labs",
-      "settings": {
-        "heading": "labs by hers",
-        "subheading": "Test what your body's been telling you",
-        "button_label": "hello",
-        "button_link": "",
-        "color_scheme": "",
-        "padding_top": 80,
-        "padding_bottom": 80
-      }
-    },
-    "hers_hero_UPRkeg": {
-      "type": "hers-hero",
-      "blocks": {
-        "treatment_card_trR84n": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Test for what matters",
-            "highlight_words": "matters",
-            "link": "",
-            "is_new": true
-          }
-        },
-        "treatment_card_JhLjq6": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Lose weight",
-            "highlight_words": "weight",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_fxw3Wc": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Grow fuller hair",
-            "highlight_words": "hair",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_YNKiEC": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Relieve menopause",
-            "highlight_words": "menopause",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_7EmtQm": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Ease perimenopause",
-            "highlight_words": "perimenopause",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_p4RWNM": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Reduce anxiety",
-            "highlight_words": "anxiety",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_irerXJ": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Get glowing skin",
-            "highlight_words": "glowing,skin",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_LCTd8D": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Browse all treatments",
-            "highlight_words": "matters",
-            "link": "",
-            "is_new": false
-          }
-        }
-      },
-      "block_order": [
-        "treatment_card_trR84n",
-        "treatment_card_JhLjq6",
-        "treatment_card_fxw3Wc",
-        "treatment_card_YNKiEC",
-        "treatment_card_7EmtQm",
-        "treatment_card_p4RWNM",
-        "treatment_card_irerXJ",
-        "treatment_card_LCTd8D"
-      ],
-      "disabled": true,
-      "name": "Hers Hero",
-      "settings": {
-        "headline_line_1": "Glowing skin",
-        "headline_line_2": "personalized to you",
-        "headline_line_1_alt": "hello",
-        "headline_line_2_alt": "how are you",
-        "rotation_interval": 5,
-        "tagline": "Customized care starts here",
-        "color_scheme": "",
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
-    },
     "hers_labs_hero_e6yQVT": {
       "type": "hers-labs-hero",
       "blocks": {
@@ -287,6 +173,120 @@
         "perspective_depth": 1000,
         "autoplay_enabled": false,
         "autoplay_speed": 5000
+      }
+    },
+    "hers_labs_CrKF3y": {
+      "type": "hers-labs",
+      "disabled": true,
+      "name": "Hers Labs",
+      "settings": {
+        "heading": "labs by hers",
+        "subheading": "Test what your body's been telling you",
+        "button_label": "hello",
+        "button_link": "",
+        "color_scheme": "",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "hers_hero_UPRkeg": {
+      "type": "hers-hero",
+      "blocks": {
+        "treatment_card_trR84n": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Test for what matters",
+            "highlight_words": "matters",
+            "link": "",
+            "is_new": true
+          }
+        },
+        "treatment_card_JhLjq6": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Lose weight",
+            "highlight_words": "weight",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_fxw3Wc": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Grow fuller hair",
+            "highlight_words": "hair",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_YNKiEC": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Relieve menopause",
+            "highlight_words": "menopause",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_7EmtQm": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Ease perimenopause",
+            "highlight_words": "perimenopause",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_p4RWNM": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Reduce anxiety",
+            "highlight_words": "anxiety",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_irerXJ": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Get glowing skin",
+            "highlight_words": "glowing,skin",
+            "link": "",
+            "is_new": false
+          }
+        },
+        "treatment_card_LCTd8D": {
+          "type": "treatment_card",
+          "settings": {
+            "title": "Browse all treatments",
+            "highlight_words": "matters",
+            "link": "",
+            "is_new": false
+          }
+        }
+      },
+      "block_order": [
+        "treatment_card_trR84n",
+        "treatment_card_JhLjq6",
+        "treatment_card_fxw3Wc",
+        "treatment_card_YNKiEC",
+        "treatment_card_7EmtQm",
+        "treatment_card_p4RWNM",
+        "treatment_card_irerXJ",
+        "treatment_card_LCTd8D"
+      ],
+      "disabled": true,
+      "name": "Hers Hero",
+      "settings": {
+        "headline_line_1": "Glowing skin",
+        "headline_line_2": "personalized to you",
+        "headline_line_1_alt": "hello",
+        "headline_line_2_alt": "how are you",
+        "rotation_interval": 5,
+        "tagline": "Customized care starts here",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
       }
     },
     "glassmorphism_3cards_yE3YDd": {
@@ -845,6 +845,20 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "section_editorial_story_mtfY8i": {
+      "type": "section-editorial-story",
+      "name": "Editorial Brand Story",
+      "settings": {
+        "heading": "Made for little moments",
+        "rich_text": "<p>Childhood is built from quiet details — soft mornings, messy afternoons, and everything in between.<br/><br/>We design clothes that feel gentle on the skin and easy to live in, so kids can move freely and be themselves.</p><p>Thoughtfully made, carefully chosen, and created to grow with your everyday moments.</p>",
+        "image": "shopify://shop_images/grey.png",
+        "image_position": "right",
+        "text_color": "#000000",
+        "background_color": "#ffffff",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
@@ -859,6 +873,7 @@
     "glassmorphism_2cards_XF4fCC",
     "bunny_glass_6QfaDx",
     "foxy_6EKM7w",
-    "multirow_7Gc4Bh"
+    "multirow_7Gc4Bh",
+    "section_editorial_story_mtfY8i"
   ]
 }
