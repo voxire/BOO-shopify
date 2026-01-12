@@ -39,10 +39,29 @@
   @media screen and (max-width: 768px) {
     .editorial-story-{{ section_id }}__container {
       padding: 0 1.5rem;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .editorial-story-{{ section_id }}__grid {
       gap: 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editorial-story-{{ section_id }}__image-wrapper {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 4 / 5;
+      margin: 0;
+    }
+
+    .editorial-story-{{ section_id }}__image {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
     }
   }
 

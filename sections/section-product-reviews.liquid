@@ -26,21 +26,47 @@
   }
 
   @media screen and (max-width: 768px) {
+    .product-reviews-{{ section_id }} {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
     .product-reviews-{{ section_id }}__container {
       padding: 0 1rem;
+      width: 100%;
+      max-width: 100%;
     }
 
     .product-reviews-{{ section_id }}__heading {
       font-size: 1.75rem;
       margin-bottom: 2rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .product-reviews-{{ section_id }}__wrapper {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    .product-reviews-{{ section_id }}__reviews {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .product-reviews-{{ section_id }}__placeholder {
       padding: 3rem 1.5rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .product-reviews-{{ section_id }}__placeholder-text {
       font-size: 1rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
   }
 

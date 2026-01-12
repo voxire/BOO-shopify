@@ -100,16 +100,25 @@
   }
 
   @media screen and (max-width: 989px) {
-    .related-products-{{ section_id }}__track {
+    .related-products-{{ section_id }}__viewport {
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      width: 100%;
     }
 
-    .related-products-{{ section_id }}__track::-webkit-scrollbar {
+    .related-products-{{ section_id }}__viewport::-webkit-scrollbar {
       display: none;
+    }
+
+    .related-products-{{ section_id }}__track {
+      display: flex;
+      gap: 1.5rem;
+      scroll-snap-type: x mandatory;
+      transform: none !important;
+      will-change: auto;
     }
   }
 
@@ -119,35 +128,88 @@
   }
 
   @media screen and (max-width: 768px) {
+    .related-products-{{ section_id }} {
+      width: 100%;
+      overflow-x: hidden;
+    }
+
     .related-products-{{ section_id }}__container {
       padding: 0 1rem;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .related-products-{{ section_id }}__header {
       margin-bottom: 1.5rem;
+      width: 100%;
+      flex-wrap: wrap;
     }
 
     .related-products-{{ section_id }}__heading {
       font-size: 1.75rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .related-products-{{ section_id }}__viewport {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .related-products-{{ section_id }}__viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .related-products-{{ section_id }}__track {
+      display: flex;
+      gap: 1rem;
+      transform: none !important;
+      will-change: auto;
+      scroll-snap-type: x mandatory;
     }
 
     .related-products-{{ section_id }}__card {
       flex: 0 0 75vw;
-      min-width: 0;
+      min-width: 75vw;
+      max-width: 75vw;
+      scroll-snap-align: start;
     }
 
-    .related-products-{{ section_id }}__track {
-      gap: 1rem;
-      -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
+    .related-products-{{ section_id }}__image-wrapper {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .related-products-{{ section_id }}__image {
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: none;
+    }
+
+    .related-products-{{ section_id }}__product-link:hover .related-products-{{ section_id }}__image {
+      transform: none;
     }
 
     .related-products-{{ section_id }}__title {
       font-size: 1rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .related-products-{{ section_id }}__price {
       font-size: 0.9rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
   }
 
@@ -308,8 +370,16 @@
     function scrollToIndex(index) {
       if (index < 0 || index > maxIndex) return;
       currentIndex = index;
-      const scrollAmount = index * cardWidth;
-      track.style.transform = `translateX(-${scrollAmount}px)`;
+      
+      // Mobile: use scrollIntoView instead of transform
+      if (window.innerWidth <= 768) {
+        if (cards[index]) {
+          cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+      } else {
+        const scrollAmount = index * cardWidth;
+        track.style.transform = `translateX(-${scrollAmount}px)`;
+      }
       updateButtons();
     }
 
@@ -378,7 +448,12 @@
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        scrollToIndex(currentIndex);
+        if (window.innerWidth > 768) {
+          scrollToIndex(currentIndex);
+        } else {
+          // Reset transform on mobile
+          track.style.transform = 'none';
+        }
       }, 250);
     });
   })();
