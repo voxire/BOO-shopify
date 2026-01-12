@@ -17,7 +17,7 @@
 
 {%- style -%}
   .embedded-header-{{ section_id }} {
-    position: {% if sticky_enabled %}sticky{% else %}relative{% endif %};
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
@@ -236,7 +236,7 @@
 
   @media screen and (max-width: 768px) {
     .embedded-header-{{ section_id }} {
-      position: relative;
+      position: sticky;
       width: 100%;
       overflow-x: hidden;
       padding: 1rem 1rem;
