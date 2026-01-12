@@ -301,13 +301,6 @@
         "border_radius": 12,
         "hotspot_color": "#000000",
         "hotspot_size": 32,
-        "glass_enabled": true,
-        "glass_blur": 20,
-        "glass_bg_opacity": 40,
-        "glass_border_opacity": 30,
-        "text_color": "#000000",
-        "button_color": "#000000",
-        "button_text_color": "#ffffff",
         "padding_top": 80,
         "padding_bottom": 80
       }
@@ -385,120 +378,6 @@
         "content_bg_opacity": 90,
         "padding_top": 80,
         "padding_bottom": 80
-      }
-    },
-    "hers_labs_CrKF3y": {
-      "type": "hers-labs",
-      "disabled": true,
-      "name": "Hers Labs",
-      "settings": {
-        "heading": "labs by hers",
-        "subheading": "Test what your body's been telling you",
-        "button_label": "hello",
-        "button_link": "",
-        "color_scheme": "",
-        "padding_top": 80,
-        "padding_bottom": 80
-      }
-    },
-    "hers_hero_UPRkeg": {
-      "type": "hers-hero",
-      "blocks": {
-        "treatment_card_trR84n": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Test for what matters",
-            "highlight_words": "matters",
-            "link": "",
-            "is_new": true
-          }
-        },
-        "treatment_card_JhLjq6": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Lose weight",
-            "highlight_words": "weight",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_fxw3Wc": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Grow fuller hair",
-            "highlight_words": "hair",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_YNKiEC": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Relieve menopause",
-            "highlight_words": "menopause",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_7EmtQm": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Ease perimenopause",
-            "highlight_words": "perimenopause",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_p4RWNM": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Reduce anxiety",
-            "highlight_words": "anxiety",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_irerXJ": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Get glowing skin",
-            "highlight_words": "glowing,skin",
-            "link": "",
-            "is_new": false
-          }
-        },
-        "treatment_card_LCTd8D": {
-          "type": "treatment_card",
-          "settings": {
-            "title": "Browse all treatments",
-            "highlight_words": "matters",
-            "link": "",
-            "is_new": false
-          }
-        }
-      },
-      "block_order": [
-        "treatment_card_trR84n",
-        "treatment_card_JhLjq6",
-        "treatment_card_fxw3Wc",
-        "treatment_card_YNKiEC",
-        "treatment_card_7EmtQm",
-        "treatment_card_p4RWNM",
-        "treatment_card_irerXJ",
-        "treatment_card_LCTd8D"
-      ],
-      "disabled": true,
-      "name": "Hers Hero",
-      "settings": {
-        "headline_line_1": "Glowing skin",
-        "headline_line_2": "personalized to you",
-        "headline_line_1_alt": "hello",
-        "headline_line_2_alt": "how are you",
-        "rotation_interval": 5,
-        "tagline": "Customized care starts here",
-        "color_scheme": "",
-        "padding_top": 36,
-        "padding_bottom": 36
       }
     },
     "glassmorphism_3cards_yE3YDd": {
@@ -1068,8 +947,6 @@
     "section_clickable_lookbook_hFFwEK",
     "section_trust_badges_qNFxCp",
     "section_newsletter_signup_TjQNBp",
-    "hers_labs_CrKF3y",
-    "hers_hero_UPRkeg",
     "glassmorphism_3cards_yE3YDd",
     "glassmorphism_3cards_cMkm9N",
     "hero_2_grey_glass_Tz8jwi",
