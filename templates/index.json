@@ -743,6 +743,67 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "3d_card_carousel_x3rUgj": {
+      "type": "3d-card-carousel",
+      "blocks": {
+        "slide_Q9JNJq": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/GriBoo.png",
+            "title": "Card Title",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
+        "slide_9XQN6P": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Shaboo.png",
+            "title": "Card Title",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
+        "slide_xmGYq7": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/DinoBoo.png",
+            "title": "Card Title",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
+        "slide_L9R84L": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/BunBoo.png",
+            "title": "Card Title",
+            "price_text": "$99.00",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_Q9JNJq",
+        "slide_9XQN6P",
+        "slide_xmGYq7",
+        "slide_L9R84L"
+      ],
+      "name": "3D Card Carousel",
+      "settings": {
+        "card_radius": 24,
+        "card_width_mobile": 280,
+        "card_width_desktop": 320,
+        "card_spacing_desktop": 40,
+        "perspective_depth": 1000,
+        "autoplay_enabled": false,
+        "autoplay_speed": 5000
+      }
     }
   },
   "order": [
@@ -756,6 +817,7 @@
     "glassmorphism_2cards_XF4fCC",
     "bunny_glass_6QfaDx",
     "foxy_6EKM7w",
-    "multirow_7Gc4Bh"
+    "multirow_7Gc4Bh",
+    "3d_card_carousel_x3rUgj"
   ]
 }
