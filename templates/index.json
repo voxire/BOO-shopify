@@ -266,7 +266,7 @@
       "name": "Clickable Lookbook",
       "settings": {
         "main_image": "shopify://shop_images/DinoBoo.png",
-        "overlay_style": "card",
+        "overlay_style": "hotspot",
         "tooltip_enabled": true,
         "hotspot_color": "#000000",
         "background_color": "#ffffff"
