@@ -26,6 +26,12 @@
     padding: 0 2rem;
   }
 
+  @media screen and (max-width: 749px) {
+    .trust-badges-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+  }
+
   {%- if heading != blank -%}
     .trust-badges-{{ section_id }}__heading {
       margin: 0 0 3rem 0;
@@ -108,6 +114,10 @@
   }
 
   @media screen and (max-width: 749px) {
+    .trust-badges-{{ section_id }}__grid {
+      gap: 1.5rem;
+    }
+
     .trust-badges-{{ section_id }}__badge {
       padding: 1.5rem 1rem;
     }
@@ -116,6 +126,14 @@
       width: 56px;
       height: 56px;
       margin-bottom: 1rem;
+    }
+
+    .trust-badges-{{ section_id }}__title {
+      font-size: 1rem;
+    }
+
+    .trust-badges-{{ section_id }}__description {
+      font-size: 0.875rem;
     }
   }
 {%- endstyle -%}

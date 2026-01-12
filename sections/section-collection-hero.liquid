@@ -47,6 +47,12 @@
     text-align: {{ text_alignment }};
   }
 
+  @media screen and (max-width: 749px) {
+    .collection-hero-{{ section_id }}__container {
+      padding: 0 1.5rem;
+    }
+  }
+
   .collection-hero-{{ section_id }}__content {
     display: inline-block;
     max-width: 800px;
@@ -72,8 +78,19 @@
   }
 
   @media screen and (max-width: 749px) {
+    .collection-hero-{{ section_id }} {
+      {% if background_image != blank %}
+        min-height: 300px;
+      {% endif %}
+    }
+
     .collection-hero-{{ section_id }}__title {
-      font-size: 2.5rem;
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .collection-hero-{{ section_id }}__content {
+      max-width: 100%;
     }
   }
 

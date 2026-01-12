@@ -29,6 +29,12 @@
     padding: 0 2rem;
   }
 
+  @media screen and (max-width: 749px) {
+    .featured-collections-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+  }
+
   {%- if heading != blank -%}
     .featured-collections-{{ section_id }}__heading {
       margin: 0 0 3rem 0;
@@ -51,6 +57,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .featured-collections-{{ section_id }}__grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
   }
 
   @media screen and (min-width: 990px) {
@@ -114,6 +127,12 @@
     right: 0;
     padding: 2rem;
     z-index: 2;
+  }
+
+  @media screen and (max-width: 749px) {
+    .featured-collections-{{ section_id }}__content {
+      padding: 1.5rem;
+    }
   }
 
   .featured-collections-{{ section_id }}__title {

@@ -31,6 +31,16 @@
     padding: 0 2rem;
   }
 
+  @media screen and (max-width: 749px) {
+    .related-products-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+
+    .related-products-{{ section_id }}__header {
+      margin-bottom: 1.5rem;
+    }
+  }
+
   .related-products-{{ section_id }}__header {
     display: flex;
     align-items: center;
@@ -126,6 +136,19 @@
   @media screen and (max-width: 749px) {
     .related-products-{{ section_id }}__card {
       flex: 0 0 75vw;
+      min-width: 0;
+    }
+
+    .related-products-{{ section_id }}__track {
+      gap: 1rem;
+    }
+
+    .related-products-{{ section_id }}__title {
+      font-size: 1rem;
+    }
+
+    .related-products-{{ section_id }}__price {
+      font-size: 0.9rem;
     }
   }
 

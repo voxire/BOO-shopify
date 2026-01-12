@@ -18,6 +18,16 @@
     padding: 0 2rem;
   }
 
+  @media screen and (max-width: 749px) {
+    .clickable-lookbook-{{ section_id }} {
+      padding: 2rem 0;
+    }
+
+    .clickable-lookbook-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+  }
+
   .clickable-lookbook-{{ section_id }}__wrapper {
     position: relative;
     width: 100%;
@@ -146,13 +156,37 @@
 
   @media screen and (max-width: 749px) {
     .clickable-lookbook-{{ section_id }}__hotspot {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
+      border-width: 2px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    .clickable-lookbook-{{ section_id }}__hotspot::before {
+      inset: -6px;
     }
 
     .clickable-lookbook-{{ section_id }}__wrapper {
       aspect-ratio: 3 / 4;
     }
+
+    {% if overlay_style == 'card' %}
+      .clickable-lookbook-{{ section_id }}__product-card {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 1rem;
+      }
+
+      .clickable-lookbook-{{ section_id }}__product-title {
+        font-size: 1rem;
+      }
+
+      .clickable-lookbook-{{ section_id }}__product-price {
+        font-size: 0.9rem;
+      }
+    {% endif %}
   }
 {%- endstyle -%}
 

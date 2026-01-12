@@ -48,6 +48,12 @@
     z-index: 2;
   }
 
+  @media screen and (max-width: 749px) {
+    .newsletter-signup-{{ section_id }}__container {
+      padding: 0 1rem;
+    }
+  }
+
   {% if glass_enabled %}
     .newsletter-signup-{{ section_id }}__content {
       background: rgba(255, 255, 255, {{ glass_bg_opacity }});
@@ -166,10 +172,20 @@
 
     .newsletter-signup-{{ section_id }}__form {
       flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .newsletter-signup-{{ section_id }}__input {
+      padding: 0.875rem 1.25rem;
+      font-size: 16px;
+      min-height: 48px;
     }
 
     .newsletter-signup-{{ section_id }}__button {
       width: 100%;
+      padding: 0.875rem 1.5rem;
+      min-height: 48px;
+      font-size: 1rem;
     }
   }
 {%- endstyle -%}
