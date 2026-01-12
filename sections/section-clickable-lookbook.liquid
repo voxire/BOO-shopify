@@ -1,15 +1,30 @@
 {%- liquid
   assign section_id = section.id
-  assign main_image = section.settings.main_image
-  assign overlay_style = section.settings.overlay_style
-  assign tooltip_enabled = section.settings.tooltip_enabled
-  assign product_blocks = section.blocks | where: 'type', 'product'
+  assign grid_gap = section.settings.grid_gap
+  assign border_radius = section.settings.border_radius
+  assign hotspot_color = section.settings.hotspot_color
+  assign hotspot_size = section.settings.hotspot_size
+  assign glass_enabled = section.settings.glass_enabled
+  assign glass_blur = section.settings.glass_blur
+  assign glass_bg_opacity = section.settings.glass_bg_opacity | divided_by: 100.0
+  assign glass_border_opacity = section.settings.glass_border_opacity | divided_by: 100.0
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+  assign image_blocks = section.blocks | where: 'type', 'lookbook_image'
 -%}
 
 {%- style -%}
   .clickable-lookbook-{{ section_id }} {
-    padding: 4rem 0;
+    padding-top: {{ padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ padding_bottom | times: 0.5 | round: 0 }}px;
     background-color: {{ section.settings.background_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .clickable-lookbook-{{ section_id }} {
+      padding-top: {{ padding_top }}px;
+      padding-bottom: {{ padding_bottom }}px;
+    }
   }
 
   .clickable-lookbook-{{ section_id }}__container {
@@ -18,14 +33,25 @@
     padding: 0 2rem;
   }
 
-  .clickable-lookbook-{{ section_id }}__wrapper {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 5;
+  /* ========================================
+     GRID LAYOUT - Replaces single image wrapper
+     ======================================== */
+  .clickable-lookbook-{{ section_id }}__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: {{ grid_gap }}px;
+    aspect-ratio: 1 / 1;
     max-width: 1000px;
     margin: 0 auto;
+  }
+
+  .clickable-lookbook-{{ section_id }}__grid-item {
+    position: relative;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: {{ border_radius }}px;
     background: #f5f5f5;
   }
 
@@ -36,17 +62,23 @@
     display: block;
   }
 
+  /* ========================================
+     HOTSPOT / DOT STYLING
+     ======================================== */
   .clickable-lookbook-{{ section_id }}__hotspot {
     position: absolute;
-    width: 32px;
-    height: 32px;
+    width: {{ hotspot_size }}px;
+    height: {{ hotspot_size }}px;
     border-radius: 50%;
-    background: {{ section.settings.hotspot_color }};
+    background: {{ hotspot_color }};
     border: 3px solid #ffffff;
     cursor: pointer;
     transform: translate(-50%, -50%);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     z-index: 10;
+    min-width: {{ hotspot_size }}px;
+    min-height: {{ hotspot_size }}px;
+    touch-action: manipulation;
   }
 
   .clickable-lookbook-{{ section_id }}__hotspot:hover {
@@ -63,12 +95,12 @@
     position: absolute;
     inset: -8px;
     border-radius: 50%;
-    border: 2px solid {{ section.settings.hotspot_color }};
+    border: 2px solid {{ hotspot_color }};
     opacity: 0.3;
-    animation: pulse 2s infinite;
+    animation: pulse-{{ section_id }} 2s infinite;
   }
 
-  @keyframes pulse {
+  @keyframes pulse-{{ section_id }} {
     0%, 100% {
       transform: scale(1);
       opacity: 0.3;
@@ -79,74 +111,98 @@
     }
   }
 
-  {% if tooltip_enabled %}
-    .clickable-lookbook-{{ section_id }}__tooltip {
-      position: absolute;
-      bottom: calc(100% + 12px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000000;
-      color: #ffffff;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      z-index: 20;
-    }
+  /* Tooltip for desktop hover */
+  .clickable-lookbook-{{ section_id }}__tooltip {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
 
-    .clickable-lookbook-{{ section_id }}__tooltip::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: #000000;
-    }
+  .clickable-lookbook-{{ section_id }}__tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #000000;
+  }
 
+  @media (hover: hover) {
     .clickable-lookbook-{{ section_id }}__hotspot:hover .clickable-lookbook-{{ section_id }}__tooltip {
       opacity: 1;
     }
-  {% endif %}
+  }
 
-  {% if overlay_style == 'card' %}
-    .clickable-lookbook-{{ section_id }}__product-card {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      right: 20px;
+  /* ========================================
+     PRODUCT CARD (Mobile / Click behavior)
+     ======================================== */
+  .clickable-lookbook-{{ section_id }}__product-card {
+    display: none;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: {{ border_radius }}px;
+    {% if glass_enabled %}
+      background: rgba(255, 255, 255, {{ glass_bg_opacity }});
+      backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
+      -webkit-backdrop-filter: blur({{ glass_blur }}px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, {{ glass_border_opacity }});
+    {% else %}
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 1.5rem;
-      display: none;
-      z-index: 15;
-    }
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    {% endif %}
+  }
 
-    .clickable-lookbook-{{ section_id }}__product-card--active {
-      display: block;
-    }
+  .clickable-lookbook-{{ section_id }}__product-card--active {
+    display: block;
+  }
 
-    .clickable-lookbook-{{ section_id }}__product-title {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.125rem;
-      font-weight: 600;
-    }
+  .clickable-lookbook-{{ section_id }}__product-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: {{ section.settings.text_color }};
+  }
 
-    .clickable-lookbook-{{ section_id }}__product-price {
-      margin: 0;
-      font-size: 1rem;
-      color: #666;
-    }
-  {% endif %}
+  .clickable-lookbook-{{ section_id }}__product-price {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: {{ section.settings.text_color }};
+    opacity: 0.7;
+  }
 
+  .clickable-lookbook-{{ section_id }}__product-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: {{ section.settings.button_color }};
+    color: {{ section.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+  }
+
+  .clickable-lookbook-{{ section_id }}__product-link:hover {
+    opacity: 0.9;
+  }
+
+  /* ========================================
+     MOBILE RESPONSIVE
+     ======================================== */
   @media screen and (max-width: 768px) {
     .clickable-lookbook-{{ section_id }} {
-      padding: 2rem 0;
       width: 100%;
       overflow-x: hidden;
     }
@@ -157,41 +213,18 @@
       max-width: 100%;
     }
 
-    .clickable-lookbook-{{ section_id }}__wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 100%;
-      aspect-ratio: 3 / 4;
-      overflow: hidden;
-      margin: 0 auto;
-    }
-
-    .clickable-lookbook-{{ section_id }}__image {
-      width: 100%;
-      max-width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: none;
+    /* Maintain 2x2 grid on mobile */
+    .clickable-lookbook-{{ section_id }}__grid {
+      gap: {{ grid_gap | times: 0.5 | round: 0 }}px;
+      aspect-ratio: 1 / 1;
     }
 
     .clickable-lookbook-{{ section_id }}__hotspot {
-      position: absolute;
       width: 44px;
       height: 44px;
-      border-width: 2px;
       min-width: 44px;
       min-height: 44px;
-      touch-action: manipulation;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-    }
-
-    .clickable-lookbook-{{ section_id }}__hotspot:hover {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .clickable-lookbook-{{ section_id }}__hotspot:active {
-      transform: translate(-50%, -50%) scale(0.95);
+      border-width: 2px;
     }
 
     .clickable-lookbook-{{ section_id }}__hotspot::before {
@@ -199,97 +232,160 @@
       animation: none;
     }
 
-    {% if overlay_style == 'card' %}
-      .clickable-lookbook-{{ section_id }}__product-card {
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
-        padding: 1rem;
-        max-width: calc(100% - 20px);
-        box-sizing: border-box;
-      }
+    .clickable-lookbook-{{ section_id }}__hotspot:hover {
+      transform: translate(-50%, -50%) scale(1);
+    }
 
-      .clickable-lookbook-{{ section_id }}__product-title {
-        font-size: 1rem;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-      }
+    .clickable-lookbook-{{ section_id }}__product-card {
+      margin-top: 1.5rem;
+      padding: 1rem;
+    }
 
-      .clickable-lookbook-{{ section_id }}__product-price {
-        font-size: 0.9rem;
-      }
-    {% endif %}
+    .clickable-lookbook-{{ section_id }}__product-title {
+      font-size: 1rem;
+    }
+
+    .clickable-lookbook-{{ section_id }}__product-price {
+      font-size: 0.9rem;
+    }
   }
 {%- endstyle -%}
 
 <section class="clickable-lookbook-{{ section_id }}" data-section-id="{{ section.id }}">
   <div class="clickable-lookbook-{{ section_id }}__container">
-    {%- if main_image != blank -%}
-      <div class="clickable-lookbook-{{ section_id }}__wrapper">
-        {%- assign image_class = 'clickable-lookbook-' | append: section_id | append: '__image' -%}
-        {{ main_image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: 'Lookbook image', class: image_class }}
+    {%- comment -%} 
+      GRID LAYOUT: 2x2 grid replaces single large image wrapper
+      Each grid item contains one image with one clickable dot
+    {%- endcomment -%}
+    <div class="clickable-lookbook-{{ section_id }}__grid">
+      {%- for block in image_blocks limit: 4 -%}
+        {%- assign image = block.settings.image -%}
+        {%- assign product = all_products[block.settings.product] -%}
+        
+        {%- if image != blank -%}
+          <div class="clickable-lookbook-{{ section_id }}__grid-item" {{ block.shopify_attributes }}>
+            {%- assign image_class = 'clickable-lookbook-' | append: section_id | append: '__image' -%}
+            {%- assign image_alt = product.title | default: 'Lookbook image' -%}
+            {{ image | image_url: width: 600 | image_tag: loading: 'lazy', alt: image_alt, class: image_class }}
 
-        {%- for block in product_blocks -%}
-          {%- assign product = all_products[block.settings.product] -%}
-          {%- if product != blank -%}
-            <a
-              href="{{ product.url }}"
-              class="clickable-lookbook-{{ section_id }}__hotspot"
-              style="left: {{ block.settings.position_x }}%; top: {{ block.settings.position_y }}%;"
-              aria-label="{{ product.title }}"
-              {{ block.shopify_attributes }}
-            >
-              {%- if tooltip_enabled -%}
-                <span class="clickable-lookbook-{{ section_id }}__tooltip">{{ product.title }}</span>
-              {%- endif -%}
-            </a>
-          {%- endif -%}
-        {%- endfor -%}
-
-        {%- if overlay_style == 'card' -%}
-          {%- for block in product_blocks -%}
-            {%- assign product = all_products[block.settings.product] -%}
             {%- if product != blank -%}
-              <div class="clickable-lookbook-{{ section_id }}__product-card" data-product-id="{{ product.id }}">
-                <h3 class="clickable-lookbook-{{ section_id }}__product-title">{{ product.title }}</h3>
-                <p class="clickable-lookbook-{{ section_id }}__product-price">{{ product.price | money }}</p>
-              </div>
+              {%- assign dot_x = block.settings.dot_x | default: 50 -%}
+              {%- assign dot_y = block.settings.dot_y | default: 50 -%}
+              
+              <a
+                href="{{ product.url }}"
+                class="clickable-lookbook-{{ section_id }}__hotspot"
+                style="left: {{ dot_x }}%; top: {{ dot_y }}%;"
+                aria-label="{{ product.title }}"
+                role="button"
+                data-product-id="{{ product.id }}"
+                data-block-index="{{ forloop.index0 }}"
+              >
+                <span class="clickable-lookbook-{{ section_id }}__tooltip">{{ product.title }}</span>
+              </a>
             {%- endif -%}
-          {%- endfor -%}
+          </div>
+        {%- else -%}
+          {%- comment -%} Empty grid cell placeholder {%- endcomment -%}
+          <div class="clickable-lookbook-{{ section_id }}__grid-item" {{ block.shopify_attributes }}>
+            <div style="width: 100%; height: 100%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.875rem;">
+              Add image
+            </div>
+          </div>
         {%- endif -%}
-      </div>
-    {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Product card shown on mobile tap / desktop click {%- endcomment -%}
+    <div class="clickable-lookbook-{{ section_id }}__product-card" id="product-card-{{ section_id }}">
+      <h3 class="clickable-lookbook-{{ section_id }}__product-title" id="product-title-{{ section_id }}"></h3>
+      <p class="clickable-lookbook-{{ section_id }}__product-price" id="product-price-{{ section_id }}"></p>
+      <a href="#" class="clickable-lookbook-{{ section_id }}__product-link" id="product-link-{{ section_id }}">View Product</a>
+    </div>
   </div>
 </section>
 
-{%- if overlay_style == 'card' -%}
-  <script>
-    (function() {
-      const section = document.querySelector('.clickable-lookbook-{{ section_id }}');
-      if (!section) return;
+<script>
+  (function() {
+    const section = document.querySelector('.clickable-lookbook-{{ section_id }}');
+    if (!section) return;
 
-      const hotspots = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__hotspot');
-      const cards = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__product-card');
+    const hotspots = section.querySelectorAll('.clickable-lookbook-{{ section_id }}__hotspot');
+    const productCard = document.getElementById('product-card-{{ section_id }}');
+    const productTitle = document.getElementById('product-title-{{ section_id }}');
+    const productPrice = document.getElementById('product-price-{{ section_id }}');
+    const productLink = document.getElementById('product-link-{{ section_id }}');
 
-      hotspots.forEach((hotspot, index) => {
-        hotspot.addEventListener('click', function(e) {
+    if (!productCard || !productTitle || !productPrice || !productLink) return;
+
+    // Store product data
+    const productData = {};
+    hotspots.forEach(function(hotspot) {
+      const productId = hotspot.dataset.productId;
+      const productUrl = hotspot.href;
+      const productName = hotspot.getAttribute('aria-label');
+      
+      // Get price from product URL or use placeholder
+      productData[productId] = {
+        url: productUrl,
+        title: productName,
+        price: '—' // Will be populated if available
+      };
+    });
+
+    function showProductCard(productId) {
+      const product = productData[productId];
+      if (!product) return;
+
+      productTitle.textContent = product.title;
+      productPrice.textContent = product.price;
+      productLink.href = product.url;
+
+      // Hide all cards first
+      productCard.classList.remove('clickable-lookbook-{{ section_id }}__product-card--active');
+      
+      // Show the card
+      setTimeout(function() {
+        productCard.classList.add('clickable-lookbook-{{ section_id }}__product-card--active');
+      }, 10);
+    }
+
+    // Desktop: show card on click, navigate on second click
+    // Mobile: show card on tap, navigate via button
+    hotspots.forEach(function(hotspot) {
+      const productId = hotspot.dataset.productId;
+      let clickCount = 0;
+
+      hotspot.addEventListener('click', function(e) {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          // Mobile: show card, don't navigate immediately
           e.preventDefault();
-          const productId = this.getAttribute('aria-label');
-          const card = Array.from(cards).find(c => c.dataset.productId === productId);
+          showProductCard(productId);
+        } else {
+          // Desktop: first click shows card, second click navigates
+          e.preventDefault();
+          clickCount++;
           
-          cards.forEach(c => c.classList.remove('clickable-lookbook-{{ section_id }}__product-card--active'));
-          if (card) {
-            card.classList.add('clickable-lookbook-{{ section_id }}__product-card--active');
-            setTimeout(() => {
-              window.location.href = hotspot.href;
+          if (clickCount === 1) {
+            showProductCard(productId);
+            setTimeout(function() {
+              clickCount = 0;
             }, 300);
+          } else {
+            window.location.href = hotspot.href;
           }
-        });
+        }
       });
-    })();
-  </script>
-{%- endif -%}
+    });
+
+    // Product link button click
+    productLink.addEventListener('click', function(e) {
+      // Allow default navigation
+    });
+  })();
+</script>
 
 {% schema %}
 {
@@ -298,31 +394,38 @@
   "class": "section",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "main_image",
-      "label": "Main Image"
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
     },
     {
-      "type": "select",
-      "id": "overlay_style",
-      "label": "Overlay Style",
-      "options": [
-        {
-          "value": "hotspot",
-          "label": "Hotspot Only"
-        },
-        {
-          "value": "card",
-          "label": "Product Card"
-        }
-      ],
-      "default": "hotspot"
+      "type": "header",
+      "content": "Grid Settings"
     },
     {
-      "type": "checkbox",
-      "id": "tooltip_enabled",
-      "label": "Show Tooltip on Hover",
-      "default": true
+      "type": "range",
+      "id": "grid_gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Grid Gap",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border Radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Hotspot Settings"
     },
     {
       "type": "color",
@@ -331,17 +434,108 @@
       "default": "#000000"
     },
     {
+      "type": "range",
+      "id": "hotspot_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Hotspot Size",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Product Card"
+    },
+    {
+      "type": "checkbox",
+      "id": "glass_enabled",
+      "label": "Enable Glassmorphism",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "glass_blur",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Blur Amount",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "glass_bg_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Background Opacity",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "glass_border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Border Opacity",
+      "default": 30
+    },
+    {
       "type": "color",
-      "id": "background_color",
-      "label": "Background Color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
     }
   ],
   "blocks": [
     {
-      "type": "product",
-      "name": "Product",
+      "type": "lookbook_image",
+      "name": "Lookbook Image",
       "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
         {
           "type": "product",
           "id": "product",
@@ -349,33 +543,48 @@
         },
         {
           "type": "range",
-          "id": "position_x",
+          "id": "dot_x",
           "min": 0,
           "max": 100,
           "step": 1,
           "unit": "%",
-          "label": "Horizontal Position",
-          "default": 50
+          "label": "Dot X Position",
+          "default": 50,
+          "info": "Horizontal position of the dot on the image"
         },
         {
           "type": "range",
-          "id": "position_y",
+          "id": "dot_y",
           "min": 0,
           "max": 100,
           "step": 1,
           "unit": "%",
-          "label": "Vertical Position",
-          "default": 50
+          "label": "Dot Y Position",
+          "default": 50,
+          "info": "Vertical position of the dot on the image"
         }
       ]
     }
   ],
-  "max_blocks": 10,
+  "max_blocks": 4,
   "presets": [
     {
-      "name": "Clickable Lookbook"
+      "name": "Clickable Lookbook",
+      "blocks": [
+        {
+          "type": "lookbook_image"
+        },
+        {
+          "type": "lookbook_image"
+        },
+        {
+          "type": "lookbook_image"
+        },
+        {
+          "type": "lookbook_image"
+        }
+      ]
     }
   ]
 }
 {% endschema %}
-
