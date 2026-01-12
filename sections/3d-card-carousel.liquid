@@ -26,6 +26,12 @@
     overflow: hidden;
   }
 
+  @media screen and (min-width: 769px) {
+    .card-carousel-{{ section_id }}__container {
+      overflow: visible;
+    }
+  }
+
   /* Mobile: 3D Carousel */
   @media screen and (max-width: 768px) {
     .card-carousel-{{ section_id }}__viewport {
@@ -170,6 +176,7 @@
       min-height: 600px;
       height: auto;
       user-select: none;
+      padding: 2rem 0;
     }
 
     .card-carousel-{{ section_id }}__track--dragging {
@@ -218,7 +225,7 @@
       background: #ffffff;
       border-radius: {{ card_radius }}px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.05);
-      overflow: visible;
+      overflow: hidden;
       backface-visibility: hidden;
       transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -232,6 +239,7 @@
       height: auto;
       display: block;
       object-fit: cover;
+      border-radius: {{ card_radius }}px {{ card_radius }}px 0 0;
     }
 
     .card-carousel-{{ section_id }}__card-content {
