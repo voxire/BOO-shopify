@@ -918,6 +918,17 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "section_clickable_lookbook_hFFwEK": {
+      "type": "section-clickable-lookbook",
+      "name": "Clickable Lookbook",
+      "settings": {
+        "main_image": "shopify://shop_images/Background_with_tgrey_itle_newssssssspng.png",
+        "overlay_style": "hotspot",
+        "tooltip_enabled": true,
+        "hotspot_color": "#000000",
+        "background_color": "#ffffff"
+      }
     }
   },
   "order": [
@@ -935,6 +946,7 @@
     "glassmorphism_2cards_XF4fCC",
     "bunny_glass_6QfaDx",
     "foxy_6EKM7w",
-    "multirow_7Gc4Bh"
+    "multirow_7Gc4Bh",
+    "section_clickable_lookbook_hFFwEK"
   ]
 }
