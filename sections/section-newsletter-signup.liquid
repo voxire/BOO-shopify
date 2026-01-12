@@ -249,7 +249,11 @@
         <p class="newsletter-signup-{{ section_id }}__subtext">{{ subtext }}</p>
       {%- endif -%}
 
-      {%- form 'customer', class: 'newsletter-signup-{{ section_id }}__form', id: 'newsletter-form-' | append: section_id -%}
+      {%- liquid
+        assign form_class = 'newsletter-signup-' | append: section_id | append: '__form'
+        assign form_id = 'newsletter-form-' | append: section_id
+      -%}
+      {%- form 'customer', class: form_class, id: form_id -%}
         <input
           type="email"
           name="contact[email]"
