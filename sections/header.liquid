@@ -118,6 +118,201 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /* Slideshow Container */
+  .header-slideshow-{{ section_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .header-slideshow-{{ section_id }}__slideshow {
+    position: relative;
+    width: 100%;
+    {% if slide_height == 'adapt_image' %}
+      height: auto;
+    {% elsif slide_height == 'small' %}
+      height: 400px;
+    {% elsif slide_height == 'medium' %}
+      height: 500px;
+    {% elsif slide_height == 'large' %}
+      height: 600px;
+    {% else %}
+      height: 700px;
+    {% endif %}
+    overflow: hidden;
+  }
+
+  .header-slideshow-{{ section_id }}__slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .header-slideshow-{{ section_id }}__slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: 1;
+  }
+
+  .header-slideshow-{{ section_id }}__slide.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .header-slideshow-{{ section_id }}__slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .header-slideshow-{{ section_id }}__slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .header-slideshow-{{ section_id }}__button {
+    position: absolute;
+    padding: 1rem 2rem;
+    background: {{ button_bg_color }};
+    color: {{ button_text_color }};
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    cursor: pointer;
+    z-index: 4;
+  }
+
+  .header-slideshow-{{ section_id }}__button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  /* Slide indicators */
+  .header-slideshow-{{ section_id }}__indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 5;
+  }
+
+  .header-slideshow-{{ section_id }}__indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    padding: 0;
+  }
+
+  .header-slideshow-{{ section_id }}__indicator.active {
+    background: {{ text_color }};
+  }
+
+  /* Make header wrapper transparent and position absolutely */
+  {% if slides.size > 0 %}
+    .header-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: transparent !important;
+    }
+
+    .header {
+      background: transparent !important;
+    }
+
+    /* Ensure logo stays on far left */
+    .header__heading {
+      order: 1;
+      margin-right: auto;
+    }
+
+    /* Menu in center */
+    .header__inline-menu {
+      order: 2;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Icons on right */
+    .header__icons {
+      order: 3;
+      margin-left: auto;
+    }
+
+    /* Make cart icon bigger */
+    .header__icon--cart {
+      width: 56px !important;
+      height: 56px !important;
+    }
+
+    .header__icon--cart .svg-wrapper {
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    .header__icon--cart .svg-wrapper svg {
+      width: 100%;
+      height: 100%;
+    }
+  {% endif %}
+
+  @media screen and (max-width: 990px) {
+    .header-slideshow-{{ section_id }}__slideshow {
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 300px;
+      {% elsif slide_height == 'medium' %}
+        height: 400px;
+      {% elsif slide_height == 'large' %}
+        height: 500px;
+      {% else %}
+        height: 600px;
+      {% endif %}
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .header-slideshow-{{ section_id }}__slideshow {
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 250px;
+      {% elsif slide_height == 'medium' %}
+        height: 350px;
+      {% elsif slide_height == 'large' %}
+        height: 450px;
+      {% else %}
+        height: 550px;
+      {% endif %}
+    }
+  }
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
@@ -128,6 +323,14 @@
       assign has_app_block = true
     endif
   endfor
+  assign section_id = section.id
+  assign autoplay_enabled = section.settings.autoplay_enabled
+  assign autoplay_speed = section.settings.autoplay_speed | default: 5000
+  assign slide_height = section.settings.slide_height | default: 'large'
+  assign slides = section.blocks | where: 'type', 'slide'
+  assign text_color = section.settings.slideshow_text_color | default: '#ffffff'
+  assign button_bg_color = section.settings.button_bg_color | default: '#ffffff'
+  assign button_text_color = section.settings.button_text_color | default: '#000000'
 -%}
 
 {% liquid
@@ -138,11 +341,14 @@
   endif
 %}
 
+{%- if slides.size > 0 -%}
+<div class="header-slideshow-{{ section_id }}">
+{%- endif -%}
 <{{ header_tag }}
   {% if header_tag == 'sticky-header' %}
     data-sticky-type="{{ section.settings.sticky_header_type }}"
   {% endif %}
-  class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}"
+  class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}{% if slides.size > 0 %} header-slideshow-wrapper{% endif %}"
 >
   {%- liquid
     assign social_links = false
@@ -324,6 +530,105 @@
     </div>
   </header>
 </{{ header_tag }}>
+{%- if slides.size > 0 -%}
+  <!-- Slideshow -->
+  <div class="header-slideshow-{{ section_id }}__slideshow">
+    <div class="header-slideshow-{{ section_id }}__slides" id="slides-{{ section_id }}">
+      {%- for block in slides -%}
+        {%- assign slide_image = block.settings.image -%}
+        {%- assign button_text = block.settings.button_text -%}
+        {%- assign button_link = block.settings.button_link -%}
+        {%- assign button_position = block.settings.button_position | default: 'center' -%}
+        {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
+        {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
+
+        <div
+          class="header-slideshow-{{ section_id }}__slide{% if forloop.first %} active{% endif %}"
+          data-slide-index="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          {%- if slide_image != blank -%}
+            {{
+              slide_image
+              | image_url: width: 1920
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: slide_image.alt | default: '',
+                class: 'header-slideshow-' | append: section_id | append: '__slide-image'
+            }}
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'header-slideshow-' | append: section_id | append: '__slide-image' }}
+          {%- endif -%}
+
+          <div class="header-slideshow-{{ section_id }}__slide-content">
+            {%- if button_text != blank and button_link != blank -%}
+              <a
+                href="{{ button_link }}"
+                class="header-slideshow-{{ section_id }}__button"
+                style="
+                  {% if button_position == 'custom' %}
+                    left: {{ button_horizontal }}%;
+                    top: {{ button_vertical }}%;
+                    transform: translate(-50%, -50%);
+                  {% elsif button_position == 'top-left' %}
+                    top: 20%;
+                    left: 10%;
+                  {% elsif button_position == 'top-center' %}
+                    top: 20%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  {% elsif button_position == 'top-right' %}
+                    top: 20%;
+                    right: 10%;
+                  {% elsif button_position == 'center-left' %}
+                    top: 50%;
+                    left: 10%;
+                    transform: translateY(-50%);
+                  {% elsif button_position == 'center-right' %}
+                    top: 50%;
+                    right: 10%;
+                    transform: translateY(-50%);
+                  {% elsif button_position == 'bottom-left' %}
+                    bottom: 20%;
+                    left: 10%;
+                  {% elsif button_position == 'bottom-center' %}
+                    bottom: 20%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  {% elsif button_position == 'bottom-right' %}
+                    bottom: 20%;
+                    right: 10%;
+                  {% else %}
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                  {% endif %}
+                "
+              >
+                {{ button_text }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if slides.size > 1 -%}
+      <div class="header-slideshow-{{ section_id }}__indicators">
+        {%- for block in slides -%}
+          <button
+            type="button"
+            class="header-slideshow-{{ section_id }}__indicator{% if forloop.first %} active{% endif %}"
+            data-slide-index="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+{%- endif -%}
 
 {%- if settings.cart_type == 'notification' -%}
   {%- render 'cart-notification',
@@ -446,6 +751,91 @@
   customElements.define('sticky-header', StickyHeader);
 {% endjavascript %}
 
+{%- if slides.size > 0 -%}
+<script>
+  (function() {
+    const section = document.querySelector('.header-slideshow-{{ section_id }}');
+    if (!section) return;
+
+    const slides = section.querySelectorAll('.header-slideshow-{{ section_id }}__slide');
+    const indicators = section.querySelectorAll('.header-slideshow-{{ section_id }}__indicator');
+    
+    if (slides.length <= 1) return;
+
+    let currentSlide = 0;
+    let autoplayInterval = null;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      indicators.forEach((indicator, i) => {
+        if (i === index) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        showSlide(index);
+      }
+    }
+
+    // Indicator clicks
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        goToSlide(index);
+        resetAutoplay();
+      });
+    });
+
+    // Auto-rotate
+    function startAutoplay() {
+      {% if autoplay_enabled %}
+        autoplayInterval = setInterval(nextSlide, {{ autoplay_speed }});
+      {% endif %}
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    function resetAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    // Pause on hover
+    const slideshow = section.querySelector('.header-slideshow-{{ section_id }}__slideshow');
+    if (slideshow) {
+      slideshow.addEventListener('mouseenter', stopAutoplay);
+      slideshow.addEventListener('mouseleave', startAutoplay);
+    }
+
+    // Initialize
+    startAutoplay();
+  })();
+</script>
+{%- endif -%}
+
 <script type="application/ld+json">
   {
     "@context": "http://schema.org",
@@ -490,8 +880,78 @@
 {
   "name": "t:sections.header.name",
   "class": "section-header",
-  "max_blocks": 3,
+  "max_blocks": 20,
   "settings": [
+    {
+      "type": "header",
+      "content": "Slideshow Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_enabled",
+      "label": "Enable Auto-rotate",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3000,
+      "max": 9500,
+      "step": 500,
+      "unit": "ms",
+      "label": "Auto-rotate Speed",
+      "default": 5000
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "label": "Slide Height",
+      "options": [
+        {
+          "value": "adapt_image",
+          "label": "Adapt to Image"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "xlarge",
+          "label": "Extra Large"
+        }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "color",
+      "id": "slideshow_text_color",
+      "label": "Slideshow Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Header Settings"
+    },
     {
       "type": "select",
       "id": "logo_position",
@@ -672,6 +1132,98 @@
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "button_position",
+          "label": "Button Position",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top-left",
+              "label": "Top Left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top Center"
+            },
+            {
+              "value": "top-right",
+              "label": "Top Right"
+            },
+            {
+              "value": "center-left",
+              "label": "Center Left"
+            },
+            {
+              "value": "center-right",
+              "label": "Center Right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom Left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom Center"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom Right"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Position"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "button_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Horizontal Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        },
+        {
+          "type": "range",
+          "id": "button_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Vertical Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        }
+      ]
     }
   ]
 }
