@@ -1,0 +1,895 @@
+{%- liquid
+  assign section_id = section.id
+  assign logo = section.settings.logo
+  assign menu = section.settings.menu
+  assign text_color = section.settings.text_color
+  assign autoplay_enabled = section.settings.autoplay_enabled
+  assign autoplay_speed = section.settings.autoplay_speed | default: 5000
+  assign slide_height = section.settings.slide_height | default: 'large'
+  assign slides = section.blocks | where: 'type', 'slide'
+-%}
+
+{%- style -%}
+  .hero-slideshow-{{ section_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .hero-slideshow-{{ section_id }}__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .hero-slideshow-{{ section_id }}__header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__logo {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-slideshow-{{ section_id }}__logo img {
+    max-height: 60px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .hero-slideshow-{{ section_id }}__logo a {
+    display: block;
+  }
+
+  .hero-slideshow-{{ section_id }}__nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-item {
+    margin: 0;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-link {
+    color: {{ text_color }};
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s ease;
+    display: block;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-link:hover {
+    opacity: 0.7;
+  }
+
+  .hero-slideshow-{{ section_id }}__actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: {{ text_color }};
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .hero-slideshow-{{ section_id }}__icon:hover {
+    opacity: 0.7;
+  }
+
+  .hero-slideshow-{{ section_id }}__icon .svg-wrapper {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-slideshow-{{ section_id }}__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-slideshow-{{ section_id }}__cart-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: {{ text_color }};
+    color: #000;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  .hero-slideshow-{{ section_id }}__slideshow {
+    position: relative;
+    width: 100%;
+    {% if slide_height == 'adapt_image' %}
+      height: auto;
+    {% elsif slide_height == 'small' %}
+      height: 400px;
+    {% elsif slide_height == 'medium' %}
+      height: 500px;
+    {% elsif slide_height == 'large' %}
+      height: 600px;
+    {% else %}
+      height: 700px;
+    {% endif %}
+    overflow: hidden;
+  }
+
+  .hero-slideshow-{{ section_id }}__slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: 1;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .hero-slideshow-{{ section_id }}__button {
+    position: absolute;
+    padding: 1rem 2rem;
+    background: {{ section.settings.button_bg_color | default: '#ffffff' }};
+    color: {{ section.settings.button_text_color | default: '#000000' }};
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    cursor: pointer;
+    z-index: 4;
+  }
+
+  .hero-slideshow-{{ section_id }}__button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  /* Mobile menu toggle */
+  .hero-slideshow-{{ section_id }}__menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: {{ text_color }};
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-toggle-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 24px;
+    height: 18px;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-toggle-line {
+    width: 100%;
+    height: 2px;
+    background-color: {{ text_color }};
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-slideshow-{{ section_id }}__menu-toggle-line:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-slideshow-{{ section_id }}__menu-toggle-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hero-slideshow-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-slideshow-{{ section_id }}__menu-toggle-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    z-index: 20;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-nav[aria-hidden="true"] {
+    display: none;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-menu-link {
+    color: {{ text_color }};
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    display: block;
+    padding: 0.75rem 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-menu-link:hover {
+    opacity: 0.7;
+  }
+
+  /* Slide indicators */
+  .hero-slideshow-{{ section_id }}__indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 5;
+  }
+
+  .hero-slideshow-{{ section_id }}__indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    padding: 0;
+  }
+
+  .hero-slideshow-{{ section_id }}__indicator.active {
+    background: {{ text_color }};
+  }
+
+  @media screen and (max-width: 990px) {
+    .hero-slideshow-{{ section_id }}__header {
+      padding: 1rem 1.5rem;
+    }
+
+    .hero-slideshow-{{ section_id }}__menu {
+      gap: 1rem;
+    }
+
+    .hero-slideshow-{{ section_id }}__menu-link {
+      font-size: 14px;
+    }
+
+    .hero-slideshow-{{ section_id }}__slideshow {
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 300px;
+      {% elsif slide_height == 'medium' %}
+        height: 400px;
+      {% elsif slide_height == 'large' %}
+        height: 500px;
+      {% else %}
+        height: 600px;
+      {% endif %}
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .hero-slideshow-{{ section_id }}__header {
+      padding: 1rem;
+    }
+
+    .hero-slideshow-{{ section_id }}__nav {
+      display: none;
+    }
+
+    .hero-slideshow-{{ section_id }}__menu-toggle {
+      display: flex;
+    }
+
+    .hero-slideshow-{{ section_id }}__mobile-nav {
+      display: block;
+    }
+
+    .hero-slideshow-{{ section_id }}__logo img {
+      max-height: 50px;
+    }
+
+    .hero-slideshow-{{ section_id }}__slideshow {
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 250px;
+      {% elsif slide_height == 'medium' %}
+        height: 350px;
+      {% elsif slide_height == 'large' %}
+        height: 450px;
+      {% else %}
+        height: 550px;
+      {% endif %}
+    }
+  }
+{%- endstyle -%}
+
+<div class="hero-slideshow-{{ section_id }}">
+  <!-- Header -->
+  <div class="hero-slideshow-{{ section_id }}__header">
+    <div class="hero-slideshow-{{ section_id }}__header-container">
+      {%- if logo != blank -%}
+        <div class="hero-slideshow-{{ section_id }}__logo">
+          <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+            {{ logo | image_url: width: 200 | image_tag: alt: shop.name, loading: 'eager' }}
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if menu != blank -%}
+        <button
+          class="hero-slideshow-{{ section_id }}__menu-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav-{{ section_id }}"
+          type="button"
+        >
+          <span class="hero-slideshow-{{ section_id }}__menu-toggle-icon">
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+          </span>
+        </button>
+
+        <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
+          <ul class="hero-slideshow-{{ section_id }}__menu">
+            {%- for link in linklists[menu].links -%}
+              <li class="hero-slideshow-{{ section_id }}__menu-item">
+                <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__menu-link">
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+
+        <nav
+          class="hero-slideshow-{{ section_id }}__mobile-nav"
+          id="mobile-nav-{{ section_id }}"
+          role="navigation"
+          aria-label="Mobile navigation"
+          aria-hidden="true"
+        >
+          <ul class="hero-slideshow-{{ section_id }}__mobile-menu">
+            {%- for link in linklists[menu].links -%}
+              <li>
+                <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__mobile-menu-link">
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      <div class="hero-slideshow-{{ section_id }}__actions">
+        {%- if shop.customer_accounts_enabled -%}
+          <a
+            href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+            class="hero-slideshow-{{ section_id }}__icon"
+            rel="nofollow"
+            aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
+          >
+            <span class="svg-wrapper">
+              {{- 'icon-account.svg' | inline_asset_content -}}
+            </span>
+          </a>
+        {%- endif -%}
+
+        <a
+          href="{{ routes.cart_url }}"
+          class="hero-slideshow-{{ section_id }}__icon"
+          id="cart-icon-bubble"
+          aria-label="{{ 'templates.cart.cart' | t }}"
+        >
+          <span class="svg-wrapper">
+            {%- if cart == empty -%}
+              {{- 'icon-cart-empty.svg' | inline_asset_content -}}
+            {%- else -%}
+              {{- 'icon-cart.svg' | inline_asset_content -}}
+            {%- endif -%}
+          </span>
+          {%- if cart != empty -%}
+            <span class="hero-slideshow-{{ section_id }}__cart-badge" aria-hidden="true">
+              {%- if cart.item_count < 100 -%}
+                {{ cart.item_count }}
+              {%- else -%}
+                99+
+              {%- endif -%}
+            </span>
+          {%- endif -%}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideshow -->
+  <div class="hero-slideshow-{{ section_id }}__slideshow">
+    <div class="hero-slideshow-{{ section_id }}__slides" id="slides-{{ section_id }}">
+      {%- for block in slides -%}
+        {%- assign slide_image = block.settings.image -%}
+        {%- assign button_text = block.settings.button_text -%}
+        {%- assign button_link = block.settings.button_link -%}
+        {%- assign button_position = block.settings.button_position | default: 'center' -%}
+        {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
+        {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
+
+        <div
+          class="hero-slideshow-{{ section_id }}__slide{% if forloop.first %} active{% endif %}"
+          data-slide-index="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          {%- if slide_image != blank -%}
+            {{
+              slide_image
+              | image_url: width: 1920
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: slide_image.alt | default: '',
+                class: 'hero-slideshow-' | append: section_id | append: '__slide-image'
+            }}
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-slideshow-' | append: section_id | append: '__slide-image' }}
+          {%- endif -%}
+
+          <div class="hero-slideshow-{{ section_id }}__slide-content">
+            {%- if button_text != blank and button_link != blank -%}
+              <a
+                href="{{ button_link }}"
+                class="hero-slideshow-{{ section_id }}__button"
+                style="
+                  {% if button_position == 'custom' %}
+                    left: {{ button_horizontal }}%;
+                    top: {{ button_vertical }}%;
+                    transform: translate(-50%, -50%);
+                  {% elsif button_position == 'top-left' %}
+                    top: 20%;
+                    left: 10%;
+                  {% elsif button_position == 'top-center' %}
+                    top: 20%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  {% elsif button_position == 'top-right' %}
+                    top: 20%;
+                    right: 10%;
+                  {% elsif button_position == 'center-left' %}
+                    top: 50%;
+                    left: 10%;
+                    transform: translateY(-50%);
+                  {% elsif button_position == 'center-right' %}
+                    top: 50%;
+                    right: 10%;
+                    transform: translateY(-50%);
+                  {% elsif button_position == 'bottom-left' %}
+                    bottom: 20%;
+                    left: 10%;
+                  {% elsif button_position == 'bottom-center' %}
+                    bottom: 20%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                  {% elsif button_position == 'bottom-right' %}
+                    bottom: 20%;
+                    right: 10%;
+                  {% else %}
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                  {% endif %}
+                "
+              >
+                {{ button_text }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if slides.size > 1 -%}
+      <div class="hero-slideshow-{{ section_id }}__indicators">
+        {%- for block in slides -%}
+          <button
+            type="button"
+            class="hero-slideshow-{{ section_id }}__indicator{% if forloop.first %} active{% endif %}"
+            data-slide-index="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+  (function() {
+    const section = document.querySelector('.hero-slideshow-{{ section_id }}');
+    if (!section) return;
+
+    const slides = section.querySelectorAll('.hero-slideshow-{{ section_id }}__slide');
+    const indicators = section.querySelectorAll('.hero-slideshow-{{ section_id }}__indicator');
+    const menuToggle = section.querySelector('.hero-slideshow-{{ section_id }}__menu-toggle');
+    const mobileNav = section.querySelector('.hero-slideshow-{{ section_id }}__mobile-nav');
+
+    if (slides.length <= 1) return;
+
+    let currentSlide = 0;
+    let autoplayInterval = null;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      indicators.forEach((indicator, i) => {
+        if (i === index) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        showSlide(index);
+      }
+    }
+
+    // Indicator clicks
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        goToSlide(index);
+        resetAutoplay();
+      });
+    });
+
+    // Auto-rotate
+    function startAutoplay() {
+      {% if autoplay_enabled %}
+        autoplayInterval = setInterval(nextSlide, {{ autoplay_speed }});
+      {% endif %}
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    function resetAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    // Pause on hover
+    const slideshow = section.querySelector('.hero-slideshow-{{ section_id }}__slideshow');
+    if (slideshow) {
+      slideshow.addEventListener('mouseenter', stopAutoplay);
+      slideshow.addEventListener('mouseleave', startAutoplay);
+    }
+
+    // Mobile menu toggle
+    if (menuToggle && mobileNav) {
+      menuToggle.addEventListener('click', function() {
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', !isExpanded);
+        mobileNav.setAttribute('aria-hidden', isExpanded);
+
+        if (!isExpanded) {
+          mobileNav.style.display = 'block';
+        } else {
+          mobileNav.style.display = 'none';
+        }
+      });
+
+      // Close menu when clicking on a link
+      const mobileLinks = mobileNav.querySelectorAll('.hero-slideshow-{{ section_id }}__mobile-menu-link');
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          mobileNav.style.display = 'none';
+        });
+      });
+    }
+
+    // Initialize
+    startAutoplay();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Hero Slideshow Header",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Slideshow Settings"
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "label": "Slide Height",
+      "options": [
+        {
+          "value": "adapt_image",
+          "label": "Adapt to Image"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "xlarge",
+          "label": "Extra Large"
+        }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_enabled",
+      "label": "Enable Auto-rotate",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3000,
+      "max": 10000,
+      "step": 500,
+      "unit": "ms",
+      "label": "Auto-rotate Speed",
+      "default": 5000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "button_position",
+          "label": "Button Position",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top-left",
+              "label": "Top Left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top Center"
+            },
+            {
+              "value": "top-right",
+              "label": "Top Right"
+            },
+            {
+              "value": "center-left",
+              "label": "Center Left"
+            },
+            {
+              "value": "center-right",
+              "label": "Center Right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom Left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom Center"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom Right"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Position"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "button_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Horizontal Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        },
+        {
+          "type": "range",
+          "id": "button_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Vertical Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Slideshow Header",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
