@@ -2934,10 +2934,7 @@ details-disclosure > details {
 .gradient {
   background: rgb(var(--color-background));
   background: var(--gradient-background);
-  /* REMOVE BORDER RADIUS FROM PAGE WRAPPER - Requirement 3 */
-  border-radius: 0 !important;
-  /* FIX OVERFLOW RULES - Requirement 4: Prevent fixed attachment issues */
-  background-attachment: scroll;
+  background-attachment: fixed;
 }
 
 @media screen and (forced-colors: active) {
@@ -3681,27 +3678,10 @@ body.template-product #MainContent > .shopify-section:first-child > *{
   --gradient-background: #ffffff !important;
 }
 
-/* FIX BACKGROUND LEAK - Requirement 5: Set black background on layout wrappers */
-#MainContent {
-  width: 100% !important;
-  max-width: none !important;
-  background-color: #000 !important;
-  background-image: none !important;
-  overflow-x: hidden !important;
-  border-radius: 0 !important;
-}
-
-.gradient {
-  width: 100% !important;
-  max-width: none !important;
-  background-color: #000 !important;
-  background-image: none !important;
-  background-attachment: scroll !important;
-  border-radius: 0 !important;
-}
-
 html,
 body,
+#MainContent,
+.gradient,
 .shopify-section,
 .section,
 .section-header,
@@ -3721,34 +3701,18 @@ main{
 *::before,
 *::after { box-sizing: border-box; }
 
-/* BODY & HTML HARD LOCK - Requirement 6 */
-html { 
-  -webkit-text-size-adjust: 100%;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  background-color: #000;
-}
-body { 
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-  background-color: #000;
-}
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
 
 img, svg, video, canvas, iframe {
   max-width: 100%;
   height: auto;
 }
 
-/* REMOVE WIDTH CONSTRAINTS - Requirement 2: Allow hero sections to be full width */
 .page-width,
 .page-width--narrow {
   max-width: min(var(--page-width, 1200px), 100%);
 }
-
-/* Override for hero slideshow sections to allow full width */
-/* Note: Individual hero sections handle their own page-width overrides */
 
 .shopify-section {
   max-width: 100%;
