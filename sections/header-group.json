@@ -57,7 +57,7 @@
           "settings": {
             "image": "shopify://shop_images/Shaboo_Bg_Blue.png",
             "button_text": "Shop Now",
-            "button_link": "",
+            "button_link": "shopify://products/light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "button_position": "center",
             "button_horizontal": 50,
             "button_vertical": 50
