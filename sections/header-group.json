@@ -11,25 +11,6 @@
   "name": "t:sections.header.name",
   "type": "header",
   "sections": {
-    "section_embedded_header_RCtYjL": {
-      "type": "section-embedded-header",
-      "name": "Embedded Header",
-      "settings": {
-        "logo": "shopify://shop_images/logo_copy.png",
-        "menu": "main-menu",
-        "cta_label": "",
-        "cta_link": "",
-        "text_color": "#000000",
-        "font_size": 17,
-        "background_color": "#0d4c07",
-        "background_opacity": 0,
-        "glass_enabled": true,
-        "glass_blur": 20,
-        "glass_bg_opacity": 50,
-        "glass_border_opacity": 35,
-        "sticky_enabled": true
-      }
-    },
     "header": {
       "type": "header",
       "disabled": true,
@@ -56,10 +37,76 @@
         "padding_top": 0,
         "padding_bottom": 0
       }
+    },
+    "hero_slideshow_header_TxDMyf": {
+      "type": "hero-slideshow-header",
+      "blocks": {
+        "slide_ETHy6N": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/BunBoo_Bg_Pink_Light.png",
+            "button_text": "Shop Now",
+            "button_link": "",
+            "button_position": "center",
+            "button_horizontal": 50,
+            "button_vertical": 50
+          }
+        },
+        "slide_jF8PyN": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Shaboo_Bg_Blue.png",
+            "button_text": "Shop Now",
+            "button_link": "",
+            "button_position": "center",
+            "button_horizontal": 50,
+            "button_vertical": 50
+          }
+        },
+        "slide_9WGLJC": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/GriBoo_Bg_Purple.png",
+            "button_text": "Shop Now",
+            "button_link": "",
+            "button_position": "center",
+            "button_horizontal": 50,
+            "button_vertical": 50
+          }
+        },
+        "slide_7MJUwU": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FoxBoo_Bg_Dark_pink.png",
+            "button_text": "Shop Now",
+            "button_link": "",
+            "button_position": "center",
+            "button_horizontal": 50,
+            "button_vertical": 50
+          }
+        }
+      },
+      "block_order": [
+        "slide_ETHy6N",
+        "slide_jF8PyN",
+        "slide_9WGLJC",
+        "slide_7MJUwU"
+      ],
+      "name": "Hero Slideshow Header",
+      "settings": {
+        "logo": "shopify://shop_images/logo_copy.png",
+        "menu": "main-menu",
+        "text_color": "#ffffff",
+        "button_bg_color": "#ffffff",
+        "button_text_color": "#000000",
+        "slide_height": "large",
+        "autoplay_enabled": true,
+        "autoplay_speed": 5000
+      }
     }
   },
   "order": [
-    "section_embedded_header_RCtYjL",
-    "header"
+    "header",
+    "hero_slideshow_header_TxDMyf"
   ]
 }
