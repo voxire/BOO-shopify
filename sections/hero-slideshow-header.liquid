@@ -10,23 +10,47 @@
 -%}
 
 {%- style -%}
-  /* Override any parent container styles */
+  /* SECTION CONTAINER FIX - Requirement 1 */
   #shopify-section-{{ section_id }} {
     padding: 0 !important;
     margin: 0 !important;
-    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    position: relative !important;
+    overflow: hidden !important;
     background-color: transparent !important;
-    overflow: hidden;
+  }
+
+  /* Remove any page-width constraints */
+  #shopify-section-{{ section_id }} .page-width,
+  #shopify-section-{{ section_id }} .page-width--narrow {
+    max-width: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* ROUNDED CORNERS FIX - Requirement 3: Handle any border-radius from parent */
+  /* If parent has border-radius, ensure proper clipping */
+  #shopify-section-{{ section_id }}[style*="border-radius"],
+  #shopify-section-{{ section_id }}.section[style*="border-radius"] {
+    overflow: hidden !important;
   }
 
   .hero-slideshow-{{ section_id }} {
     position: relative;
     width: 100%;
+    max-width: 100%;
     overflow: hidden;
     border-radius: 0;
     background-color: #000;
     margin: 0;
     padding: 0;
+    /* Ensure no viewport width tricks - Requirement 1 */
+    box-sizing: border-box;
+    /* ROUNDED CORNERS FIX - Requirement 3: overflow hidden ensures clipping */
+    /* ZOOM & RESPONSIVENESS - Requirement 5: Ensure proper behavior at all zoom levels */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .hero-slideshow-{{ section_id }}__header {
@@ -49,6 +73,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
+    box-sizing: border-box;
   }
 
   .hero-slideshow-{{ section_id }}__logo {
@@ -173,11 +198,14 @@
     line-height: 1;
   }
 
+  /* SLIDESHOW STRUCTURE - Requirement 4 */
   .hero-slideshow-{{ section_id }}__slideshow {
     position: relative;
     width: 100%;
+    max-width: 100%;
     {% if slide_height == 'adapt_image' %}
       height: auto;
+      min-height: 400px;
     {% elsif slide_height == 'small' %}
       height: 400px;
     {% elsif slide_height == 'medium' %}
@@ -189,26 +217,35 @@
     {% endif %}
     overflow: hidden;
     border-radius: 0;
+    /* BACKGROUND FALLBACK SAFETY - Requirement 6: Black background prevents flicker/gaps during transitions */
     background-color: #000;
+    /* Ensure proper clipping for rounded corners if they exist */
+    box-sizing: border-box;
   }
 
   .hero-slideshow-{{ section_id }}__slides {
     position: relative;
     width: 100%;
+    max-width: 100%;
     height: 100%;
+    overflow: hidden;
   }
 
+  /* BACKGROUND / IMAGE HANDLING - Requirement 2 */
   .hero-slideshow-{{ section_id }}__slide {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
+    max-width: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
     z-index: 1;
     overflow: hidden;
+    /* BACKGROUND FALLBACK SAFETY - Requirement 6: Black background prevents flicker/gaps during transitions */
     background-color: #000;
+    /* ROUNDED CORNERS FIX - Requirement 3: overflow hidden on same element */
+    box-sizing: border-box;
   }
 
   .hero-slideshow-{{ section_id }}__slide.active {
@@ -216,14 +253,27 @@
     z-index: 2;
   }
 
+  /* BACKGROUND / IMAGE HANDLING - Requirement 2 */
   .hero-slideshow-{{ section_id }}__slide-image {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+    max-width: 100%;
     object-fit: cover;
     object-position: center center;
     display: block;
+    /* Ensure image always covers full section at all zoom levels - Requirement 5 */
     min-width: 100%;
     min-height: 100%;
+    /* Prevent image from exceeding section width */
+    box-sizing: border-box;
+    /* ZOOM & RESPONSIVENESS - Requirement 5: Ensure proper coverage at all zoom levels */
+    /* Force image to fill container completely */
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .hero-slideshow-{{ section_id }}__slide-content {
@@ -386,6 +436,7 @@
     .hero-slideshow-{{ section_id }}__slideshow {
       {% if slide_height == 'adapt_image' %}
         height: auto;
+        min-height: 300px;
       {% elsif slide_height == 'small' %}
         height: 300px;
       {% elsif slide_height == 'medium' %}
@@ -396,6 +447,8 @@
         height: 600px;
       {% endif %}
       background-color: #000;
+      width: 100%;
+      max-width: 100%;
     }
   }
 
@@ -437,6 +490,7 @@
     .hero-slideshow-{{ section_id }}__slideshow {
       {% if slide_height == 'adapt_image' %}
         height: auto;
+        min-height: 250px;
       {% elsif slide_height == 'small' %}
         height: 250px;
       {% elsif slide_height == 'medium' %}
@@ -447,6 +501,8 @@
         height: 550px;
       {% endif %}
       background-color: #000;
+      width: 100%;
+      max-width: 100%;
     }
   }
 {%- endstyle -%}
