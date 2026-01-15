@@ -11,11 +11,7 @@
 
 {%- style -%}
   /* LOCK OVERFLOW AT ROOT LEVEL - Requirement 3 */
-  html, body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
+  /* Note: Global fix applied in base.css, this ensures hero section compatibility */
 
   /* SECTION CONTAINER FIX - Requirement 1 */
   /* FIX SECTION BACKGROUND LEAK - Requirement 2 */
@@ -29,12 +25,20 @@
     background-color: #000 !important;
   }
 
-  /* Remove any page-width constraints */
+  /* Remove any page-width constraints - Requirement 2 */
   #shopify-section-{{ section_id }} .page-width,
   #shopify-section-{{ section_id }} .page-width--narrow {
     max-width: none !important;
     padding: 0 !important;
     width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure MainContent doesn't constrain hero section */
+  #MainContent {
+    width: 100% !important;
+    max-width: none !important;
+    overflow-x: hidden !important;
   }
 
   /* ROUNDED CORNERS FIX - Requirement 3: Handle any border-radius from parent */
