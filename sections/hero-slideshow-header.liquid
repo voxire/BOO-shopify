@@ -12,8 +12,13 @@
 {%- style -%}
   .hero-slideshow-{{ section_id }} {
     position: relative;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     overflow: hidden;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
     border-radius: 0;
   }
 
@@ -26,17 +31,21 @@
     padding: 1.5rem 0;
     background: transparent;
     border-radius: 0;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
   }
 
   .hero-slideshow-{{ section_id }}__header-container {
     width: 100%;
-    max-width: 100%;
+    max-width: 100vw;
     margin: 0;
     padding: 0 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
+    overflow: hidden;
   }
 
   .hero-slideshow-{{ section_id }}__logo {
@@ -102,6 +111,7 @@
     order: 3;
     margin-right: 0;
     padding-right: 0;
+    min-width: 0;
   }
 
   .hero-slideshow-{{ section_id }}__icon {
@@ -131,6 +141,8 @@
   .hero-slideshow-{{ section_id }}__icon#cart-icon-bubble {
     width: 72px;
     height: 72px;
+    max-width: 72px;
+    overflow: hidden;
   }
 
   .hero-slideshow-{{ section_id }}__icon#cart-icon-bubble .svg-wrapper {
@@ -163,7 +175,8 @@
 
   .hero-slideshow-{{ section_id }}__slideshow {
     position: relative;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     {% if slide_height == 'adapt_image' %}
       height: auto;
     {% elsif slide_height == 'small' %}
@@ -181,19 +194,23 @@
 
   .hero-slideshow-{{ section_id }}__slides {
     position: relative;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     height: 100%;
+    overflow: hidden;
   }
 
   .hero-slideshow-{{ section_id }}__slide {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     height: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
     z-index: 1;
+    overflow: hidden;
   }
 
   .hero-slideshow-{{ section_id }}__slide.active {
@@ -204,7 +221,9 @@
   .hero-slideshow-{{ section_id }}__slide-image {
     width: 100%;
     height: 100%;
+    min-width: 100vw;
     object-fit: cover;
+    object-position: center;
     display: block;
   }
 
