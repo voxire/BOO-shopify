@@ -68,6 +68,7 @@
         "sliding_image_3a9UAb",
         "sliding_image_9xww6K"
       ],
+      "disabled": true,
       "name": "Hers Labs Hero",
       "settings": {
         "label": "labs by hers",
@@ -143,7 +144,6 @@
             "image": "shopify://shop_images/BunBoo.png",
             "title": "Card",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": "shopify://products/dark-pink-fox-costume-for-babies-toddlers-lebanon"
           }
         },
@@ -153,7 +153,6 @@
             "image": "shopify://shop_images/Shaboo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         },
@@ -163,7 +162,6 @@
             "image": "shopify://shop_images/FoxBoo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         },
@@ -173,7 +171,6 @@
             "image": "shopify://shop_images/GriBoo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         },
@@ -183,7 +180,6 @@
             "image": "shopify://shop_images/Shaboo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         },
@@ -193,7 +189,6 @@
             "image": "shopify://shop_images/DinoBoo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         },
@@ -203,7 +198,6 @@
             "image": "shopify://shop_images/BunBoo.png",
             "title": "Card Title",
             "price_text": "$99.00",
-            "button_label": "Shop Now",
             "button_link": ""
           }
         }
@@ -217,6 +211,7 @@
         "slide_xmGYq7",
         "slide_L9R84L"
       ],
+      "disabled": true,
       "name": "3D Card Carousel",
       "settings": {
         "card_radius": 24,
