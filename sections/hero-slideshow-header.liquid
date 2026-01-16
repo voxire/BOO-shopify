@@ -10,12 +10,19 @@
 -%}
 
 {%- style -%}
-  .shopify-section.section:has(.hero-slideshow-{{ section_id }}) {
+  .shopify-section[data-section-id="{{ section.id }}"] {
     max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  .shopify-section[data-section-id="{{ section.id }}"] .page-width,
+  .shopify-section[data-section-id="{{ section.id }}"] .page-width--narrow {
+    max-width: none !important;
+    margin: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    margin: 0 !important;
-    overflow-x: hidden !important;
   }
 
   .hero-slideshow-{{ section_id }} {
@@ -765,7 +772,7 @@
 {
   "name": "Hero Slideshow Header",
   "tag": "section",
-  "class": "section",
+  "class": "hero-slideshow-section",
   "settings": [
     {
       "type": "image_picker",
