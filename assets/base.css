@@ -3702,7 +3702,10 @@ main{
 *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
-body { overflow-x: hidden; }
+body { 
+  overflow-x: hidden;
+  background-color: #3a0f6f;
+}
 
 img, svg, video, canvas, iframe {
   max-width: 100%;

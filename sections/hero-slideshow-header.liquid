@@ -31,6 +31,7 @@
     max-width: 100%;
     overflow: hidden;
     border-radius: 0;
+    background: #3a0f6f; /* fallback background matching hero image */
   }
 
   .hero-slideshow-{{ section_id }}__header {
@@ -188,6 +189,9 @@
     position: relative;
     width: 100%;
     max-width: 100%;
+    padding-top: 96px; /* header height */
+    margin-top: -96px;
+    box-sizing: border-box;
     {% if slide_height == 'adapt_image' %}
       height: auto;
     {% elsif slide_height == 'small' %}
