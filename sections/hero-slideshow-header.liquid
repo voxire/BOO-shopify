@@ -32,7 +32,6 @@
     overflow: hidden;
     border-radius: 0;
     background: none;
-    min-height: 100svh;
   }
 
   .hero-slideshow-{{ section_id }}__header {
@@ -189,7 +188,17 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    min-height: 100svh;
+    {% if slide_height == 'adapt_image' %}
+      height: auto;
+    {% elsif slide_height == 'small' %}
+      height: 400px;
+    {% elsif slide_height == 'medium' %}
+      height: 500px;
+    {% elsif slide_height == 'large' %}
+      height: 600px;
+    {% else %}
+      height: 700px;
+    {% endif %}
     overflow: hidden;
     border-radius: 0;
   }
@@ -198,7 +207,7 @@
     position: relative;
     width: 100%;
     max-width: 100%;
-    min-height: 100svh;
+    height: 100%;
     overflow: hidden;
   }
 
@@ -208,7 +217,7 @@
     left: 0;
     width: 100%;
     max-width: 100%;
-    min-height: 100svh;
+    height: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
     z-index: 1;
@@ -233,7 +242,6 @@
   .hero-slideshow-{{ section_id }}__slide-image {
     width: 100%;
     height: 100%;
-    min-height: 100svh;
     object-fit: cover;
     object-position: center;
     transform: scale(1.12);
@@ -398,7 +406,17 @@
     }
 
     .hero-slideshow-{{ section_id }}__slideshow {
-      min-height: 100svh;
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 300px;
+      {% elsif slide_height == 'medium' %}
+        height: 400px;
+      {% elsif slide_height == 'large' %}
+        height: 500px;
+      {% else %}
+        height: 600px;
+      {% endif %}
     }
   }
 
@@ -438,7 +456,17 @@
     }
 
     .hero-slideshow-{{ section_id }}__slideshow {
-      min-height: 100svh;
+      {% if slide_height == 'adapt_image' %}
+        height: auto;
+      {% elsif slide_height == 'small' %}
+        height: 250px;
+      {% elsif slide_height == 'medium' %}
+        height: 350px;
+      {% elsif slide_height == 'large' %}
+        height: 450px;
+      {% else %}
+        height: 550px;
+      {% endif %}
     }
   }
 {%- endstyle -%}
