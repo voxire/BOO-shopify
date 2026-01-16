@@ -196,6 +196,7 @@
     position: relative;
     width: 100%;
     overflow: hidden;
+    min-height: 0;
   }
 
   .hero-slideshow-{{ section_id }}__slides {
@@ -225,8 +226,15 @@
     inset: 0;
     width: 100%;
     height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    max-width: none;
+    max-height: none;
     object-fit: cover;
     object-position: center;
+    display: block;
+    /* Ensure image always covers container, even at extreme zoom levels */
+    transform: scale(1.01);
   }
 
   .hero-slideshow-{{ section_id }}__slide-content {
