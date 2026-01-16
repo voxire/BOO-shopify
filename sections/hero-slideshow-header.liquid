@@ -220,12 +220,23 @@
     z-index: 2;
   }
 
+  /* 
+   * HERO IMAGE REQUIREMENTS:
+   * - Minimum width: 2560px
+   * - Preferred aspect ratio: 16:9 or wider (e.g., 3000×1600)
+   * - 3:2 ratio (1920×1280) cannot cover ultra-wide/zoomed-out viewports
+   * 
+   * TEMPORARY SAFETY SCALE:
+   * - Scale 1.12 helps prevent background exposure until proper images are uploaded
+   * - Remove this scale once images meet the requirements above
+   */
   .hero-slideshow-{{ section_id }}__slide-image {
     width: 100%;
     height: 100%;
     min-height: 100svh;
     object-fit: cover;
     object-position: center;
+    transform: scale(1.12);
     display: block;
   }
 
@@ -550,7 +561,7 @@
           {%- if slide_image != blank -%}
             {{
               slide_image
-              | image_url: width: 1920
+              | image_url: width: 2560
               | image_tag:
                 loading: 'eager',
                 fetchpriority: 'high',
