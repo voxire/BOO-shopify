@@ -12,6 +12,15 @@
     "hex_prism_carousel_WDEgJy": {
       "type": "hex-prism-carousel",
       "blocks": {
+        "face_HDip3z": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/GriBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
         "face_JxVWWQ": {
           "type": "face",
           "settings": {
@@ -59,6 +68,7 @@
         }
       },
       "block_order": [
+        "face_HDip3z",
         "face_JxVWWQ",
         "face_jLktq7",
         "face_q8Wjqd",
