@@ -15,6 +15,8 @@
   assign side2_opacity = side2_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
   assign image_max_width = section.settings.image_max_width | default: 700
+  assign padding_top = section.settings.padding_top | default: 0
+  assign padding_bottom = section.settings.padding_bottom | default: 0
   assign blocks_count = section.blocks.size
 -%}
 
@@ -113,6 +115,8 @@
     overflow: hidden;
     background-color: {{ background_color }};
     background-image: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+    padding-top: {{ padding_top }}px;
+    padding-bottom: {{ padding_bottom }}px;
   }
 
   .hex-prism-carousel__scene--{{ section_id }} {
@@ -773,6 +777,32 @@
       "id": "background_color",
       "label": "Background Color",
       "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "Top padding for the section"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 0,
+      "info": "Bottom padding for the section"
     }
   ],
   "blocks": [
