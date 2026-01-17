@@ -1,0 +1,484 @@
+{%- liquid
+  assign section_id = section.id
+  assign rotation_speed = section.settings.rotation_speed | default: 18
+  assign perspective = section.settings.perspective | default: 1400
+  assign radius = section.settings.radius | default: 320
+  assign face_width = section.settings.face_width | default: 520
+  assign face_height = section.settings.face_height | default: 320
+  assign corner_radius = section.settings.corner_radius | default: 14
+  assign base_opacity = section.settings.base_opacity | default: 0.25
+  assign background_color = section.settings.background_color | default: '#111111'
+  assign blocks_count = section.blocks.size
+-%}
+
+<section
+  class="hex-prism-carousel hex-prism-carousel--{{ section_id }}"
+  data-section-id="{{ section_id }}"
+  data-rotation-speed="{{ rotation_speed }}"
+  data-perspective="{{ perspective }}"
+  data-radius="{{ radius }}"
+  data-face-width="{{ face_width }}"
+  data-face-height="{{ face_height }}"
+  data-corner-radius="{{ corner_radius }}"
+  data-base-opacity="{{ base_opacity }}"
+  style="background-color: {{ background_color }};"
+>
+  <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
+    <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
+      {%- for i in (1..6) -%}
+        {%- liquid
+          assign block_index = forloop.index0 | modulo: blocks_count
+          assign block = section.blocks[block_index]
+          assign face_image = null
+          assign gradient_start = '#4a90e2'
+          assign gradient_end = '#7b68ee'
+          
+          if block.settings.image
+            assign face_image = block.settings.image
+          endif
+          
+          if block.settings.gradient_start != blank
+            assign gradient_start = block.settings.gradient_start
+          endif
+          
+          if block.settings.gradient_end != blank
+            assign gradient_end = block.settings.gradient_end
+          endif
+        -%}
+        <a
+          href="{{ block.settings.link | default: '#' }}"
+          class="hex-prism-carousel__face hex-prism-carousel__face--{{ section_id }}"
+          data-face
+          data-face-index="{{ forloop.index0 }}"
+          aria-label="{{ block.settings.image.alt | default: 'Carousel face ' | append: forloop.index }}"
+          tabindex="0"
+        >
+          {%- if face_image -%}
+            {{
+              face_image
+              | image_url: width: 1040
+              | image_tag:
+                loading: 'lazy',
+                alt: face_image.alt | default: 'Carousel image',
+                class: 'hex-prism-carousel__image hex-prism-carousel__image--' | append: section_id
+              }}
+          {%- else -%}
+            <div
+              class="hex-prism-carousel__gradient hex-prism-carousel__gradient--{{ section_id }}"
+              style="background: linear-gradient(135deg, {{ gradient_start }}, {{ gradient_end }});"
+            ></div>
+          {%- endif -%}
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hex-prism-carousel--{{ section_id }} {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    overflow: hidden;
+    background-color: {{ background_color }};
+    background-image: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  }
+
+  .hex-prism-carousel__scene--{{ section_id }} {
+    perspective: {{ perspective }}px;
+    perspective-origin: center center;
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .hex-prism-carousel__prism--{{ section_id }} {
+    position: relative;
+    width: {{ face_width }}px;
+    height: {{ face_height }}px;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }} {
+    position: absolute;
+    width: {{ face_width }}px;
+    height: {{ face_height }}px;
+    border-radius: {{ corner_radius }}px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+    display: block;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 4px;
+  }
+
+  .hex-prism-carousel__image--{{ section_id }},
+  .hex-prism-carousel__gradient--{{ section_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hex-prism-carousel__prism--{{ section_id }} {
+      animation: none !important;
+    }
+    
+    .hex-prism-carousel__face--{{ section_id }} {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (!section) return;
+    
+    const prism = section.querySelector('[data-prism]');
+    const faces = Array.from(section.querySelectorAll('[data-face]'));
+    if (!prism || faces.length === 0) return;
+    
+    let animationFrameId = null;
+    let currentRotation = 0;
+    let isPaused = false;
+    let rotationSpeed = parseFloat(section.dataset.rotationSpeed) || 18;
+    const perspective = parseFloat(section.dataset.perspective) || 1400;
+    const radius = parseFloat(section.dataset.radius) || 320;
+    const faceWidth = parseFloat(section.dataset.faceWidth) || 520;
+    const faceHeight = parseFloat(section.dataset.faceHeight) || 320;
+    const baseOpacity = parseFloat(section.dataset.baseOpacity) || 0.25;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    const numFaces = 6;
+    const angleStep = (360 / numFaces) * (Math.PI / 180);
+    
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+    
+    function updateFaces() {
+      faces.forEach((face, index) => {
+        const faceAngle = index * angleStep;
+        const theta = faceAngle + (currentRotation * Math.PI / 180);
+        const cosTheta = Math.cos(theta);
+        const maxCos = Math.max(0, cosTheta);
+        
+        const opacity = clamp(baseOpacity + (1 - baseOpacity) * maxCos, baseOpacity, 1);
+        const scale = 1 + 0.06 * maxCos;
+        
+        const rotateY = index * 60;
+        const translateZ = radius;
+        
+        face.style.opacity = opacity;
+        face.style.transform = `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`;
+      });
+    }
+    
+    function animate() {
+      if (isPaused || prefersReducedMotion) {
+        animationFrameId = null;
+        return;
+      }
+      
+      currentRotation += rotationSpeed * (16.67 / 1000);
+      if (currentRotation >= 360) {
+        currentRotation -= 360;
+      }
+      
+      prism.style.transform = `rotateY(${currentRotation}deg)`;
+      updateFaces();
+      
+      animationFrameId = requestAnimationFrame(animate);
+    }
+    
+    function startAnimation() {
+      if (animationFrameId === null && !prefersReducedMotion) {
+        animate();
+      }
+    }
+    
+    function stopAnimation() {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    }
+    
+    function handlePause() {
+      isPaused = true;
+      stopAnimation();
+    }
+    
+    function handleResume() {
+      isPaused = false;
+      startAnimation();
+    }
+    
+    function stepRotation(direction) {
+      const step = direction === 'left' ? -60 : 60;
+      currentRotation += step;
+      if (currentRotation >= 360) currentRotation -= 360;
+      if (currentRotation < 0) currentRotation += 360;
+      
+      prism.style.transform = `rotateY(${currentRotation}deg)`;
+      updateFaces();
+    }
+    
+    function handleKeydown(e) {
+      if (!section.contains(document.activeElement)) return;
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        stepRotation('left');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        stepRotation('right');
+      }
+    }
+    
+    function init() {
+      if (prefersReducedMotion) {
+        currentRotation = 0;
+        prism.style.transform = 'rotateY(0deg)';
+        updateFaces();
+        return;
+      }
+      
+      section.addEventListener('mouseenter', handlePause);
+      section.addEventListener('mouseleave', handleResume);
+      section.addEventListener('focusin', handlePause);
+      section.addEventListener('focusout', handleResume);
+      document.addEventListener('keydown', handleKeydown);
+      
+      updateFaces();
+      startAnimation();
+    }
+    
+    function cleanup() {
+      stopAnimation();
+      section.removeEventListener('mouseenter', handlePause);
+      section.removeEventListener('mouseleave', handleResume);
+      section.removeEventListener('focusin', handlePause);
+      section.removeEventListener('focusout', handleResume);
+      document.removeEventListener('keydown', handleKeydown);
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        cleanup();
+        setTimeout(init, 100);
+      }
+    });
+    
+    document.addEventListener('shopify:section:unload', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        cleanup();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Hex Prism Carousel",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Rotation Settings"
+    },
+    {
+      "type": "range",
+      "id": "rotation_speed",
+      "label": "Rotation Speed",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "deg/sec",
+      "default": 18,
+      "info": "Speed of rotation in degrees per second"
+    },
+    {
+      "type": "header",
+      "content": "3D Perspective Settings"
+    },
+    {
+      "type": "range",
+      "id": "perspective",
+      "label": "Perspective",
+      "min": 500,
+      "max": 3000,
+      "step": 50,
+      "unit": "px",
+      "default": 1400,
+      "info": "CSS perspective value for 3D effect"
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Prism Radius",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 320,
+      "info": "Distance of faces from center"
+    },
+    {
+      "type": "header",
+      "content": "Face Dimensions"
+    },
+    {
+      "type": "range",
+      "id": "face_width",
+      "label": "Face Width",
+      "min": 300,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "face_height",
+      "label": "Face Height",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "header",
+      "content": "Visual Settings"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner Radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "base_opacity",
+      "label": "Base Opacity",
+      "min": 0.1,
+      "max": 0.5,
+      "step": 0.05,
+      "default": 0.25,
+      "info": "Minimum opacity for faces when angled away"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#111111"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "face",
+      "name": "Face",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Recommended: 1040x640px or larger"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional link for this face"
+        },
+        {
+          "type": "header",
+          "content": "Fallback Gradient",
+          "info": "Used if no image is provided"
+        },
+        {
+          "type": "color",
+          "id": "gradient_start",
+          "label": "Gradient Start Color",
+          "default": "#4a90e2"
+        },
+        {
+          "type": "color",
+          "id": "gradient_end",
+          "label": "Gradient End Color",
+          "default": "#7b68ee"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hex Prism Carousel",
+      "blocks": [
+        {
+          "type": "face"
+        },
+        {
+          "type": "face"
+        },
+        {
+          "type": "face"
+        },
+        {
+          "type": "face"
+        },
+        {
+          "type": "face"
+        },
+        {
+          "type": "face"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6
+}
+{% endschema %}
+
