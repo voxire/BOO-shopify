@@ -16,6 +16,20 @@
   display: flex;
   justify-content: center;
   transform-style: preserve-3d;
+  position: relative;
+}
+
+/* Perspective vignette - depth gradient behind object */
+.carousel-arc-scene-{{ id }}::before {
+  content: '';
+  position: absolute;
+  inset: -200px;
+  background: radial-gradient(ellipse at center, 
+    rgba(10, 10, 10, 0.3) 0%,
+    rgba(10, 10, 10, 0.6) 50%,
+    rgba(5, 5, 5, 0.9) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .carousel-arc-track-{{ id }} {
@@ -25,6 +39,25 @@
   transform-style: preserve-3d;
   cursor: grab;
   user-select: none;
+  z-index: 1;
+}
+
+/* Grounding shadow - soft contact shadow beneath center face */
+.carousel-arc-track-{{ id }}::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 380px;
+  height: 60px;
+  background: radial-gradient(ellipse, 
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.08) 40%,
+    transparent 100%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .carousel-arc-track-{{ id }}:active {
@@ -51,6 +84,16 @@
   box-shadow: 
     0 0 30px rgba(0, 0, 0, 0.4),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  /* Sharp silhouette - no edge softness */
+  /* Slight falloff toward bottom for grounding */
+  mask-image: linear-gradient(to bottom, 
+    black 0%,
+    black 85%,
+    rgba(0, 0, 0, 0.95) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, 
+    black 0%,
+    black 85%,
+    rgba(0, 0, 0, 0.95) 100%);
 }
 
 /* Side panels - true occlusion, clipped by center panel */
@@ -76,15 +119,39 @@
     inset 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Outer panels - further back, more clipped */
+/* Outer panels - further back, more clipped, with edge softness */
 .carousel-arc-item-{{ id }}[data-side="left"][data-depth="2"] {
   clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%);
   z-index: 3;
+  /* Micro softness on outer edges - reduced contrast on far silhouette */
+  filter: contrast(0.75) brightness(0.6);
+  mask-image: linear-gradient(to right, 
+    transparent 0%,
+    black 3%,
+    black 97%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, 
+    transparent 0%,
+    black 3%,
+    black 97%,
+    transparent 100%);
 }
 
 .carousel-arc-item-{{ id }}[data-side="right"][data-depth="2"] {
   clip-path: polygon(65% 0, 100% 0, 100% 100%, 65% 100%);
   z-index: 3;
+  /* Micro softness on outer edges - reduced contrast on far silhouette */
+  filter: contrast(0.75) brightness(0.6);
+  mask-image: linear-gradient(to left, 
+    transparent 0%,
+    black 3%,
+    black 97%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, 
+    transparent 0%,
+    black 3%,
+    black 97%,
+    transparent 100%);
 }
 
 .carousel-arc-item-{{ id }} img {
@@ -148,8 +215,20 @@
     // Normalize target periodically to prevent extreme values
     normalizeTarget();
     
-    // Interpolate active towards target
-    active += (target - active) * 0.08;
+    // Directional easing bias: forward motion slower/heavier, backward faster/lighter
+    const diff = target - active;
+    let easingFactor = 0.08; // Base easing
+    
+    if (diff > 0) {
+      // Forward motion: slower, heavier (0.06)
+      easingFactor = 0.06;
+    } else if (diff < 0) {
+      // Backward motion: slightly faster, lighter (0.1)
+      easingFactor = 0.1;
+    }
+    
+    // Interpolate active towards target with directional bias
+    active += (target - active) * easingFactor;
     
     render();
     
