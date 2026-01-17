@@ -9,6 +9,9 @@
   assign base_opacity_raw = section.settings.base_opacity | default: 3
   assign base_opacity = base_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
+  assign image_max_width = section.settings.image_max_width | default: 900
+  assign overlay_opacity_raw = section.settings.overlay_opacity | default: 8
+  assign overlay_opacity = overlay_opacity_raw | divided_by: 100.0
   assign blocks_count = section.blocks.size
 -%}
 
@@ -28,41 +31,59 @@
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
       {%- for i in (1..6) -%}
         {%- liquid
-          assign block_index = forloop.index0 | modulo: blocks_count
-          assign block = section.blocks[block_index]
+          assign block_index = forloop.index0
+          if blocks_count > 0
+            assign block_index = forloop.index0 | modulo: blocks_count
+            assign block = section.blocks[block_index]
+          else
+            assign block = null
+          endif
+          
           assign face_image = null
           assign gradient_start = '#4a90e2'
           assign gradient_end = '#7b68ee'
+          assign face_link = '#'
+          assign face_alt = 'Carousel face ' | append: forloop.index
           
-          if block.settings.image
-            assign face_image = block.settings.image
-          endif
-          
-          if block.settings.gradient_start != blank
-            assign gradient_start = block.settings.gradient_start
-          endif
-          
-          if block.settings.gradient_end != blank
-            assign gradient_end = block.settings.gradient_end
+          if block
+            if block.settings.image
+              assign face_image = block.settings.image
+              assign face_alt = block.settings.image.alt | default: face_alt
+            endif
+            
+            if block.settings.link != blank
+              assign face_link = block.settings.link
+            endif
+            
+            if block.settings.gradient_start != blank
+              assign gradient_start = block.settings.gradient_start
+            endif
+            
+            if block.settings.gradient_end != blank
+              assign gradient_end = block.settings.gradient_end
+            endif
           endif
         -%}
         <a
-          href="{{ block.settings.link | default: '#' }}"
+          href="{{ face_link }}"
           class="hex-prism-carousel__face hex-prism-carousel__face--{{ section_id }}"
           data-face
           data-face-index="{{ forloop.index0 }}"
-          aria-label="{{ block.settings.image.alt | default: 'Carousel face ' | append: forloop.index }}"
+          aria-label="{{ face_alt }}"
           tabindex="0"
         >
           {%- if face_image -%}
-            {{
-              face_image
-              | image_url: width: 1040
-              | image_tag:
-                loading: 'lazy',
-                alt: face_image.alt | default: 'Carousel image',
-                class: 'hex-prism-carousel__image hex-prism-carousel__image--' | append: section_id
-              }}
+            {%- assign image_width_2x = image_max_width | times: 2 -%}
+            {%- assign image_1x_url = face_image | image_url: width: image_max_width -%}
+            {%- assign image_2x_url = face_image | image_url: width: image_width_2x -%}
+            <img
+              src="{{ image_1x_url }}"
+              srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
+              sizes="(max-width: 768px) 100vw, {{ image_max_width }}px"
+              alt="{{ face_alt }}"
+              loading="lazy"
+              class="hex-prism-carousel__image hex-prism-carousel__image--{{ section_id }}"
+            >
           {%- else -%}
             <div
               class="hex-prism-carousel__gradient hex-prism-carousel__gradient--{{ section_id }}"
@@ -113,7 +134,7 @@
     overflow: hidden;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-    will-change: transform, opacity;
+    will-change: opacity;
     display: block;
     text-decoration: none;
     outline: none;
@@ -139,8 +160,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.08);
-    mix-blend-mode: overlay;
+    background: rgba(255, 255, 255, {{ overlay_opacity }});
     pointer-events: none;
     z-index: 1;
   }
@@ -171,59 +191,79 @@
     let animationFrameId = null;
     let currentRotation = 0;
     let isPaused = false;
-    let rotationSpeed = parseFloat(section.dataset.rotationSpeed) || 18;
-    const perspective = parseFloat(section.dataset.perspective) || 1400;
+    let lastTimestamp = null;
+    
+    const rotationSpeed = parseFloat(section.dataset.rotationSpeed) || 18;
     const radius = parseFloat(section.dataset.radius) || 320;
-    const faceWidth = parseFloat(section.dataset.faceWidth) || 520;
-    const faceHeight = parseFloat(section.dataset.faceHeight) || 320;
     const baseOpacity = parseFloat(section.dataset.baseOpacity) || 0.3;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
     const numFaces = 6;
-    const angleStep = (360 / numFaces) * (Math.PI / 180);
+    const angleStepRad = (2 * Math.PI) / numFaces;
+    const faceAnglesRad = [];
+    
+    for (let i = 0; i < numFaces; i++) {
+      faceAnglesRad.push(i * angleStepRad);
+    }
     
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
     }
     
-    function updateFaces() {
+    function initFaceTransforms() {
       faces.forEach((face, index) => {
-        const faceAngle = index * angleStep;
-        const theta = faceAngle + (currentRotation * Math.PI / 180);
+        const rotateY = index * 60;
+        face.style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px)`;
+      });
+    }
+    
+    function updateFaceOpacities() {
+      const rotationRad = (currentRotation * Math.PI) / 180;
+      
+      faces.forEach((face, index) => {
+        const faceAngle = faceAnglesRad[index];
+        const theta = faceAngle - rotationRad;
         const cosTheta = Math.cos(theta);
         const maxCos = Math.max(0, cosTheta);
         
         const opacity = clamp(baseOpacity + (1 - baseOpacity) * maxCos, baseOpacity, 1);
-        const scale = 1 + 0.06 * maxCos;
-        
-        const rotateY = index * 60;
-        const translateZ = radius;
-        
         face.style.opacity = opacity;
-        face.style.transform = `rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`;
       });
     }
     
-    function animate() {
+    function animate(timestamp) {
       if (isPaused || prefersReducedMotion) {
         animationFrameId = null;
+        lastTimestamp = null;
         return;
       }
       
-      currentRotation += rotationSpeed * (16.67 / 1000);
+      if (lastTimestamp === null) {
+        lastTimestamp = timestamp;
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      
+      const dt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+      
+      currentRotation += rotationSpeed * dt;
       if (currentRotation >= 360) {
         currentRotation -= 360;
+      } else if (currentRotation < 0) {
+        currentRotation += 360;
       }
       
       prism.style.transform = `rotateY(${currentRotation}deg)`;
-      updateFaces();
+      updateFaceOpacities();
       
       animationFrameId = requestAnimationFrame(animate);
     }
     
     function startAnimation() {
       if (animationFrameId === null && !prefersReducedMotion) {
-        animate();
+        lastTimestamp = null;
+        animationFrameId = requestAnimationFrame(animate);
       }
     }
     
@@ -231,6 +271,7 @@
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
+        lastTimestamp = null;
       }
     }
     
@@ -247,11 +288,14 @@
     function stepRotation(direction) {
       const step = direction === 'left' ? -60 : 60;
       currentRotation += step;
-      if (currentRotation >= 360) currentRotation -= 360;
-      if (currentRotation < 0) currentRotation += 360;
+      if (currentRotation >= 360) {
+        currentRotation -= 360;
+      } else if (currentRotation < 0) {
+        currentRotation += 360;
+      }
       
       prism.style.transform = `rotateY(${currentRotation}deg)`;
-      updateFaces();
+      updateFaceOpacities();
     }
     
     function handleKeydown(e) {
@@ -267,10 +311,12 @@
     }
     
     function init() {
+      initFaceTransforms();
+      
       if (prefersReducedMotion) {
         currentRotation = 0;
         prism.style.transform = 'rotateY(0deg)';
-        updateFaces();
+        updateFaceOpacities();
         return;
       }
       
@@ -278,9 +324,9 @@
       section.addEventListener('mouseleave', handleResume);
       section.addEventListener('focusin', handlePause);
       section.addEventListener('focusout', handleResume);
-      document.addEventListener('keydown', handleKeydown);
+      section.addEventListener('keydown', handleKeydown);
       
-      updateFaces();
+      updateFaceOpacities();
       startAnimation();
     }
     
@@ -290,7 +336,7 @@
       section.removeEventListener('mouseleave', handleResume);
       section.removeEventListener('focusin', handlePause);
       section.removeEventListener('focusout', handleResume);
-      document.removeEventListener('keydown', handleKeydown);
+      section.removeEventListener('keydown', handleKeydown);
     }
     
     if (document.readyState === 'loading') {
@@ -409,6 +455,27 @@
       "info": "Minimum opacity for faces when angled away (1 = 0.1, 5 = 0.5)"
     },
     {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Face Overlay Opacity",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 8,
+      "info": "White overlay opacity on faces (0 = none, 20 = 0.2)"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image Max Width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "default": 900,
+      "info": "Maximum image width for performance optimization"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "Background Color",
@@ -425,7 +492,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Recommended: 1040x640px or larger"
+          "info": "Recommended: 900x560px or larger"
         },
         {
           "type": "url",
@@ -481,4 +548,3 @@
   "max_blocks": 6
 }
 {% endschema %}
-
