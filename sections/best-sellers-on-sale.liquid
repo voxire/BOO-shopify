@@ -218,6 +218,7 @@
     padding: 6px 2px 14px;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    width: 100%;
   }
 
   .best-sellers-on-sale__grid::-webkit-scrollbar {
@@ -233,10 +234,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 calc((100% - 150px) / 4);
-    min-width: 260px;
-    max-width: 520px;
+    flex: 0 0 280px;
+    width: 280px;
     scroll-snap-align: start;
+  }
+
+  @media (min-width: 1200px) {
+    .best-sellers-on-sale__card {
+      flex: 0 0 320px;
+      width: 320px;
+    }
   }
 
   .best-sellers-on-sale__badge {
@@ -293,7 +300,8 @@
 
     .best-sellers-on-sale__card {
       height: {{ card_height_tablet }}px;
-      flex: 0 0 calc((100% - 24px) / 2);
+      flex: 0 0 300px;
+      width: 300px;
     }
   }
 
