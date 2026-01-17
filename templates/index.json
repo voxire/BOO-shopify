@@ -89,7 +89,9 @@
         "side_opacity": 2,
         "side2_opacity": 2,
         "image_max_width": 700,
-        "background_color": "#ffffff"
+        "background_color": "#ffffff",
+        "padding_top": 100,
+        "padding_bottom": 100
       }
     },
     "hers_labs_hero_e6yQVT": {
