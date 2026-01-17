@@ -405,14 +405,17 @@
       ],
       "name": "Hex Prism Carousel",
       "settings": {
-        "rotation_speed": 14,
         "perspective": 1600,
         "radius": 300,
-        "face_width": 520,
+        "perspective_mobile": 1000,
+        "radius_mobile": 220,
+        "face_width": 320,
         "face_height": 320,
+        "face_width_mobile": 280,
+        "face_height_mobile": 420,
         "corner_radius": 14,
-        "base_opacity": 1,
-        "overlay_opacity": 4,
+        "side_opacity": 2,
+        "side2_opacity": 2,
         "image_max_width": 800,
         "background_color": "#111111"
       }
