@@ -115,11 +115,12 @@
   }
 
   function render() {
-    // Hexagon layout: 6 images arranged in a hexagon, touching each other
-    // Center image (active) + 5 surrounding images
-    const cardWidth = 420; // Card width from CSS
-    const hexRadius = cardWidth * 0.85; // Radius so images touch (slightly less for overlap)
-    const hexAngle = (Math.PI * 2) / 6; // 60 degrees per vertex
+    // 3D linear arrangement creating hexagon-like optical illusion
+    // Center rectangle faces camera, side rectangles rotated and pushed back
+    const cardWidth = 420;
+    const horizontalOffset = 180; // Small horizontal offset between cards
+    const rotationAngle = 28; // Rotate around Y-axis (±25–30°)
+    const depthOffset = 200; // Push back along Z-axis
     
     items.forEach((item, i) => {
       // Calculate position relative to active (center)
@@ -135,8 +136,8 @@
       
       const abs = Math.abs(position);
       
-      // Show only 6 images: center + 5 around it
-      if (abs > 2.5) {
+      // Show 6 images: center + 2-3 on each side
+      if (abs > 3) {
         item.style.opacity = 0;
         item.style.pointerEvents = 'none';
         item.style.zIndex = 0;
@@ -147,61 +148,46 @@
       let translateY = 0;
       let translateZ = 0;
       let rotateY = 0;
-      let rotateX = 0;
       let scale = 1;
       let opacity = 1;
       
       if (abs === 0) {
-        // Center image - always fully visible, no opacity, no depth
+        // Center rectangle - faces camera directly, no rotation, no depth
         translateX = 0;
         translateY = 0;
         translateZ = 0;
         rotateY = 0;
-        rotateX = 0;
         scale = 1;
-        opacity = 1;
+        opacity = 1; // Always fully visible, no opacity
       } else {
-        // Position images in hexagon around center, touching each other
-        let hexPosition = position;
-        if (hexPosition < 0) {
-          hexPosition = 6 + hexPosition;
-        }
-        
-        // Calculate angle for hexagon vertex (0-5, starting from top)
-        const angle = hexPosition * hexAngle - Math.PI / 2;
-        
-        // Position so images touch (form continuous hexagon)
-        translateX = Math.cos(angle) * hexRadius;
-        translateY = Math.sin(angle) * hexRadius;
-        
-        // Depth effect - push back in 3D space
-        translateZ = -abs * 180;
-        
-        // Rotate to face center and create depth
-        rotateY = Math.atan2(translateX, -translateZ) * (180 / Math.PI);
-        rotateX = Math.atan2(translateY, -translateZ) * (180 / Math.PI) * 0.3;
-        
-        scale = 0.75;
+        // Side rectangles - rotated around Y-axis and pushed back
+        // Horizontal offset
+        translateX = position * horizontalOffset;
+        translateY = 0; // No vertical offset
+        // Push back along Z-axis
+        translateZ = -abs * depthOffset;
+        // Rotate around Y-axis (±25–30°)
+        rotateY = position * rotationAngle;
+        scale = 0.8;
         opacity = 0.6; // Semi-transparent
       }
       
-      // Hover effect - make hovered card fully visible and bring forward
+      // Hover effect - make hovered card fully visible
       if (i === hoveredIndex && abs !== 0) {
         opacity = 1;
-        scale = 0.85;
-        translateZ = -abs * 100; // Bring forward on hover
+        scale = 0.9;
+        translateZ = -abs * 120; // Bring forward slightly
       }
       
       item.style.opacity = opacity;
       item.style.pointerEvents = 'auto';
       item.style.zIndex = abs === 0 ? 10 : (10 - abs);
       
+      // Transform order: translateX, translateZ, rotateY (creates hexagon illusion)
       item.style.transform = `
         translateX(${translateX}px)
-        translateY(${translateY}px)
         translateZ(${translateZ}px)
         rotateY(${rotateY}deg)
-        rotateX(${rotateX}deg)
         scale(${scale})
       `;
     });
