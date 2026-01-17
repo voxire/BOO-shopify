@@ -6,7 +6,8 @@
   assign face_width = section.settings.face_width | default: 520
   assign face_height = section.settings.face_height | default: 320
   assign corner_radius = section.settings.corner_radius | default: 14
-  assign base_opacity = section.settings.base_opacity | default: 0.3
+  assign base_opacity_raw = section.settings.base_opacity | default: 3
+  assign base_opacity = base_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
   assign blocks_count = section.blocks.size
 -%}
@@ -175,7 +176,7 @@
     const radius = parseFloat(section.dataset.radius) || 320;
     const faceWidth = parseFloat(section.dataset.faceWidth) || 520;
     const faceHeight = parseFloat(section.dataset.faceHeight) || 320;
-    const baseOpacity = parseFloat(section.dataset.baseOpacity) || 0.25;
+    const baseOpacity = parseFloat(section.dataset.baseOpacity) || 0.3;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
     const numFaces = 6;
@@ -326,11 +327,10 @@
     {
       "type": "range",
       "id": "rotation_speed",
-      "label": "Rotation Speed",
+      "label": "Rotation Speed (deg/sec)",
       "min": 0,
       "max": 60,
       "step": 1,
-      "unit": "deg",
       "default": 18,
       "info": "Speed of rotation in degrees per second"
     },
@@ -402,11 +402,11 @@
       "type": "range",
       "id": "base_opacity",
       "label": "Base Opacity",
-      "min": 0.1,
-      "max": 0.5,
-      "step": 0.1,
-      "default": 0.3,
-      "info": "Minimum opacity for faces when angled away"
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 3,
+      "info": "Minimum opacity for faces when angled away (1 = 0.1, 5 = 0.5)"
     },
     {
       "type": "color",
