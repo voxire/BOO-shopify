@@ -343,33 +343,25 @@
         "slide_Ng9Fz6": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/FoxBoo.png",
-            "overlay_color": "",
-            "overlay_gradient": ""
+            "image": "shopify://shop_images/Screenshot_2025-12-26_at_8.27.17_PM_copy_f934f229-b117-4f75-a1da-48ce205ba3f6.png"
           }
         },
         "slide_fryDDb": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/blue.png",
-            "overlay_color": "",
-            "overlay_gradient": ""
+            "image": "shopify://shop_images/FoxBoo_Bg_Dark_pink.png"
           }
         },
         "slide_93yw8W": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/GriBoo.png",
-            "overlay_color": "",
-            "overlay_gradient": ""
+            "image": "shopify://shop_images/Shaboo_Bg_Blue.png"
           }
         },
         "slide_MqVV6p": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/BunBoo.png",
-            "overlay_color": "",
-            "overlay_gradient": ""
+            "image": "shopify://shop_images/GriBoo_Bg_Purple.png"
           }
         }
       },
@@ -380,10 +372,7 @@
         "slide_MqVV6p"
       ],
       "name": "3D Carousel",
-      "settings": {
-        "autoplay_enabled": true,
-        "autoplay_speed": 3500
-      }
+      "settings": {}
     }
   },
   "order": [
