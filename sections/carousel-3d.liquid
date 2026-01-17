@@ -1,0 +1,416 @@
+{%- liquid
+  assign section_id = section.id
+  assign slides = section.blocks | where: 'type', 'slide'
+  assign autoplay_enabled = section.settings.autoplay_enabled
+  assign autoplay_speed = section.settings.autoplay_speed | default: 3500
+-%}
+
+{%- style -%}
+  /* Section-scoped styles to prevent CSS leakage */
+  .carousel-3d-section-{{ section_id }} {
+    position: relative;
+    width: 100%;
+    padding: 4rem 0;
+    background: #1a1a1a;
+    overflow: hidden;
+  }
+
+  .carousel-3d-scene-{{ section_id }} {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    perspective: 1400px;
+    perspective-origin: center center;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-3d-track-{{ section_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-3d-item-{{ section_id }} {
+    position: absolute;
+    width: 400px;
+    max-width: 85vw;
+    height: auto;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .carousel-3d-item-{{ section_id }} img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  /* Center card - fully visible */
+  .carousel-3d-item-{{ section_id }}.is-active {
+    --offset: 0;
+    --rotation: 0deg;
+    --z-depth: 0px;
+    transform: translateX(var(--offset)) 
+               rotateY(var(--rotation)) 
+               translateZ(var(--z-depth)) 
+               scale(1);
+    opacity: 1;
+    z-index: 10;
+  }
+
+  /* Left side cards */
+  .carousel-3d-item-{{ section_id }}:not(.is-active)[data-position="left"] {
+    --offset: -280px;
+    --rotation: -30deg;
+    --z-depth: -160px;
+    transform: translateX(var(--offset)) 
+               rotateY(var(--rotation)) 
+               translateZ(var(--z-depth)) 
+               scale(1);
+    opacity: 0.45;
+    z-index: 5;
+  }
+
+  /* Right side cards */
+  .carousel-3d-item-{{ section_id }}:not(.is-active)[data-position="right"] {
+    --offset: 280px;
+    --rotation: 30deg;
+    --z-depth: -160px;
+    transform: translateX(var(--offset)) 
+               rotateY(var(--rotation)) 
+               translateZ(var(--z-depth)) 
+               scale(1);
+    opacity: 0.45;
+    z-index: 5;
+  }
+
+  /* Hidden cards (far from center) */
+  .carousel-3d-item-{{ section_id }}:not(.is-active):not([data-position]) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Responsive adjustments for mobile */
+  @media screen and (max-width: 768px) {
+    .carousel-3d-scene-{{ section_id }} {
+      perspective: 800px;
+      min-height: 400px;
+    }
+
+    .carousel-3d-item-{{ section_id }} {
+      width: 300px;
+      max-width: 80vw;
+      border-radius: 10px;
+    }
+
+    .carousel-3d-item-{{ section_id }} img {
+      border-radius: 10px;
+    }
+
+    /* Reduced transforms for mobile */
+    .carousel-3d-item-{{ section_id }}:not(.is-active)[data-position="left"] {
+      --offset: -180px;
+      --rotation: -15deg;
+      --z-depth: -100px;
+    }
+
+    .carousel-3d-item-{{ section_id }}:not(.is-active)[data-position="right"] {
+      --offset: 180px;
+      --rotation: 15deg;
+      --z-depth: -100px;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-3d-item-{{ section_id }},
+    .carousel-3d-track-{{ section_id }} {
+      transition: none;
+    }
+
+    .carousel-3d-scene-{{ section_id }} {
+      perspective: none;
+    }
+  }
+{%- endstyle -%}
+
+<section class="carousel-3d-section-{{ section_id }}" data-section-id="{{ section_id }}" data-carousel-3d>
+  <div class="carousel-3d-scene-{{ section_id }}" data-scene>
+    <div class="carousel-3d-track-{{ section_id }}" data-track>
+      {%- for block in slides -%}
+        {%- liquid
+          assign slide_index = forloop.index0
+          assign image = block.settings.image
+          assign overlay_color = block.settings.overlay_color
+          assign overlay_gradient = block.settings.overlay_gradient
+        -%}
+        <div class="carousel-3d-item-{{ section_id }}{% if slide_index == 0 %} is-active{% endif %}" 
+             data-item 
+             data-index="{{ slide_index }}">
+          {%- if image != blank -%}
+            <div style="position: relative; width: 100%; height: 100%;">
+              <img src="{{ image | image_url: width: 1600 }}" 
+                   srcset="{{ image | image_url: width: 800 }} 800w,
+                           {{ image | image_url: width: 1200 }} 1200w,
+                           {{ image | image_url: width: 1600 }} 1600w"
+                   sizes="(max-width: 768px) 300px, 400px"
+                   alt="{{ image.alt | escape }}"
+                   loading="lazy">
+              {%- if overlay_color != blank or overlay_gradient != blank -%}
+                <div style="position: absolute; inset: 0; 
+                           {% if overlay_gradient != blank %}background: {{ overlay_gradient }};{% else %}background-color: {{ overlay_color }};{% endif %}
+                           mix-blend-mode: overlay;
+                           pointer-events: none;"></div>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <div style="width: 100%; aspect-ratio: 3/4; background: #2a2a2a; 
+                       display: flex; align-items: center; justify-content: center; 
+                       color: #999; border-radius: 12px;">
+              {{ 'image' | placeholder_svg_tag: 'placeholder' }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    'use strict';
+    
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (!section) return;
+    
+    const track = section.querySelector('[data-track]');
+    const items = section.querySelectorAll('[data-item]');
+    const totalSlides = items.length;
+    
+    if (totalSlides === 0) return;
+    
+    // Check for reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    let currentIndex = 0;
+    let autoplayTimer = null;
+    let isPaused = false;
+    
+    // Update carousel positions
+    function updateCarousel() {
+      items.forEach((item, index) => {
+        const diff = index - currentIndex;
+        const absDiff = Math.abs(diff);
+        
+        // Remove all position classes
+        item.classList.remove('is-active');
+        item.removeAttribute('data-position');
+        
+        if (diff === 0) {
+          // Center card
+          item.classList.add('is-active');
+        } else if (diff === -1 || (diff === -(totalSlides - 1) && totalSlides > 2)) {
+          // Left side card
+          item.setAttribute('data-position', 'left');
+        } else if (diff === 1 || (diff === totalSlides - 1 && totalSlides > 2)) {
+          // Right side card
+          item.setAttribute('data-position', 'right');
+        }
+        // Cards further away will have no data-position and be hidden via CSS
+      });
+    }
+    
+    // Navigate to next slide
+    function nextSlide() {
+      if (prefersReducedMotion) return;
+      currentIndex = (currentIndex + 1) % totalSlides;
+      updateCarousel();
+    }
+    
+    // Navigate to previous slide
+    function prevSlide() {
+      if (prefersReducedMotion) return;
+      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+      updateCarousel();
+    }
+    
+    // Auto-rotate functionality
+    const autoplayEnabled = {{ autoplay_enabled | json }};
+    const autoplaySpeed = {{ autoplay_speed | json }};
+    
+    function startAutoplay() {
+      if (!autoplayEnabled || prefersReducedMotion || isPaused) return;
+      
+      stopAutoplay();
+      autoplayTimer = setInterval(() => {
+        if (!isPaused) {
+          nextSlide();
+        }
+      }, autoplaySpeed);
+    }
+    
+    function stopAutoplay() {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    }
+    
+    // Pause on hover
+    section.addEventListener('mouseenter', () => {
+      isPaused = true;
+      stopAutoplay();
+    });
+    
+    section.addEventListener('mouseleave', () => {
+      isPaused = false;
+      if (autoplayEnabled && !prefersReducedMotion) {
+        startAutoplay();
+      }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      // Only handle if section is visible (rough check)
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+          stopAutoplay();
+          // Restart after a delay
+          setTimeout(() => {
+            if (autoplayEnabled && !prefersReducedMotion) {
+              startAutoplay();
+            }
+          }, 2000);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nextSlide();
+          stopAutoplay();
+          // Restart after a delay
+          setTimeout(() => {
+            if (autoplayEnabled && !prefersReducedMotion) {
+              startAutoplay();
+            }
+          }, 2000);
+        }
+      }
+    });
+    
+    // Initialize
+    function initializeCarousel() {
+      updateCarousel();
+      if (autoplayEnabled && !prefersReducedMotion) {
+        startAutoplay();
+      }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeCarousel);
+    } else {
+      initializeCarousel();
+    }
+    
+    // Cleanup on section unload
+    document.addEventListener('shopify:section:unload', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        stopAutoplay();
+      }
+    });
+    
+    // Reinitialize on section load (theme editor)
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail.sectionId === sectionId) {
+        initializeCarousel();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "3D Carousel",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay_enabled",
+      "label": "Enable autoplay",
+      "default": true,
+      "info": "Automatically rotate slides every few seconds"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 2000,
+      "max": 5000,
+      "step": 500,
+      "unit": "ms",
+      "label": "Autoplay speed",
+      "default": 3500,
+      "info": "Time between slides (3-4 seconds recommended)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay color",
+          "info": "Optional color overlay on the image"
+        },
+        {
+          "type": "text",
+          "id": "overlay_gradient",
+          "label": "Overlay gradient",
+          "info": "Optional CSS gradient (e.g., 'linear-gradient(45deg, rgba(255,0,0,0.3), rgba(0,0,255,0.3))')"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "3D Carousel",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
