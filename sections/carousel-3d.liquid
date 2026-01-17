@@ -144,24 +144,20 @@
     // Check for reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    // Fixed arc parameters
-    let maxAngle = 60; // Total arc spread in degrees (max 80)
-    let angle = totalSlides > 1 ? maxAngle / (totalSlides - 1) : 0;
-    
-    // Radius settings
-    let radius = 260; // Desktop default
-    let mobileRadius = 170; // Mobile default
+    // Fixed parameters (reference accurate)
+    const angle = 20; // Fixed angle in degrees
+    let spacing = 120; // Desktop spacing in pixels
+    let radius = 200; // Desktop radius in pixels
     
     function updateDimensions() {
       const isMobile = window.innerWidth <= 768;
       if (isMobile) {
-        radius = mobileRadius;
-        maxAngle = 50; // Smaller arc on mobile
+        spacing = 80;
+        radius = 140;
       } else {
-        radius = 260;
-        maxAngle = 60;
+        spacing = 120;
+        radius = 200;
       }
-      angle = totalSlides > 1 ? maxAngle / (totalSlides - 1) : 0;
       updateItemPositions();
     }
     
@@ -177,11 +173,9 @@
         const diff = index - currentIndex;
         const absDiff = Math.abs(diff);
         
-        // Calculate rotation: (index - activeIndex) * angle
-        const rotation = diff * angle;
-        
-        // Apply transform: rotateY(rotation) translateZ(radius)
-        item.style.transform = `rotateY(${rotation}deg) translateZ(${radius}px)`;
+        // Transform: translateX(diff * spacing) rotateY(diff * angle) translateZ(radius)
+        // Center item (diff === 0): flat, no rotation, centered
+        item.style.transform = `translateX(${diff * spacing}px) rotateY(${diff * angle}deg) translateZ(${radius}px)`;
         
         // Visibility: items farther than ±2 from activeIndex are hidden
         if (absDiff > 2) {
