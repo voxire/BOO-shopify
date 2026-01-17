@@ -1,123 +1,66 @@
 {%- liquid
-  assign section_id = section.id
-  assign slides = section.blocks | where: 'type', 'slide'
-  assign autoplay_enabled = section.settings.autoplay_enabled
-  assign autoplay_speed = section.settings.autoplay_speed | default: 3500
-  assign total_slides = slides.size
+  assign id = section.id
+  assign slides = section.blocks
 -%}
 
-{%- style -%}
-  /* Section-scoped styles */
-  .carousel-3d-{{ section_id }} {
-    position: relative;
-    width: 100%;
-    padding: 6rem 0;
-    background: #ffffff;
-    overflow: hidden;
+<style>
+.carousel-arc-{{ id }} {
+  background: #fff;
+  padding: 80px 0;
+  overflow: hidden;
+}
+
+.carousel-arc-scene-{{ id }} {
+  perspective: 1200px;
+  display: flex;
+  justify-content: center;
+}
+
+.carousel-arc-track-{{ id }} {
+  position: relative;
+  width: 420px;
+  height: 560px;
+}
+
+.carousel-arc-item-{{ id }} {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  transform-origin: center center;
+  transition: transform 0.6s ease, opacity 0.3s ease;
+  backface-visibility: hidden;
+}
+
+.carousel-arc-item-{{ id }} img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .carousel-arc-track-{{ id }} {
+    width: 280px;
+    height: 400px;
   }
+}
+</style>
 
-  .carousel-3d-scene-{{ section_id }} {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    perspective: 1600px;
-    perspective-origin: center center;
-    min-height: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .carousel-3d-ring-{{ section_id }} {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .carousel-3d-item-{{ section_id }} {
-    position: absolute;
-    width: 380px;
-    max-width: 85vw;
-    height: auto;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .carousel-3d-item-{{ section_id }} img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-    border-radius: 12px;
-  }
-
-  /* Responsive adjustments for mobile */
-  @media screen and (max-width: 768px) {
-    .carousel-3d-{{ section_id }} {
-      padding: 4rem 0;
-    }
-
-    .carousel-3d-scene-{{ section_id }} {
-      perspective: 1000px;
-      min-height: 450px;
-    }
-
-    .carousel-3d-item-{{ section_id }} {
-      width: 280px;
-      max-width: 80vw;
-      border-radius: 10px;
-    }
-
-    .carousel-3d-item-{{ section_id }} img {
-      border-radius: 10px;
-    }
-  }
-
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    .carousel-3d-item-{{ section_id }} {
-      transition: none;
-    }
-
-    .carousel-3d-scene-{{ section_id }} {
-      perspective: none;
-    }
-  }
-{%- endstyle -%}
-
-<section class="carousel-3d-{{ section_id }}" data-section-id="{{ section_id }}" data-carousel-3d>
-  <div class="carousel-3d-scene-{{ section_id }}" data-scene>
-    <div class="carousel-3d-ring-{{ section_id }}" data-ring>
+<section class="carousel-arc-{{ id }}">
+  <div class="carousel-arc-scene-{{ id }}">
+    <div class="carousel-arc-track-{{ id }}" data-track>
       {%- for block in slides -%}
-        {%- liquid
-          assign slide_index = forloop.index0
-          assign image = block.settings.image
-        -%}
-        <div class="carousel-3d-item-{{ section_id }}" 
-             data-item 
-             data-index="{{ slide_index }}"
-             style="--i: {{ slide_index }};">
-          {%- if image != blank -%}
-            <img src="{{ image | image_url: width: 1600 }}" 
-                 srcset="{{ image | image_url: width: 800 }} 800w,
-                         {{ image | image_url: width: 1200 }} 1200w,
-                         {{ image | image_url: width: 1600 }} 1600w"
-                 sizes="(max-width: 768px) 280px, 380px"
-                 alt="{{ image.alt | escape }}"
-                 loading="lazy">
+        <div
+          class="carousel-arc-item-{{ id }}"
+          data-index="{{ forloop.index0 }}">
+          {%- if block.settings.image != blank -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 1200 }}"
+              alt="{{ block.settings.image.alt | escape }}"
+              loading="lazy">
           {%- else -%}
-            <div style="width: 100%; aspect-ratio: 3/4; background: #f5f5f5; 
-                       display: flex; align-items: center; justify-content: center; 
-                       color: #999; border-radius: 12px;">
+            <div style="width: 100%; height: 100%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 16px;">
               {{ 'image' | placeholder_svg_tag: 'placeholder' }}
             </div>
           {%- endif -%}
@@ -128,202 +71,116 @@
 </section>
 
 <script>
-  (function() {
-    'use strict';
-    
-    const sectionId = '{{ section_id }}';
-    const section = document.querySelector(`[data-section-id="${sectionId}"]`);
-    if (!section) return;
-    
-    const ring = section.querySelector('[data-ring]');
-    const items = section.querySelectorAll('[data-item]');
-    const totalSlides = items.length;
-    
-    if (totalSlides === 0) return;
-    
-    // Check for reduced motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-    // Fixed parameters (reference accurate)
-    const angle = 20; // Fixed angle in degrees
-    let spacing = 120; // Desktop spacing in pixels
-    let radius = 200; // Desktop radius in pixels
-    
-    function updateDimensions() {
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
-        spacing = 80;
-        radius = 140;
-      } else {
-        spacing = 120;
-        radius = 200;
+(() => {
+  const track = document.querySelector('[data-track]');
+  if (!track) return;
+
+  const items = [...track.children];
+  const total = items.length;
+
+  if (total === 0) return;
+
+  let active = 0;
+
+  const ANGLE = 22;     // tilt
+  const OFFSET = 110;  // horizontal spacing
+  const DEPTH = 140;   // Z depth
+
+  function render() {
+    items.forEach((item, i) => {
+      const diff = i - active;
+
+      if (Math.abs(diff) > 2) {
+        item.style.opacity = 0;
+        item.style.pointerEvents = 'none';
+        return;
       }
-      updateItemPositions();
-    }
-    
-    let currentIndex = 0;
-    let autoplayTimer = null;
+
+      item.style.opacity = 1;
+      item.style.pointerEvents = 'auto';
+
+      item.style.transform = `
+        translateX(${diff * OFFSET}px)
+        translateZ(${Math.abs(diff) * -DEPTH}px)
+        rotateY(${diff * ANGLE}deg)
+      `;
+    });
+  }
+
+  function next() {
+    active = (active + 1) % total;
+    render();
+  }
+
+  // Pause on hover
+  const section = track.closest('section');
+  if (section) {
     let isPaused = false;
-    
-    // Update item positions (limited arc, not full ring)
-    function updateItemPositions() {
-      if (prefersReducedMotion) return;
-      
-      items.forEach((item, index) => {
-        const diff = index - currentIndex;
-        const absDiff = Math.abs(diff);
-        
-        // Transform: translateX(diff * spacing) rotateY(diff * angle) translateZ(radius)
-        // Center item (diff === 0): flat, no rotation, centered
-        item.style.transform = `translateX(${diff * spacing}px) rotateY(${diff * angle}deg) translateZ(${radius}px)`;
-        
-        // Visibility: items farther than ±2 from activeIndex are hidden
-        if (absDiff > 2) {
-          item.style.opacity = '0';
-          item.style.pointerEvents = 'none';
-        } else {
-          item.style.opacity = '1';
-          item.style.pointerEvents = 'auto';
-        }
-      });
-    }
-    
-    // Navigate to next slide
-    function nextSlide() {
-      if (prefersReducedMotion) return;
-      currentIndex = (currentIndex + 1) % totalSlides;
-      updateItemPositions();
-    }
-    
-    // Navigate to previous slide
-    function prevSlide() {
-      if (prefersReducedMotion) return;
-      currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-      updateItemPositions();
-    }
-    
-    // Update dimensions on resize
-    window.addEventListener('resize', updateDimensions);
-    
-    // Auto-rotate functionality
-    const autoplayEnabled = {{ autoplay_enabled | json }};
-    const autoplaySpeed = {{ autoplay_speed | json }};
-    
+    let autoplayTimer = null;
+
     function startAutoplay() {
-      if (!autoplayEnabled || prefersReducedMotion || isPaused) return;
-      
+      if (isPaused) return;
       stopAutoplay();
-      autoplayTimer = setInterval(() => {
-        if (!isPaused) {
-          nextSlide();
-        }
-      }, autoplaySpeed);
+      autoplayTimer = setInterval(next, 3500);
     }
-    
+
     function stopAutoplay() {
       if (autoplayTimer) {
         clearInterval(autoplayTimer);
         autoplayTimer = null;
       }
     }
-    
-    // Pause on hover
+
     section.addEventListener('mouseenter', () => {
       isPaused = true;
       stopAutoplay();
     });
-    
+
     section.addEventListener('mouseleave', () => {
       isPaused = false;
-      if (autoplayEnabled && !prefersReducedMotion) {
-        startAutoplay();
-      }
+      startAutoplay();
     });
-    
+
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       const rect = section.getBoundingClientRect();
       if (rect.top < window.innerHeight && rect.bottom > 0) {
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          prevSlide();
+          active = (active - 1 + total) % total;
+          render();
           stopAutoplay();
-          setTimeout(() => {
-            if (autoplayEnabled && !prefersReducedMotion) {
-              startAutoplay();
-            }
-          }, 2000);
+          setTimeout(startAutoplay, 2000);
         } else if (e.key === 'ArrowRight') {
           e.preventDefault();
-          nextSlide();
+          next();
           stopAutoplay();
-          setTimeout(() => {
-            if (autoplayEnabled && !prefersReducedMotion) {
-              startAutoplay();
-            }
-          }, 2000);
+          setTimeout(startAutoplay, 2000);
         }
       }
     });
-    
-    // Initialize
-    function initializeCarousel() {
-      updateDimensions();
-      
-      if (autoplayEnabled && !prefersReducedMotion) {
-        startAutoplay();
-      }
-    }
-    
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeCarousel);
-    } else {
-      // Small delay to ensure layout is ready
-      setTimeout(initializeCarousel, 100);
-    }
-    
+
+    render();
+    startAutoplay();
+
     // Cleanup on section unload
     document.addEventListener('shopify:section:unload', function(e) {
-      if (e.detail.sectionId === sectionId) {
+      if (e.detail.sectionId === '{{ id }}') {
         stopAutoplay();
       }
     });
-    
-    // Reinitialize on section load (theme editor)
-    document.addEventListener('shopify:section:load', function(e) {
-      if (e.detail.sectionId === sectionId) {
-        setTimeout(initializeCarousel, 100);
-      }
-    });
-  })();
+  } else {
+    render();
+    setInterval(next, 3500);
+  }
+})();
 </script>
 
 {% schema %}
 {
-  "name": "3D Carousel",
+  "name": "3D Arc Carousel",
   "tag": "section",
   "class": "section",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "autoplay_enabled",
-      "label": "Enable autoplay",
-      "default": true,
-      "info": "Automatically rotate slides every few seconds"
-    },
-    {
-      "type": "range",
-      "id": "autoplay_speed",
-      "min": 2000,
-      "max": 5000,
-      "step": 500,
-      "unit": "ms",
-      "label": "Autoplay speed",
-      "default": 3500,
-      "info": "Time between slides (3.5 seconds default)"
-    }
-  ],
   "blocks": [
     {
       "type": "slide",
@@ -339,11 +196,8 @@
   ],
   "presets": [
     {
-      "name": "3D Carousel",
+      "name": "3D Arc Carousel",
       "blocks": [
-        {
-          "type": "slide"
-        },
         {
           "type": "slide"
         },
