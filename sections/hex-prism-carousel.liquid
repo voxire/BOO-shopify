@@ -147,6 +147,11 @@
     justify-content: center;
     position: relative;
     touch-action: pan-y pinch-zoom;
+    cursor: grab;
+  }
+
+  .hex-prism-carousel__scene--{{ section_id }}:active {
+    cursor: grabbing;
   }
 
   .hex-prism-carousel__prism--{{ section_id }} {
@@ -512,6 +517,7 @@
       currentX = startX;
       dragOffset = 0;
       section.style.cursor = 'grabbing';
+      section.style.userSelect = 'none';
       e.preventDefault();
     }
     
@@ -521,17 +527,25 @@
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = x - startX;
       currentX = x;
+      
+      if (Math.abs(dragOffset) > 5) {
+        e.preventDefault();
+      }
     }
     
     function handlePointerUp(e) {
       if (!isDragging) return;
       
+      const threshold = section.dataset.faceWidth ? parseFloat(section.dataset.faceWidth) * 0.1 : 40;
+      const wasDrag = Math.abs(dragOffset) > threshold;
+      
       isDragging = false;
       section.style.cursor = '';
+      section.style.userSelect = '';
       
-      const threshold = section.dataset.faceWidth ? parseFloat(section.dataset.faceWidth) * 0.1 : 40;
-      
-      if (Math.abs(dragOffset) > threshold) {
+      if (wasDrag) {
+        e.preventDefault();
+        e.stopPropagation();
         if (dragOffset > 0) {
           goPrev();
         } else {
