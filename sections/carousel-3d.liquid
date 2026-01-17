@@ -5,13 +5,13 @@
 
 <style>
 .carousel-arc-{{ id }} {
-  background: #fff;
+  background: #0a0a0a;
   padding: 80px 0;
   overflow: hidden;
 }
 
 .carousel-arc-scene-{{ id }} {
-  perspective: 1800px;
+  perspective: 2000px;
   perspective-origin: center center;
   display: flex;
   justify-content: center;
@@ -37,8 +37,9 @@
   border-radius: 16px;
   overflow: hidden;
   transform-origin: center center;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
   backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .carousel-arc-item-{{ id }} img {
@@ -126,24 +127,36 @@
       
       const abs = Math.abs(diff);
 
-      // Visibility
-      if (abs > 3.2) {
+      // Visibility - show up to 2 cards on each side (5 total visible)
+      if (abs > 2.5) {
         item.style.opacity = 0;
         item.style.pointerEvents = 'none';
         item.style.zIndex = 0;
         return;
       }
 
-      // Transform model (EXACT)
-      const translateX = diff * 150;
-      const translateZ = -abs * 260;
-      const rotateY = diff * 14;
-      const scale = Math.max(0.78, Math.min(1, 1 - abs * 0.08));
+      // Transform model - adjusted for reference visual
+      const translateX = diff * 180;
+      const translateZ = -abs * 300;
+      const rotateY = diff * 18;
+      const scale = Math.max(0.7, Math.min(1, 1 - abs * 0.1));
 
       // Z-index
       const zIndex = Math.round(100 - abs * 10);
 
-      item.style.opacity = 1;
+      // Opacity based on distance - center fully opaque, sides semi-transparent
+      let opacity;
+      if (abs === 0) {
+        opacity = 1; // Center card fully opaque
+      } else if (abs === 1) {
+        opacity = 0.65; // Immediate side cards semi-transparent
+      } else if (abs === 2) {
+        opacity = 0.45; // Outer side cards more transparent
+      } else {
+        opacity = 0.3; // Far cards very transparent
+      }
+
+      item.style.opacity = opacity;
       item.style.pointerEvents = 'auto';
       item.style.zIndex = zIndex;
 
@@ -228,8 +241,8 @@
       const currentX = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = startX - currentX;
       
-      // Convert pixel drag to target offset (150px per slide)
-      const slideOffset = dragOffset / 150;
+      // Convert pixel drag to target offset (180px per slide)
+      const slideOffset = dragOffset / 180;
       target = startTarget + slideOffset;
       
       e.preventDefault();
@@ -241,7 +254,7 @@
       isDragging = false;
       
       // Snap to nearest slide based on drag distance
-      const slideOffset = dragOffset / 150;
+      const slideOffset = dragOffset / 180;
       if (Math.abs(slideOffset) > 0.3) {
         if (slideOffset > 0) {
           target = Math.ceil(startTarget + slideOffset);
