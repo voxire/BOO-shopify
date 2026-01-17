@@ -13,6 +13,8 @@
   assign side_opacity = side_opacity_raw | divided_by: 10.0
   assign side2_opacity_raw = section.settings.side2_opacity | default: 2
   assign side2_opacity = side2_opacity_raw | divided_by: 10.0
+  assign side_fade = 1.0 | minus: side_opacity
+  assign side2_fade = 1.0 | minus: side2_opacity
   assign background_color = section.settings.background_color | default: '#111111'
   assign image_max_width = section.settings.image_max_width | default: 700
   assign blocks_count = section.blocks.size
@@ -27,7 +29,7 @@
   data-face-height="{{ face_height }}"
   data-corner-radius="{{ corner_radius }}"
   data-side-opacity="{{ side_opacity }}"
-  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px;"
+  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --side-fade: {{ side_fade }}; --side2-fade: {{ side2_fade }};"
 >
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
@@ -197,7 +199,22 @@
     width: 100%;
     height: 100%;
     position: relative;
-    transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), opacity 650ms cubic-bezier(0.23, 1, 0.32, 1);
+    isolation: isolate;
+    background: {{ background_color }};
+    overflow: hidden;
+    transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), filter 650ms cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: inherit;
+    opacity: 1;
+  }
+
+  .hex-prism-carousel__face-inner--{{ section_id }}::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    z-index: 2;
+    transition: background 650ms cubic-bezier(0.23, 1, 0.32, 1);
     border-radius: inherit;
   }
 
@@ -206,8 +223,12 @@
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }} {
-    opacity: 1;
     transform: scale(1);
+    filter: none;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }}::after {
+    background: rgba(0, 0, 0, 0);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side"] {
@@ -215,20 +236,12 @@
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }} {
-    opacity: {{ side_opacity }};
     transform: scale(0.92);
+    filter: brightness(0.9) contrast(0.95) saturate(0.95);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }}::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
-    pointer-events: none;
-    z-index: 1;
+    background: rgba(0, 0, 0, var(--side-fade));
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] {
@@ -236,20 +249,12 @@
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
-    opacity: {{ side2_opacity }};
     transform: scale(0.86);
+    filter: brightness(0.82) contrast(0.92) saturate(0.9);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }}::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.06) 100%);
-    pointer-events: none;
-    z-index: 1;
+    background: rgba(0, 0, 0, var(--side2-fade));
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="far"] {
@@ -270,6 +275,8 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    position: relative;
+    z-index: 1;
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
