@@ -4,6 +4,8 @@
   assign radius = section.settings.radius | default: 300
   assign face_width = section.settings.face_width | default: 360
   assign face_height = section.settings.face_height | default: 520
+  assign face_width_mobile = section.settings.face_width_mobile | default: 280
+  assign face_height_mobile = section.settings.face_height_mobile | default: 420
   assign corner_radius = section.settings.corner_radius | default: 14
   assign side_opacity_raw = section.settings.side_opacity | default: 2
   assign side_opacity = side_opacity_raw | divided_by: 10.0
@@ -23,7 +25,7 @@
   data-face-height="{{ face_height }}"
   data-corner-radius="{{ corner_radius }}"
   data-side-opacity="{{ side_opacity }}"
-  style="background-color: {{ background_color }};"
+  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px;"
 >
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism style="--radius: {{ radius }}px;">
@@ -147,8 +149,8 @@
 
   .hex-prism-carousel__prism--{{ section_id }} {
     position: relative;
-    width: {{ face_width }}px;
-    height: {{ face_height }}px;
+    width: var(--card-w);
+    height: var(--card-h);
     transform-style: preserve-3d;
     will-change: transform;
     transform: rotateY(var(--rot, 0deg));
@@ -157,8 +159,8 @@
 
   .hex-prism-carousel__face--{{ section_id }} {
     position: absolute;
-    width: {{ face_width }}px;
-    height: {{ face_height }}px;
+    width: var(--card-w);
+    height: var(--card-h);
     border-radius: {{ corner_radius }}px;
     overflow: hidden;
     backface-visibility: hidden;
@@ -190,6 +192,7 @@
     height: 100%;
     position: relative;
     transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), opacity 650ms cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: inherit;
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] {
@@ -263,6 +266,15 @@
     display: block;
   }
 
+  .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }},
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    padding: 0;
+  }
+
   .hex-prism-carousel__button--{{ section_id }} {
     position: absolute;
     top: 50%;
@@ -331,16 +343,33 @@
   }
 
   @media (max-width: 768px) {
-    .hex-prism-carousel__button--prev--{{ section_id }} {
-      left: 10px;
-      width: 40px;
-      height: 40px;
+    .hex-prism-carousel--{{ section_id }} {
+      min-height: auto;
     }
 
-    .hex-prism-carousel__button--next--{{ section_id }} {
-      right: 10px;
-      width: 40px;
-      height: 40px;
+    .hex-prism-carousel__scene--{{ section_id }} {
+      min-height: auto;
+      padding: 20px 0;
+    }
+
+    .hex-prism-carousel--{{ section_id }} {
+      --card-w: min(var(--card-w-m), calc(100vw - 72px));
+      --card-h: var(--card-h-m);
+    }
+
+    .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
+    .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }},
+    .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
+      padding: 14px;
+    }
+
+    .hex-prism-carousel__image--{{ section_id }} {
+      object-fit: contain;
+      background: transparent;
+    }
+
+    .hex-prism-carousel__button--{{ section_id }} {
+      display: none;
     }
 
     .hex-prism-carousel__dots--{{ section_id }} {
@@ -645,6 +674,32 @@
       "unit": "px",
       "default": 520,
       "info": "Height of each card"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Card Dimensions"
+    },
+    {
+      "type": "range",
+      "id": "face_width_mobile",
+      "label": "Card Width (Mobile)",
+      "min": 220,
+      "max": 340,
+      "step": 10,
+      "unit": "px",
+      "default": 280,
+      "info": "Width of each card on mobile devices"
+    },
+    {
+      "type": "range",
+      "id": "face_height_mobile",
+      "label": "Card Height (Mobile)",
+      "min": 320,
+      "max": 520,
+      "step": 20,
+      "unit": "px",
+      "default": 420,
+      "info": "Height of each card on mobile devices"
     },
     {
       "type": "header",
