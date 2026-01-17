@@ -1,67 +1,53 @@
 {%- liquid
   assign section_id = section.id
-  assign rotation_speed = section.settings.rotation_speed | default: 18
   assign perspective = section.settings.perspective | default: 1400
-  assign radius = section.settings.radius | default: 320
-  assign face_width = section.settings.face_width | default: 520
-  assign face_height = section.settings.face_height | default: 320
+  assign radius = section.settings.radius | default: 300
+  assign face_width = section.settings.face_width | default: 360
+  assign face_height = section.settings.face_height | default: 520
   assign corner_radius = section.settings.corner_radius | default: 14
-  assign base_opacity_raw = section.settings.base_opacity | default: 3
-  assign base_opacity = base_opacity_raw | divided_by: 10.0
+  assign side_opacity_raw = section.settings.side_opacity | default: 2
+  assign side_opacity = side_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
-  assign image_max_width = section.settings.image_max_width | default: 900
-  assign overlay_opacity_raw = section.settings.overlay_opacity | default: 8
-  assign overlay_opacity = overlay_opacity_raw | divided_by: 100.0
+  assign image_max_width = section.settings.image_max_width | default: 720
   assign blocks_count = section.blocks.size
 -%}
 
 <section
   class="hex-prism-carousel hex-prism-carousel--{{ section_id }}"
   data-section-id="{{ section_id }}"
-  data-rotation-speed="{{ rotation_speed }}"
   data-perspective="{{ perspective }}"
   data-radius="{{ radius }}"
   data-face-width="{{ face_width }}"
   data-face-height="{{ face_height }}"
   data-corner-radius="{{ corner_radius }}"
-  data-base-opacity="{{ base_opacity }}"
+  data-side-opacity="{{ side_opacity }}"
   style="background-color: {{ background_color }};"
 >
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
-    <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
-      {%- for i in (1..6) -%}
+    <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism style="--radius: {{ radius }}px;">
+      {%- for block in section.blocks -%}
         {%- liquid
-          assign block_index = forloop.index0
-          if blocks_count > 0
-            assign block_index = forloop.index0 | modulo: blocks_count
-            assign block = section.blocks[block_index]
-          else
-            assign block = null
-          endif
-          
           assign face_image = null
           assign gradient_start = '#4a90e2'
           assign gradient_end = '#7b68ee'
           assign face_link = '#'
-          assign face_alt = 'Carousel face ' | append: forloop.index
+          assign face_alt = 'Carousel card ' | append: forloop.index
           
-          if block
-            if block.settings.image
-              assign face_image = block.settings.image
-              assign face_alt = block.settings.image.alt | default: face_alt
-            endif
-            
-            if block.settings.link != blank
-              assign face_link = block.settings.link
-            endif
-            
-            if block.settings.gradient_start != blank
-              assign gradient_start = block.settings.gradient_start
-            endif
-            
-            if block.settings.gradient_end != blank
-              assign gradient_end = block.settings.gradient_end
-            endif
+          if block.settings.image
+            assign face_image = block.settings.image
+            assign face_alt = block.settings.image.alt | default: face_alt
+          endif
+          
+          if block.settings.link != blank
+            assign face_link = block.settings.link
+          endif
+          
+          if block.settings.gradient_start != blank
+            assign gradient_start = block.settings.gradient_start
+          endif
+          
+          if block.settings.gradient_end != blank
+            assign gradient_end = block.settings.gradient_end
           endif
         -%}
         <a
@@ -71,28 +57,66 @@
           data-face-index="{{ forloop.index0 }}"
           aria-label="{{ face_alt }}"
           tabindex="0"
+          style="--i: {{ forloop.index0 }};"
         >
-          {%- if face_image -%}
-            {%- assign image_width_2x = image_max_width | times: 2 -%}
-            {%- assign image_1x_url = face_image | image_url: width: image_max_width -%}
-            {%- assign image_2x_url = face_image | image_url: width: image_width_2x -%}
-            <img
-              src="{{ image_1x_url }}"
-              srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
-              sizes="(max-width: 768px) 100vw, {{ image_max_width }}px"
-              alt="{{ face_alt }}"
-              loading="lazy"
-              class="hex-prism-carousel__image hex-prism-carousel__image--{{ section_id }}"
-            >
-          {%- else -%}
-            <div
-              class="hex-prism-carousel__gradient hex-prism-carousel__gradient--{{ section_id }}"
-              style="background: linear-gradient(135deg, {{ gradient_start }}, {{ gradient_end }});"
-            ></div>
-          {%- endif -%}
+          <div class="hex-prism-carousel__face-inner hex-prism-carousel__face-inner--{{ section_id }}">
+            {%- if face_image -%}
+              {%- assign image_width_2x = image_max_width | times: 2 -%}
+              {%- assign image_1x_url = face_image | image_url: width: image_max_width -%}
+              {%- assign image_2x_url = face_image | image_url: width: image_width_2x -%}
+              <img
+                src="{{ image_1x_url }}"
+                srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
+                sizes="(max-width: 768px) 100vw, {{ image_max_width }}px"
+                alt="{{ face_alt }}"
+                loading="lazy"
+                class="hex-prism-carousel__image hex-prism-carousel__image--{{ section_id }}"
+              >
+            {%- else -%}
+              <div
+                class="hex-prism-carousel__gradient hex-prism-carousel__gradient--{{ section_id }}"
+                style="background: linear-gradient(135deg, {{ gradient_start }}, {{ gradient_end }});"
+              ></div>
+            {%- endif -%}
+          </div>
         </a>
       {%- endfor -%}
     </div>
+    
+    {%- if blocks_count > 1 -%}
+      <button
+        class="hex-prism-carousel__button hex-prism-carousel__button--prev hex-prism-carousel__button--{{ section_id }}"
+        data-prev
+        aria-label="Previous card"
+        type="button"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button
+        class="hex-prism-carousel__button hex-prism-carousel__button--next hex-prism-carousel__button--{{ section_id }}"
+        data-next
+        aria-label="Next card"
+        type="button"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+      
+      <div class="hex-prism-carousel__dots hex-prism-carousel__dots--{{ section_id }}" data-dots>
+        {%- for block in section.blocks -%}
+          <button
+            class="hex-prism-carousel__dot hex-prism-carousel__dot--{{ section_id }}"
+            data-dot
+            data-dot-index="{{ forloop.index0 }}"
+            aria-label="Go to card {{ forloop.index }}"
+            type="button"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -116,6 +140,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
+    touch-action: pan-y pinch-zoom;
   }
 
   .hex-prism-carousel__prism--{{ section_id }} {
@@ -124,6 +149,8 @@
     height: {{ face_height }}px;
     transform-style: preserve-3d;
     will-change: transform;
+    transform: rotateY(var(--rot, 0deg));
+    transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .hex-prism-carousel__face--{{ section_id }} {
@@ -134,15 +161,66 @@
     overflow: hidden;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-    will-change: opacity;
+    transform: rotateY(calc(var(--i) * 60deg)) translateZ(var(--radius));
     display: block;
     text-decoration: none;
     outline: none;
+    pointer-events: auto;
   }
 
   .hex-prism-carousel__face--{{ section_id }}:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 4px;
+  }
+
+  .hex-prism-carousel__face-inner--{{ section_id }} {
+    width: 100%;
+    height: 100%;
+    transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), opacity 650ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="active"] {
+    opacity: 1;
+    z-index: 10;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    transform: scale(1);
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="active"]::before {
+    display: none;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side"] {
+    opacity: {{ side_opacity }};
+    z-index: 5;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    transform: scale(0.92);
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] {
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    transform: scale(0.85);
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+    z-index: 1;
   }
 
   .hex-prism-carousel__image--{{ section_id }},
@@ -153,24 +231,94 @@
     display: block;
   }
 
-  .hex-prism-carousel__face--{{ section_id }}::before {
-    content: '';
+  .hex-prism-carousel__button--{{ section_id }} {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, {{ overlay_opacity }});
-    pointer-events: none;
-    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    transition: background 200ms, transform 200ms;
+    backdrop-filter: blur(8px);
+  }
+
+  .hex-prism-carousel__button--{{ section_id }}:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .hex-prism-carousel__button--{{ section_id }}:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .hex-prism-carousel__button--prev--{{ section_id }} {
+    left: 20px;
+  }
+
+  .hex-prism-carousel__button--next--{{ section_id }} {
+    right: 20px;
+  }
+
+  .hex-prism-carousel__dots--{{ section_id }} {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 20;
+  }
+
+  .hex-prism-carousel__dot--{{ section_id }} {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 200ms, transform 200ms;
+  }
+
+  .hex-prism-carousel__dot--{{ section_id }}:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.2);
+  }
+
+  .hex-prism-carousel__dot--{{ section_id }}[aria-current="true"] {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.3);
+  }
+
+  @media (max-width: 768px) {
+    .hex-prism-carousel__button--prev--{{ section_id }} {
+      left: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .hex-prism-carousel__button--next--{{ section_id }} {
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .hex-prism-carousel__dots--{{ section_id }} {
+      bottom: 20px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hex-prism-carousel__prism--{{ section_id }} {
-      animation: none !important;
-    }
-    
-    .hex-prism-carousel__face--{{ section_id }} {
+    .hex-prism-carousel__prism--{{ section_id }},
+    .hex-prism-carousel__face-inner--{{ section_id }} {
       transition: none !important;
     }
   }
@@ -186,156 +334,196 @@
     
     const prism = section.querySelector('[data-prism]');
     const faces = Array.from(section.querySelectorAll('[data-face]'));
+    const prevBtn = section.querySelector('[data-prev]');
+    const nextBtn = section.querySelector('[data-next]');
+    const dots = Array.from(section.querySelectorAll('[data-dot]'));
+    const dotsContainer = section.querySelector('[data-dots]');
+    
     if (!prism || faces.length === 0) return;
     
-    let animationFrameId = null;
-    let currentRotation = 0;
-    let isPaused = false;
-    let lastTimestamp = null;
-    
-    const rotationSpeed = parseFloat(section.dataset.rotationSpeed) || 18;
-    const radius = parseFloat(section.dataset.radius) || 320;
-    const baseOpacity = parseFloat(section.dataset.baseOpacity) || 0.3;
+    let activeIndex = 0;
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let dragOffset = 0;
+    const numFaces = faces.length;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dotHandlers = new Map();
     
-    const numFaces = 6;
-    const angleStepRad = (2 * Math.PI) / numFaces;
-    const faceAnglesRad = [];
-    
-    for (let i = 0; i < numFaces; i++) {
-      faceAnglesRad.push(i * angleStepRad);
+    function wrapIndex(index) {
+      if (index < 0) return numFaces + index;
+      if (index >= numFaces) return index - numFaces;
+      return index;
     }
     
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
+    function getWrappedDiff(faceIndex, activeIndex) {
+      let diff = faceIndex - activeIndex;
+      if (diff > numFaces / 2) diff -= numFaces;
+      if (diff < -numFaces / 2) diff += numFaces;
+      return diff;
     }
     
-    function initFaceTransforms() {
-      faces.forEach((face, index) => {
-        const rotateY = index * 60;
-        face.style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px)`;
-      });
-    }
-    
-    function updateFaceOpacities() {
-      const rotationRad = (currentRotation * Math.PI) / 180;
+    function updateUI() {
+      const rotation = -activeIndex * 60;
+      prism.style.setProperty('--rot', `${rotation}deg`);
       
       faces.forEach((face, index) => {
-        const faceAngle = faceAnglesRad[index];
-        const theta = faceAngle - rotationRad;
-        const cosTheta = Math.cos(theta);
-        const maxCos = Math.max(0, cosTheta);
+        const diff = getWrappedDiff(index, activeIndex);
         
-        const opacity = clamp(baseOpacity + (1 - baseOpacity) * maxCos, baseOpacity, 1);
-        face.style.opacity = opacity;
+        if (diff === 0) {
+          face.setAttribute('data-state', 'active');
+          face.setAttribute('tabindex', '0');
+        } else if (diff === -1 || diff === 1) {
+          face.setAttribute('data-state', 'side');
+          face.setAttribute('tabindex', '-1');
+        } else {
+          face.setAttribute('data-state', 'far');
+          face.setAttribute('tabindex', '-1');
+        }
       });
-    }
-    
-    function animate(timestamp) {
-      if (isPaused || prefersReducedMotion) {
-        animationFrameId = null;
-        lastTimestamp = null;
-        return;
+      
+      dots.forEach((dot, index) => {
+        if (index === activeIndex) {
+          dot.setAttribute('aria-current', 'true');
+        } else {
+          dot.removeAttribute('aria-current');
+        }
+      });
+      
+      if (prevBtn) {
+        prevBtn.disabled = numFaces <= 1;
       }
-      
-      if (lastTimestamp === null) {
-        lastTimestamp = timestamp;
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-      
-      const dt = (timestamp - lastTimestamp) / 1000;
-      lastTimestamp = timestamp;
-      
-      currentRotation += rotationSpeed * dt;
-      if (currentRotation >= 360) {
-        currentRotation -= 360;
-      } else if (currentRotation < 0) {
-        currentRotation += 360;
-      }
-      
-      prism.style.transform = `rotateY(${currentRotation}deg)`;
-      updateFaceOpacities();
-      
-      animationFrameId = requestAnimationFrame(animate);
-    }
-    
-    function startAnimation() {
-      if (animationFrameId === null && !prefersReducedMotion) {
-        lastTimestamp = null;
-        animationFrameId = requestAnimationFrame(animate);
+      if (nextBtn) {
+        nextBtn.disabled = numFaces <= 1;
       }
     }
     
-    function stopAnimation() {
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-        lastTimestamp = null;
+    function setActive(index, animate = true) {
+      if (numFaces <= 1) return;
+      
+      activeIndex = wrapIndex(index);
+      
+      if (!animate || prefersReducedMotion) {
+        prism.style.transition = 'none';
+        updateUI();
+        requestAnimationFrame(() => {
+          prism.style.transition = '';
+        });
+      } else {
+        updateUI();
       }
     }
     
-    function handlePause() {
-      isPaused = true;
-      stopAnimation();
+    function goNext() {
+      setActive(activeIndex + 1);
     }
     
-    function handleResume() {
-      isPaused = false;
-      startAnimation();
+    function goPrev() {
+      setActive(activeIndex - 1);
     }
     
-    function stepRotation(direction) {
-      const step = direction === 'left' ? -60 : 60;
-      currentRotation += step;
-      if (currentRotation >= 360) {
-        currentRotation -= 360;
-      } else if (currentRotation < 0) {
-        currentRotation += 360;
+    function handlePointerDown(e) {
+      if (numFaces <= 1) return;
+      if (e.target.closest('[data-prev], [data-next], [data-dot]')) return;
+      
+      isDragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      currentX = startX;
+      dragOffset = 0;
+      section.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+    
+    function handlePointerMove(e) {
+      if (!isDragging) return;
+      
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      dragOffset = x - startX;
+      currentX = x;
+    }
+    
+    function handlePointerUp(e) {
+      if (!isDragging) return;
+      
+      isDragging = false;
+      section.style.cursor = '';
+      
+      const threshold = section.dataset.faceWidth ? parseFloat(section.dataset.faceWidth) * 0.1 : 40;
+      
+      if (Math.abs(dragOffset) > threshold) {
+        if (dragOffset > 0) {
+          goPrev();
+        } else {
+          goNext();
+        }
       }
       
-      prism.style.transform = `rotateY(${currentRotation}deg)`;
-      updateFaceOpacities();
+      dragOffset = 0;
     }
     
     function handleKeydown(e) {
-      if (!section.contains(document.activeElement)) return;
+      if (!section.contains(document.activeElement) && !section.matches(':hover')) return;
       
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        stepRotation('left');
+        goPrev();
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        stepRotation('right');
+        goNext();
       }
     }
     
     function init() {
-      initFaceTransforms();
+      if (faces.length === 0) return;
       
-      if (prefersReducedMotion) {
-        currentRotation = 0;
-        prism.style.transform = 'rotateY(0deg)';
-        updateFaceOpacities();
-        return;
+      faces.forEach((face, index) => {
+        face.style.setProperty('--i', index);
+      });
+      
+      if (prevBtn) {
+        prevBtn.addEventListener('click', goPrev);
       }
       
-      section.addEventListener('mouseenter', handlePause);
-      section.addEventListener('mouseleave', handleResume);
-      section.addEventListener('focusin', handlePause);
-      section.addEventListener('focusout', handleResume);
+      if (nextBtn) {
+        nextBtn.addEventListener('click', goNext);
+      }
+      
+      dots.forEach((dot, index) => {
+        const handler = () => setActive(index);
+        dotHandlers.set(dot, handler);
+        dot.addEventListener('click', handler);
+      });
+      
+      section.addEventListener('pointerdown', handlePointerDown);
+      section.addEventListener('pointermove', handlePointerMove);
+      section.addEventListener('pointerup', handlePointerUp);
+      section.addEventListener('pointercancel', handlePointerUp);
       section.addEventListener('keydown', handleKeydown);
       
-      updateFaceOpacities();
-      startAnimation();
+      updateUI();
     }
     
     function cleanup() {
-      stopAnimation();
-      section.removeEventListener('mouseenter', handlePause);
-      section.removeEventListener('mouseleave', handleResume);
-      section.removeEventListener('focusin', handlePause);
-      section.removeEventListener('focusout', handleResume);
+      if (prevBtn) {
+        prevBtn.removeEventListener('click', goPrev);
+      }
+      
+      if (nextBtn) {
+        nextBtn.removeEventListener('click', goNext);
+      }
+      
+      dots.forEach((dot) => {
+        const handler = dotHandlers.get(dot);
+        if (handler) {
+          dot.removeEventListener('click', handler);
+          dotHandlers.delete(dot);
+        }
+      });
+      
+      section.removeEventListener('pointerdown', handlePointerDown);
+      section.removeEventListener('pointermove', handlePointerMove);
+      section.removeEventListener('pointerup', handlePointerUp);
+      section.removeEventListener('pointercancel', handlePointerUp);
       section.removeEventListener('keydown', handleKeydown);
     }
     
@@ -368,20 +556,6 @@
   "settings": [
     {
       "type": "header",
-      "content": "Rotation Settings"
-    },
-    {
-      "type": "range",
-      "id": "rotation_speed",
-      "label": "Rotation Speed (deg/sec)",
-      "min": 0,
-      "max": 60,
-      "step": 1,
-      "default": 18,
-      "info": "Speed of rotation in degrees per second"
-    },
-    {
-      "type": "header",
       "content": "3D Perspective Settings"
     },
     {
@@ -403,32 +577,34 @@
       "max": 600,
       "step": 10,
       "unit": "px",
-      "default": 320,
-      "info": "Distance of faces from center"
+      "default": 300,
+      "info": "Distance of cards from center"
     },
     {
       "type": "header",
-      "content": "Face Dimensions"
+      "content": "Card Dimensions"
     },
     {
       "type": "range",
       "id": "face_width",
-      "label": "Face Width",
-      "min": 300,
-      "max": 800,
-      "step": 20,
+      "label": "Card Width",
+      "min": 250,
+      "max": 600,
+      "step": 10,
       "unit": "px",
-      "default": 520
+      "default": 360,
+      "info": "Width of each card"
     },
     {
       "type": "range",
       "id": "face_height",
-      "label": "Face Height",
-      "min": 200,
-      "max": 600,
+      "label": "Card Height",
+      "min": 300,
+      "max": 800,
       "step": 20,
       "unit": "px",
-      "default": 320
+      "default": 520,
+      "info": "Height of each card"
     },
     {
       "type": "header",
@@ -446,23 +622,13 @@
     },
     {
       "type": "range",
-      "id": "base_opacity",
-      "label": "Base Opacity",
+      "id": "side_opacity",
+      "label": "Side Card Opacity",
       "min": 1,
       "max": 5,
       "step": 1,
-      "default": 3,
-      "info": "Minimum opacity for faces when angled away (1 = 0.1, 5 = 0.5)"
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "label": "Face Overlay Opacity",
-      "min": 0,
-      "max": 20,
-      "step": 1,
-      "default": 8,
-      "info": "White overlay opacity on faces (0 = none, 20 = 0.2)"
+      "default": 2,
+      "info": "Opacity of side cards (1 = 0.1, 5 = 0.5)"
     },
     {
       "type": "range",
@@ -472,7 +638,7 @@
       "max": 1200,
       "step": 50,
       "unit": "px",
-      "default": 900,
+      "default": 720,
       "info": "Maximum image width for performance optimization"
     },
     {
@@ -485,20 +651,20 @@
   "blocks": [
     {
       "type": "face",
-      "name": "Face",
+      "name": "Card",
       "limit": 6,
       "settings": [
         {
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Recommended: 900x560px or larger"
+          "info": "Recommended: 720x1040px or larger"
         },
         {
           "type": "url",
           "id": "link",
           "label": "Link",
-          "info": "Optional link for this face"
+          "info": "Optional link for this card"
         },
         {
           "type": "header",
@@ -524,15 +690,6 @@
     {
       "name": "Hex Prism Carousel",
       "blocks": [
-        {
-          "type": "face"
-        },
-        {
-          "type": "face"
-        },
-        {
-          "type": "face"
-        },
         {
           "type": "face"
         },
