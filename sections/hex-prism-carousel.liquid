@@ -90,27 +90,6 @@
     </div>
     
     {%- if blocks_count > 1 -%}
-      <button
-        class="hex-prism-carousel__button hex-prism-carousel__button--prev hex-prism-carousel__button--{{ section_id }}"
-        data-prev
-        aria-label="Previous card"
-        type="button"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 18l-6-6 6-6"/>
-        </svg>
-      </button>
-      <button
-        class="hex-prism-carousel__button hex-prism-carousel__button--next hex-prism-carousel__button--{{ section_id }}"
-        data-next
-        aria-label="Next card"
-        type="button"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </button>
-      
       <div class="hex-prism-carousel__dots hex-prism-carousel__dots--{{ section_id }}" data-dots>
         {%- for block in section.blocks -%}
           <button
@@ -286,42 +265,6 @@
     padding: 0;
   }
 
-  .hex-prism-carousel__button--{{ section_id }} {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    transition: background 200ms, transform 200ms;
-    backdrop-filter: blur(8px);
-  }
-
-  .hex-prism-carousel__button--{{ section_id }}:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  .hex-prism-carousel__button--{{ section_id }}:active {
-    transform: translateY(-50%) scale(0.95);
-  }
-
-  .hex-prism-carousel__button--prev--{{ section_id }} {
-    left: 20px;
-  }
-
-  .hex-prism-carousel__button--next--{{ section_id }} {
-    right: 20px;
-  }
-
   .hex-prism-carousel__dots--{{ section_id }} {
     position: absolute;
     bottom: 30px;
@@ -385,10 +328,6 @@
       background: transparent;
     }
 
-    .hex-prism-carousel__button--{{ section_id }} {
-      display: none;
-    }
-
     .hex-prism-carousel__dots--{{ section_id }} {
       bottom: 20px;
     }
@@ -412,8 +351,6 @@
     
     const prism = section.querySelector('[data-prism]');
     const faces = Array.from(section.querySelectorAll('[data-face]'));
-    const prevBtn = section.querySelector('[data-prev]');
-    const nextBtn = section.querySelector('[data-next]');
     const dots = Array.from(section.querySelectorAll('[data-dot]'));
     const dotsContainer = section.querySelector('[data-dots]');
     
@@ -478,13 +415,6 @@
           dot.removeAttribute('aria-current');
         }
       });
-      
-      if (prevBtn) {
-        prevBtn.disabled = numFaces <= 1;
-      }
-      if (nextBtn) {
-        nextBtn.disabled = numFaces <= 1;
-      }
     }
     
     function setActive(index, animate = true) {
@@ -513,7 +443,7 @@
     
     function handlePointerDown(e) {
       if (numFaces <= 1) return;
-      if (e.target.closest('[data-prev], [data-next], [data-dot]')) return;
+      if (e.target.closest('[data-dot]')) return;
       
       isDragging = true;
       startX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -568,7 +498,7 @@
       const faceLink = e.target.closest('[data-face]');
       if (!faceLink) return;
       
-      if (e.target.closest('[data-prev], [data-next], [data-dot]')) return;
+      if (e.target.closest('[data-dot]')) return;
       
       const currentTime = Date.now();
       const timeSinceLastClick = currentTime - lastClickTime;
@@ -624,14 +554,6 @@
         face.style.setProperty('--i', index);
       });
       
-      if (prevBtn) {
-        prevBtn.addEventListener('click', goPrev);
-      }
-      
-      if (nextBtn) {
-        nextBtn.addEventListener('click', goNext);
-      }
-      
       dots.forEach((dot, index) => {
         const handler = () => setActive(index);
         dotHandlers.set(dot, handler);
@@ -649,14 +571,6 @@
     }
     
     function cleanup() {
-      if (prevBtn) {
-        prevBtn.removeEventListener('click', goPrev);
-      }
-      
-      if (nextBtn) {
-        nextBtn.removeEventListener('click', goNext);
-      }
-      
       dots.forEach((dot) => {
         const handler = dotHandlers.get(dot);
         if (handler) {
