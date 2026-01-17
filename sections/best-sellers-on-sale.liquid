@@ -1,0 +1,438 @@
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading | default: 'Best Sellers on Sale'
+  assign button_label = section.settings.button_label | default: 'SHOP NOW'
+  assign button_link = section.settings.button_link | default: '#'
+  assign collection = section.settings.collection
+  assign products_to_show = section.settings.products_to_show | default: 8
+  assign only_sale = section.settings.only_sale | default: true
+  assign badge_text = section.settings.badge_text | default: 'Best Seller'
+  assign badge_tag = section.settings.badge_tag | default: 'Best Seller'
+  assign section_bg = section.settings.section_bg | default: '#ffffff'
+  assign card_bg = section.settings.card_bg | default: '#f3f3f3'
+  assign button_bg = section.settings.button_bg | default: '#b7aca4'
+  assign button_text = section.settings.button_text | default: '#ffffff'
+  assign badge_bg = section.settings.badge_bg | default: '#d8d0c8'
+  assign badge_text_color = section.settings.badge_text_color | default: '#4b4b4b'
+  assign card_height_desktop = section.settings.card_height_desktop | default: 520
+  assign card_height_tablet = section.settings.card_height_tablet | default: 460
+  assign card_height_mobile = section.settings.card_height_mobile | default: 440
+  assign image_max_width = section.settings.image_max_width | default: 900
+
+  assign products_array = blank
+  if collection != blank
+    if only_sale
+      assign products_array = collection.products
+    else
+      assign products_array = collection.products
+    endif
+  endif
+
+  assign products_count = 0
+  if products_array != blank
+    assign products_count = products_array.size
+    if products_count > products_to_show
+      assign products_count = products_to_show
+    endif
+  endif
+-%}
+
+<section
+  class="best-sellers-on-sale best-sellers-on-sale--{{ section_id }}"
+  data-section-id="{{ section_id }}"
+  style="background-color: {{ section_bg }};"
+>
+  <div class="page-width">
+    <div class="best-sellers-on-sale__header">
+      {%- if heading != blank -%}
+        <h2 class="best-sellers-on-sale__heading">{{ heading }}</h2>
+      {%- endif -%}
+      {%- if button_label != blank and button_link != blank -%}
+        <a href="{{ button_link }}" class="best-sellers-on-sale__button">
+          {{ button_label }} →
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if collection != blank and products_count > 0 -%}
+      <div class="best-sellers-on-sale__grid">
+        {%- assign rendered_count = 0 -%}
+        {%- for product in products_array -%}
+          {%- liquid
+            assign should_show = true
+            if only_sale
+              if product.compare_at_price_max <= product.price
+                assign should_show = false
+              endif
+            endif
+
+            if should_show
+              assign rendered_count = rendered_count | plus: 1
+              if rendered_count > products_to_show
+                break
+              endif
+
+              assign show_badge = false
+            if badge_tag == blank
+              assign show_badge = true
+            else
+              assign badge_tag_lower = badge_tag | downcase
+              for tag in product.tags
+                assign tag_lower = tag | downcase
+                if tag_lower == badge_tag_lower
+                  assign show_badge = true
+                  break
+                endif
+              endfor
+            endif
+
+              assign product_image = product.featured_image
+              if product_image == blank
+                assign product_image = product.images.first
+              endif
+            endif
+          -%}
+          {%- if should_show -%}
+            <div class="best-sellers-on-sale__card">
+            {%- if show_badge and badge_text != blank -%}
+              <div class="best-sellers-on-sale__badge" style="background-color: {{ badge_bg }}; color: {{ badge_text_color }};">
+                {{ badge_text }}
+              </div>
+            {%- endif -%}
+            {%- if product_image != blank -%}
+              {%- assign image_width_2x = image_max_width | times: 2 -%}
+              {%- assign image_1x_url = product_image | image_url: width: image_max_width -%}
+              {%- assign image_2x_url = product_image | image_url: width: image_width_2x -%}
+              <a href="{{ product.url }}" class="best-sellers-on-sale__image-link">
+                <img
+                  src="{{ image_1x_url }}"
+                  srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
+                  alt="{{ product_image.alt | default: product.title }}"
+                  loading="lazy"
+                  class="best-sellers-on-sale__image"
+                >
+              </a>
+            {%- else -%}
+              <div class="best-sellers-on-sale__placeholder">
+                {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
+              </div>
+            {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div class="best-sellers-on-sale__empty">
+        <p>{{ 'sections.best_sellers_on_sale.no_products' | t | default: 'No products found.' }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .best-sellers-on-sale--{{ section_id }} {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  .best-sellers-on-sale__header {
+    margin-bottom: 40px;
+  }
+
+  .best-sellers-on-sale__heading {
+    font-family: serif;
+    font-size: 22px;
+    font-weight: normal;
+    line-height: 1.3;
+    margin: 0 0 16px 0;
+    text-align: left;
+  }
+
+  .best-sellers-on-sale__button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: {{ button_bg }};
+    color: {{ button_text }};
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+
+  .best-sellers-on-sale__button:hover {
+    opacity: 0.8;
+  }
+
+  .best-sellers-on-sale__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 50px;
+  }
+
+  .best-sellers-on-sale__card {
+    position: relative;
+    background-color: {{ card_bg }};
+    border-radius: 2px;
+    height: {{ card_height_desktop }}px;
+    padding: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .best-sellers-on-sale__badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    z-index: 2;
+  }
+
+  .best-sellers-on-sale__image-link {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .best-sellers-on-sale__image {
+    max-width: 75%;
+    max-height: 60%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .best-sellers-on-sale__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .best-sellers-on-sale__placeholder-svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .best-sellers-on-sale__empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+
+  @media (min-width: 750px) and (max-width: 989px) {
+    .best-sellers-on-sale__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px;
+    }
+
+    .best-sellers-on-sale__card {
+      height: {{ card_height_tablet }}px;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .best-sellers-on-sale--{{ section_id }} {
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+
+    .best-sellers-on-sale__header {
+      margin-bottom: 24px;
+    }
+
+    .best-sellers-on-sale__heading {
+      font-size: 20px;
+    }
+
+    .best-sellers-on-sale__grid {
+      display: flex;
+      overflow-x: auto;
+      gap: 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .best-sellers-on-sale__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .best-sellers-on-sale__card {
+      flex: 0 0 80vw;
+      max-width: 340px;
+      height: {{ card_height_mobile }}px;
+      scroll-snap-align: center;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Best Sellers on Sale",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Best Sellers on Sale"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Product Settings"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to Show",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "only_sale",
+      "label": "Only Show Sale Products",
+      "default": true,
+      "info": "Only display products with a compare at price higher than the current price"
+    },
+    {
+      "type": "header",
+      "content": "Badge Settings"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Best Seller"
+    },
+    {
+      "type": "text",
+      "id": "badge_tag",
+      "label": "Badge Tag",
+      "default": "Best Seller",
+      "info": "Show badge only if product has this tag (case-insensitive). Leave blank to always show badge."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_bg",
+      "label": "Section Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#f3f3f3"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Button Background",
+      "default": "#b7aca4"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "badge_bg",
+      "label": "Badge Background",
+      "default": "#d8d0c8"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Badge Text Color",
+      "default": "#4b4b4b"
+    },
+    {
+      "type": "header",
+      "content": "Card Dimensions"
+    },
+    {
+      "type": "range",
+      "id": "card_height_desktop",
+      "label": "Card Height (Desktop)",
+      "min": 400,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "card_height_tablet",
+      "label": "Card Height (Tablet)",
+      "min": 350,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 460
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Card Height (Mobile)",
+      "min": 300,
+      "max": 500,
+      "step": 20,
+      "unit": "px",
+      "default": 440
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image Max Width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "default": 900,
+      "info": "Maximum image width for performance optimization"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Sellers on Sale"
+    }
+  ]
+}
+{% endschema %}
+
