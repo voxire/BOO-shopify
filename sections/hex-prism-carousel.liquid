@@ -304,6 +304,8 @@
     .hex-prism-carousel--{{ section_id }} {
       min-height: auto;
       --radius: var(--radius-m);
+      --card-w: min(var(--card-w-m), calc(100vw - 72px));
+      --card-h: var(--card-h-m);
     }
 
     .hex-prism-carousel__scene--{{ section_id }} {
@@ -312,13 +314,15 @@
       perspective: var(--persp-m);
     }
 
-    .hex-prism-carousel--{{ section_id }} {
-      --card-w: min(var(--card-w-m), calc(100vw - 72px));
-      --card-h: var(--card-h-m);
-    }
-
     .hex-prism-carousel__prism--{{ section_id }} {
       --radius: var(--radius-m);
+      width: min(var(--card-w-m), calc(100vw - 72px));
+      height: var(--card-h-m);
+    }
+
+    .hex-prism-carousel__face--{{ section_id }} {
+      width: min(var(--card-w-m), calc(100vw - 72px));
+      height: var(--card-h-m);
     }
 
     .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
