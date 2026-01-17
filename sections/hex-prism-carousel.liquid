@@ -424,6 +424,9 @@
     let startX = 0;
     let currentX = 0;
     let dragOffset = 0;
+    let lastClickTime = 0;
+    let lastClickTarget = null;
+    let clickTimer = null;
     const numFaces = faces.length;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const dotHandlers = new Map();
@@ -534,7 +537,10 @@
     }
     
     function handlePointerUp(e) {
-      if (!isDragging) return;
+      if (!isDragging) {
+        dragOffset = 0;
+        return;
+      }
       
       const threshold = section.dataset.faceWidth ? parseFloat(section.dataset.faceWidth) * 0.1 : 40;
       const wasDrag = Math.abs(dragOffset) > threshold;
@@ -551,9 +557,52 @@
         } else {
           goNext();
         }
+        dragOffset = 0;
+        return;
       }
       
       dragOffset = 0;
+    }
+    
+    function handleClick(e) {
+      const faceLink = e.target.closest('[data-face]');
+      if (!faceLink) return;
+      
+      if (e.target.closest('[data-prev], [data-next], [data-dot]')) return;
+      
+      const currentTime = Date.now();
+      const timeSinceLastClick = currentTime - lastClickTime;
+      const isDoubleClick = timeSinceLastClick < 300 && faceLink === lastClickTarget;
+      
+      if (isDoubleClick) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+        }
+        const href = faceLink.getAttribute('href');
+        if (href && href !== '#') {
+          window.location.href = href;
+        }
+        lastClickTime = 0;
+        lastClickTarget = null;
+      } else {
+        e.preventDefault();
+        e.stopPropagation();
+        lastClickTime = currentTime;
+        lastClickTarget = faceLink;
+        
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+        }
+        
+        clickTimer = setTimeout(() => {
+          lastClickTime = 0;
+          lastClickTarget = null;
+          clickTimer = null;
+        }, 300);
+      }
     }
     
     function handleKeydown(e) {
@@ -593,6 +642,7 @@
       section.addEventListener('pointermove', handlePointerMove);
       section.addEventListener('pointerup', handlePointerUp);
       section.addEventListener('pointercancel', handlePointerUp);
+      section.addEventListener('click', handleClick, true);
       section.addEventListener('keydown', handleKeydown);
       
       updateUI();
@@ -619,7 +669,13 @@
       section.removeEventListener('pointermove', handlePointerMove);
       section.removeEventListener('pointerup', handlePointerUp);
       section.removeEventListener('pointercancel', handlePointerUp);
+      section.removeEventListener('click', handleClick, true);
       section.removeEventListener('keydown', handleKeydown);
+      
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
     }
     
     if (document.readyState === 'loading') {
