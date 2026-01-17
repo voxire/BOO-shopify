@@ -7,6 +7,8 @@
   assign corner_radius = section.settings.corner_radius | default: 14
   assign side_opacity_raw = section.settings.side_opacity | default: 2
   assign side_opacity = side_opacity_raw | divided_by: 10.0
+  assign side2_opacity_raw = section.settings.side2_opacity | default: 2
+  assign side2_opacity = side2_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
   assign image_max_width = section.settings.image_max_width | default: 700
   assign blocks_count = section.blocks.size
@@ -161,11 +163,21 @@
     overflow: hidden;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-    transform: rotateY(calc(var(--i) * 60deg)) translateZ(var(--radius));
+    transform: rotateY(calc(var(--i) * 60deg)) translateZ(calc(var(--radius) + var(--z, 0px)));
     display: block;
     text-decoration: none;
     outline: none;
     pointer-events: auto;
+    opacity: 1;
+  }
+
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }}::after {
+    content: none !important;
+  }
+
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }} > svg,
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }} .icon {
+    display: none !important;
   }
 
   .hex-prism-carousel__face--{{ section_id }}:focus-visible {
@@ -176,51 +188,71 @@
   .hex-prism-carousel__face-inner--{{ section_id }} {
     width: 100%;
     height: 100%;
+    position: relative;
     transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), opacity 650ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] {
-    opacity: 1;
     z-index: 10;
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    opacity: 1;
     transform: scale(1);
   }
 
-  .hex-prism-carousel__face--{{ section_id }}[data-state="active"]::before {
-    display: none;
-  }
-
   .hex-prism-carousel__face--{{ section_id }}[data-state="side"] {
-    opacity: {{ side_opacity }};
-    z-index: 5;
+    z-index: 7;
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    opacity: {{ side_opacity }};
     transform: scale(0.92);
   }
 
-  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] {
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] .hex-prism-carousel__face-inner--{{ section_id }} {
-    transform: scale(0.85);
-  }
-
-  .hex-prism-carousel__face--{{ section_id }}::before {
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }}::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
     pointer-events: none;
     z-index: 1;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] {
+    z-index: 4;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    opacity: {{ side2_opacity }};
+    transform: scale(0.86);
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }}::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.06) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: 1;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-state="far"] .hex-prism-carousel__face-inner--{{ section_id }} {
+    opacity: 0;
+    transform: scale(0.85);
   }
 
   .hex-prism-carousel__image--{{ section_id }},
@@ -369,16 +401,24 @@
       
       faces.forEach((face, index) => {
         const diff = getWrappedDiff(index, activeIndex);
+        const absDiff = Math.abs(diff);
         
         if (diff === 0) {
           face.setAttribute('data-state', 'active');
           face.setAttribute('tabindex', '0');
-        } else if (diff === -1 || diff === 1) {
+          face.style.setProperty('--z', '18px');
+        } else if (absDiff === 1) {
           face.setAttribute('data-state', 'side');
           face.setAttribute('tabindex', '-1');
+          face.style.setProperty('--z', '6px');
+        } else if (absDiff === 2) {
+          face.setAttribute('data-state', 'side2');
+          face.setAttribute('tabindex', '-1');
+          face.style.setProperty('--z', '0px');
         } else {
           face.setAttribute('data-state', 'far');
           face.setAttribute('tabindex', '-1');
+          face.style.setProperty('--z', '-40px');
         }
       });
       
@@ -623,12 +663,22 @@
     {
       "type": "range",
       "id": "side_opacity",
-      "label": "Side Card Opacity",
+      "label": "Side Card Opacity (±1)",
       "min": 1,
       "max": 5,
       "step": 1,
       "default": 2,
-      "info": "Opacity of side cards (1 = 0.1, 5 = 0.5)"
+      "info": "Opacity of first side cards (1 = 0.1, 5 = 0.5)"
+    },
+    {
+      "type": "range",
+      "id": "side2_opacity",
+      "label": "Side Card Opacity (±2)",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 2,
+      "info": "Opacity of second side cards (1 = 0.1, 5 = 0.5)"
     },
     {
       "type": "range",
@@ -705,3 +755,4 @@
   "max_blocks": 6
 }
 {% endschema %}
+
