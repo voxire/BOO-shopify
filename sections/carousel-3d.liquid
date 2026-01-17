@@ -43,6 +43,15 @@
   cursor: pointer;
 }
 
+/* Edge clipping for side panels to create sharp hexagon silhouette */
+.carousel-arc-item-{{ id }}[data-side="left"] {
+  clip-path: polygon(0 0, 60% 0, 60% 100%, 0 100%);
+}
+
+.carousel-arc-item-{{ id }}[data-side="right"] {
+  clip-path: polygon(40% 0, 100% 0, 100% 100%, 40% 100%);
+}
+
 .carousel-arc-item-{{ id }} img {
   width: 100%;
   height: 100%;
@@ -119,8 +128,8 @@
     // Center rectangle faces camera, side rectangles rotated and pushed back
     const cardWidth = 420;
     const horizontalOffset = 180; // Small horizontal offset between cards
-    const rotationAngle = 28; // Rotate around Y-axis (±25–30°)
-    const depthOffset = 200; // Push back along Z-axis
+    const baseRotationAngle = 28; // Base rotation for first sides
+    const depthOffset = 350; // Stronger depth separation (increased from 200)
     
     items.forEach((item, i) => {
       // Calculate position relative to active (center)
@@ -141,6 +150,7 @@
         item.style.opacity = 0;
         item.style.pointerEvents = 'none';
         item.style.zIndex = 0;
+        item.removeAttribute('data-side');
         return;
       }
       
@@ -151,41 +161,76 @@
       let scale = 1;
       let opacity = 1;
       
+      // Remove side attribute for center
+      item.removeAttribute('data-side');
+      
       if (abs === 0) {
         // Center rectangle - faces camera directly, no rotation, no depth
         translateX = 0;
         translateY = 0;
-        translateZ = 0;
+        translateZ = 0; // Clearly forward
         rotateY = 0;
         scale = 1;
-        opacity = 1; // Always fully visible, no opacity
+        opacity = 1; // Fully opaque
       } else {
         // Side rectangles - rotated around Y-axis and pushed back
         // Horizontal offset
         translateX = position * horizontalOffset;
-        translateY = 0; // No vertical offset
-        // Push back along Z-axis
-        translateZ = -abs * depthOffset;
-        // Rotate around Y-axis (±25–30°)
-        rotateY = position * rotationAngle;
+        // Vertical parallax - side cards sit slightly lower
+        translateY = 8; // +6-10px for realism
+        // Stronger depth separation - fall back faster
+        if (abs === 1) {
+          translateZ = -depthOffset; // First sides: -350px
+        } else if (abs === 2) {
+          translateZ = -depthOffset * 1.8; // Outer sides: -630px
+        } else {
+          translateZ = -depthOffset * 2.5; // Far sides: -875px
+        }
+        
+        // Stronger rotation on outer cards for edge clipping effect
+        if (abs === 1) {
+          rotateY = position * baseRotationAngle; // ±28°
+        } else if (abs === 2) {
+          rotateY = position * (baseRotationAngle + 8); // ±36° for sharper edges
+        } else {
+          rotateY = position * (baseRotationAngle + 12); // ±40° for outer cards
+        }
+        
         scale = 0.8;
-        opacity = 0.6; // Semi-transparent
+        
+        // Non-linear opacity curve
+        if (abs === 1) {
+          opacity = 0.75; // First sides: 70-80%
+        } else if (abs === 2) {
+          opacity = 0.35; // Outer sides: 30-40%
+        } else {
+          opacity = 0.2; // Far sides: very transparent
+        }
+        
+        // Set side attribute for CSS clipping
+        if (position < 0) {
+          item.setAttribute('data-side', 'left');
+        } else {
+          item.setAttribute('data-side', 'right');
+        }
       }
       
       // Hover effect - make hovered card fully visible
       if (i === hoveredIndex && abs !== 0) {
         opacity = 1;
         scale = 0.9;
-        translateZ = -abs * 120; // Bring forward slightly
+        translateZ = -abs * 200; // Bring forward
+        item.removeAttribute('data-side'); // Remove clipping on hover
       }
       
       item.style.opacity = opacity;
       item.style.pointerEvents = 'auto';
       item.style.zIndex = abs === 0 ? 10 : (10 - abs);
       
-      // Transform order: translateX, translateZ, rotateY (creates hexagon illusion)
+      // Transform order: translateX, translateY, translateZ, rotateY (creates hexagon illusion)
       item.style.transform = `
         translateX(${translateX}px)
+        translateY(${translateY}px)
         translateZ(${translateZ}px)
         rotateY(${rotateY}deg)
         scale(${scale})
