@@ -337,42 +337,83 @@
       "disabled": true,
       "settings": {}
     },
-    "carousel_3d_UnQPG8": {
-      "type": "carousel-3d",
+    "hex_prism_carousel_WBiKbP": {
+      "type": "hex-prism-carousel",
       "blocks": {
-        "slide_Ng9Fz6": {
-          "type": "slide",
+        "face_W9JEMc": {
+          "type": "face",
           "settings": {
-            "image": "shopify://shop_images/Screenshot_2025-12-26_at_8.27.17_PM_copy_f934f229-b117-4f75-a1da-48ce205ba3f6.png"
+            "image": "shopify://shop_images/FoxBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
           }
         },
-        "slide_fryDDb": {
-          "type": "slide",
+        "face_iJTAd7": {
+          "type": "face",
           "settings": {
-            "image": "shopify://shop_images/FoxBoo_Bg_Dark_pink.png"
+            "image": "shopify://shop_images/GriBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
           }
         },
-        "slide_93yw8W": {
-          "type": "slide",
+        "face_E3wKmb": {
+          "type": "face",
           "settings": {
-            "image": "shopify://shop_images/Shaboo_Bg_Blue.png"
+            "image": "shopify://shop_images/BunBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
           }
         },
-        "slide_MqVV6p": {
-          "type": "slide",
+        "face_r6ihhE": {
+          "type": "face",
           "settings": {
-            "image": "shopify://shop_images/GriBoo_Bg_Purple.png"
+            "image": "shopify://shop_images/Shaboo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_FCNhBE": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/DinoBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_3HAW8z": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/OIP.webp",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
           }
         }
       },
       "block_order": [
-        "slide_Ng9Fz6",
-        "slide_fryDDb",
-        "slide_93yw8W",
-        "slide_MqVV6p"
+        "face_W9JEMc",
+        "face_iJTAd7",
+        "face_E3wKmb",
+        "face_r6ihhE",
+        "face_FCNhBE",
+        "face_3HAW8z"
       ],
-      "name": "3D Carousel",
-      "settings": {}
+      "name": "Hex Prism Carousel",
+      "settings": {
+        "rotation_speed": 18,
+        "perspective": 1400,
+        "radius": 320,
+        "face_width": 520,
+        "face_height": 320,
+        "corner_radius": 14,
+        "base_opacity": 3,
+        "background_color": "#111111"
+      }
     }
   },
   "order": [
@@ -386,6 +427,6 @@
     "1767115431d2365970",
     "1767115924e3e1520e",
     "1767117382e575a2c4",
-    "carousel_3d_UnQPG8"
+    "hex_prism_carousel_WBiKbP"
   ]
 }
