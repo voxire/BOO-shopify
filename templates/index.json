@@ -16,7 +16,7 @@
           "type": "face",
           "settings": {
             "image": "shopify://shop_images/DinoBoo.png",
-            "link": "",
+            "link": "shopify://products/green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -25,7 +25,7 @@
           "type": "face",
           "settings": {
             "image": "shopify://shop_images/Shaboo.png",
-            "link": "",
+            "link": "shopify://products/dark-blue-shark-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -34,7 +34,7 @@
           "type": "face",
           "settings": {
             "image": "shopify://shop_images/FoxBoo.png",
-            "link": "",
+            "link": "shopify://products/dark-pink-fox-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -43,7 +43,7 @@
           "type": "face",
           "settings": {
             "image": "shopify://shop_images/GriBoo.png",
-            "link": "",
+            "link": "shopify://products/grey-dragon-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -52,7 +52,7 @@
           "type": "face",
           "settings": {
             "image": "shopify://shop_images/BunBoo.png",
-            "link": "",
+            "link": "shopify://products/light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -73,8 +73,8 @@
         "radius_mobile": 180,
         "face_width": 320,
         "face_height": 520,
-        "face_width_mobile": 280,
-        "face_height_mobile": 320,
+        "face_width_mobile": 250,
+        "face_height_mobile": 400,
         "corner_radius": 14,
         "side_opacity": 2,
         "side2_opacity": 2,
