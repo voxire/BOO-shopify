@@ -8,7 +8,7 @@
   assign side_opacity_raw = section.settings.side_opacity | default: 2
   assign side_opacity = side_opacity_raw | divided_by: 10.0
   assign background_color = section.settings.background_color | default: '#111111'
-  assign image_max_width = section.settings.image_max_width | default: 720
+  assign image_max_width = section.settings.image_max_width | default: 700
   assign blocks_count = section.blocks.size
 -%}
 
@@ -638,7 +638,7 @@
       "max": 1200,
       "step": 50,
       "unit": "px",
-      "default": 720,
+      "default": 700,
       "info": "Maximum image width for performance optimization"
     },
     {
@@ -658,7 +658,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Recommended: 720x1040px or larger"
+          "info": "Recommended: 700x1000px or larger"
         },
         {
           "type": "url",
