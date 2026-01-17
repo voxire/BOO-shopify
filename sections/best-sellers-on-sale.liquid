@@ -14,6 +14,12 @@
   assign button_text = section.settings.button_text | default: '#ffffff'
   assign badge_bg = section.settings.badge_bg | default: '#d8d0c8'
   assign badge_text_color = section.settings.badge_text_color | default: '#4b4b4b'
+  assign top_cta_1_label = section.settings.top_cta_1_label | default: 'SHOP BEST SELLERS'
+  assign top_cta_1_link = section.settings.top_cta_1_link
+  assign top_cta_2_label = section.settings.top_cta_2_label | default: 'SHOP ALL AW25'
+  assign top_cta_2_link = section.settings.top_cta_2_link
+  assign top_cta_bg = section.settings.top_cta_bg | default: button_bg
+  assign top_cta_text = section.settings.top_cta_text | default: button_text
   assign card_height_desktop = section.settings.card_height_desktop | default: 520
   assign card_height_tablet = section.settings.card_height_tablet | default: 460
   assign card_height_mobile = section.settings.card_height_mobile | default: 440
@@ -43,6 +49,15 @@
   style="background-color: {{ section_bg }};"
 >
   <div class="page-width">
+    <div class="best-sellers-on-sale__top-ctas" role="navigation" aria-label="Sale navigation">
+      {%- if top_cta_1_link != blank -%}
+        <a class="best-sellers-on-sale__top-cta" href="{{ top_cta_1_link }}">{{ top_cta_1_label }}</a>
+      {%- endif -%}
+      {%- if top_cta_2_link != blank -%}
+        <a class="best-sellers-on-sale__top-cta" href="{{ top_cta_2_link }}">{{ top_cta_2_label }}</a>
+      {%- endif -%}
+    </div>
+
     <div class="best-sellers-on-sale__header">
       {%- if heading != blank -%}
         <h2 class="best-sellers-on-sale__heading">{{ heading }}</h2>
@@ -165,10 +180,48 @@
     opacity: 0.8;
   }
 
+  .best-sellers-on-sale__top-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 6px 0 22px;
+    flex-wrap: wrap;
+  }
+
+  .best-sellers-on-sale__top-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    background: {{ top_cta_bg }};
+    color: {{ top_cta_text }};
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    border-radius: 0;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  .best-sellers-on-sale__top-cta:hover {
+    opacity: 0.8;
+  }
+
   .best-sellers-on-sale__grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    overflow-x: auto;
     gap: 50px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 2px 14px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .best-sellers-on-sale__grid::-webkit-scrollbar {
+    display: none;
   }
 
   .best-sellers-on-sale__card {
@@ -180,6 +233,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 calc((100% - 150px) / 4);
+    min-width: 260px;
+    max-width: 520px;
+    scroll-snap-align: start;
   }
 
   .best-sellers-on-sale__badge {
@@ -231,12 +288,12 @@
 
   @media (min-width: 750px) and (max-width: 989px) {
     .best-sellers-on-sale__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 40px;
+      gap: 24px;
     }
 
     .best-sellers-on-sale__card {
       height: {{ card_height_tablet }}px;
+      flex: 0 0 calc((100% - 24px) / 2);
     }
   }
 
@@ -255,17 +312,7 @@
     }
 
     .best-sellers-on-sale__grid {
-      display: flex;
-      overflow-x: auto;
       gap: 16px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .best-sellers-on-sale__grid::-webkit-scrollbar {
-      display: none;
     }
 
     .best-sellers-on-sale__card {
@@ -299,6 +346,44 @@
       "type": "url",
       "id": "button_link",
       "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Top CTA Buttons"
+    },
+    {
+      "type": "text",
+      "id": "top_cta_1_label",
+      "label": "Top CTA 1 Label",
+      "default": "SHOP BEST SELLERS"
+    },
+    {
+      "type": "url",
+      "id": "top_cta_1_link",
+      "label": "Top CTA 1 Link"
+    },
+    {
+      "type": "text",
+      "id": "top_cta_2_label",
+      "label": "Top CTA 2 Label",
+      "default": "SHOP ALL AW25"
+    },
+    {
+      "type": "url",
+      "id": "top_cta_2_link",
+      "label": "Top CTA 2 Link"
+    },
+    {
+      "type": "color",
+      "id": "top_cta_bg",
+      "label": "Top CTA Background",
+      "default": "#b7aca4"
+    },
+    {
+      "type": "color",
+      "id": "top_cta_text",
+      "label": "Top CTA Text",
+      "default": "#ffffff"
     },
     {
       "type": "header",
