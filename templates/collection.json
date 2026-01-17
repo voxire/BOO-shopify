@@ -41,10 +41,12 @@
     },
     "1766198384ec95d504": {
       "type": "_blocks",
+      "disabled": true,
       "settings": {}
     },
     "17661987485ac72ce4": {
       "type": "_blocks",
+      "disabled": true,
       "settings": {}
     },
     "shop_color_grid_HyVwhd": {
@@ -98,6 +100,7 @@
         "tile_M34eBP",
         "tile_4jkKf7"
       ],
+      "disabled": true,
       "custom_css": [],
       "name": "Shop color grid (full screen)",
       "settings": {
@@ -171,6 +174,7 @@
         "tile_ViQ7GJ",
         "tile_3dYtDP"
       ],
+      "disabled": true,
       "custom_css": [],
       "name": "Shop color grid (full screen)",
       "settings": {
@@ -227,6 +231,7 @@
       "block_order": [
         "ai_gen_block_da32be5_RpgUkX"
       ],
+      "disabled": true,
       "settings": {}
     },
     "1767115431d2365970": {
@@ -255,6 +260,7 @@
       "block_order": [
         "ai_gen_block_690f344_BUJGTT"
       ],
+      "disabled": true,
       "settings": {}
     },
     "1767115924e3e1520e": {
@@ -323,11 +329,61 @@
         "ai_gen_block_3d9aa66_RUi9hf",
         "ai_gen_block_3d9aa66_ptKNrn"
       ],
+      "disabled": true,
       "settings": {}
     },
     "1767117382e575a2c4": {
       "type": "_blocks",
+      "disabled": true,
       "settings": {}
+    },
+    "carousel_3d_UnQPG8": {
+      "type": "carousel-3d",
+      "blocks": {
+        "slide_Ng9Fz6": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FoxBoo.png",
+            "overlay_color": "",
+            "overlay_gradient": ""
+          }
+        },
+        "slide_fryDDb": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/blue.png",
+            "overlay_color": "",
+            "overlay_gradient": ""
+          }
+        },
+        "slide_93yw8W": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/GriBoo.png",
+            "overlay_color": "",
+            "overlay_gradient": ""
+          }
+        },
+        "slide_MqVV6p": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/BunBoo.png",
+            "overlay_color": "",
+            "overlay_gradient": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_Ng9Fz6",
+        "slide_fryDDb",
+        "slide_93yw8W",
+        "slide_MqVV6p"
+      ],
+      "name": "3D Carousel",
+      "settings": {
+        "autoplay_enabled": true,
+        "autoplay_speed": 3500
+      }
     }
   },
   "order": [
@@ -340,6 +396,7 @@
     "1767114833c9c201eb",
     "1767115431d2365970",
     "1767115924e3e1520e",
-    "1767117382e575a2c4"
+    "1767117382e575a2c4",
+    "carousel_3d_UnQPG8"
   ]
 }
