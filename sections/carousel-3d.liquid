@@ -43,59 +43,48 @@
   cursor: pointer;
 }
 
-/* Center panel - sharp edge contrast */
+/* Center panel - sharp, fully opaque, blocks side panels */
 .carousel-arc-item-{{ id }}[data-center="true"] {
-  filter: contrast(1.15) brightness(1.05);
+  filter: contrast(1.2) brightness(1.08);
+  z-index: 20 !important; /* Highest z-index to block side panels */
+  opacity: 1 !important; /* Fully opaque for true occlusion */
   box-shadow: 
-    inset -1px 0 0 rgba(255, 255, 255, 0.15),
-    inset 1px 0 0 rgba(255, 255, 255, 0.15),
-    0 0 20px rgba(0, 0, 0, 0.3);
+    0 0 30px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-/* Side panels - faster edge falloff */
+/* Side panels - true occlusion, clipped by center panel */
 .carousel-arc-item-{{ id }}[data-side="left"] {
-  clip-path: polygon(0 0, 60% 0, 60% 100%, 0 100%);
-  filter: contrast(0.85) brightness(0.7);
+  /* Clip to show only outer portion - inner edge hidden by center */
+  clip-path: polygon(0 0, 45% 0, 45% 100%, 0 100%);
+  filter: contrast(0.8) brightness(0.65);
+  z-index: 5; /* Behind center panel */
+  /* Dark shadow on inner edge (occlusion boundary, not highlight) */
   box-shadow: 
-    inset -2px 0 8px rgba(0, 0, 0, 0.4),
-    inset 0 0 20px rgba(0, 0, 0, 0.2);
+    inset -1px 0 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .carousel-arc-item-{{ id }}[data-side="right"] {
-  clip-path: polygon(40% 0, 100% 0, 100% 100%, 40% 100%);
-  filter: contrast(0.85) brightness(0.7);
+  /* Clip to show only outer portion - inner edge hidden by center */
+  clip-path: polygon(55% 0, 100% 0, 100% 100%, 55% 100%);
+  filter: contrast(0.8) brightness(0.65);
+  z-index: 5; /* Behind center panel */
+  /* Dark shadow on inner edge (occlusion boundary, not highlight) */
   box-shadow: 
-    inset 2px 0 8px rgba(0, 0, 0, 0.4),
-    inset 0 0 20px rgba(0, 0, 0, 0.2);
+    inset 1px 0 0 rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Inner-edge emphasis - highlight where panels overlap */
-.carousel-arc-item-{{ id }}[data-side="left"]::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(to right, 
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.05) 100%);
-  pointer-events: none;
-  z-index: 1;
+/* Outer panels - further back, more clipped */
+.carousel-arc-item-{{ id }}[data-side="left"][data-depth="2"] {
+  clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%);
+  z-index: 3;
 }
 
-.carousel-arc-item-{{ id }}[data-side="right"]::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(to left, 
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.05) 100%);
-  pointer-events: none;
-  z-index: 1;
+.carousel-arc-item-{{ id }}[data-side="right"][data-depth="2"] {
+  clip-path: polygon(65% 0, 100% 0, 100% 100%, 65% 100%);
+  z-index: 3;
 }
 
 .carousel-arc-item-{{ id }} img {
@@ -222,46 +211,56 @@
         item.setAttribute('data-center', 'true');
       } else {
         // Side rectangles - rotated around Y-axis and pushed back
-        // Horizontal offset
-        translateX = position * horizontalOffset;
-        // Vertical parallax - side cards sit slightly lower
-        translateY = 8; // +6-10px for realism
+        // Non-linear horizontal spacing for motion parallax
+        let spacingMultiplier = 1;
+        if (abs === 1) {
+          spacingMultiplier = 1; // First sides: normal spacing
+        } else if (abs === 2) {
+          spacingMultiplier = 1.15; // Outer sides: slightly more spaced
+        } else {
+          spacingMultiplier = 1.3; // Far sides: more spaced
+        }
+        translateX = position * horizontalOffset * spacingMultiplier;
         
-        // Depth compression: strong jump center→first, weaker first→second
+        // Vertical parallax - side cards sit slightly lower
+        translateY = 8 + (abs * 2); // Progressive vertical offset
+        
+        // Depth compression with visual advancement: strong jump center→first, weaker first→second
         if (abs === 1) {
           translateZ = -depthOffset; // First sides: -350px (strong jump)
         } else if (abs === 2) {
-          translateZ = -depthOffset * 1.4; // Outer sides: -490px (weaker jump, was 1.8)
+          translateZ = -depthOffset * 1.35; // Outer sides: -472px (weaker jump)
         } else {
-          translateZ = -depthOffset * 1.9; // Far sides: -665px (was 2.5)
+          translateZ = -depthOffset * 1.75; // Far sides: -612px (compressed)
         }
         
         // Stronger rotation on outer cards for edge clipping effect
         if (abs === 1) {
           rotateY = position * baseRotationAngle; // ±28°
         } else if (abs === 2) {
-          rotateY = position * (baseRotationAngle + 8); // ±36° for sharper edges
+          rotateY = position * (baseRotationAngle + 10); // ±38° for sharper edges
         } else {
-          rotateY = position * (baseRotationAngle + 12); // ±40° for outer cards
+          rotateY = position * (baseRotationAngle + 15); // ±43° for outer cards
         }
         
         scale = 0.8;
         
-        // Non-linear opacity curve with faster falloff
+        // Non-linear opacity - but higher for true occlusion (not just visual)
         if (abs === 1) {
-          opacity = 0.75; // First sides: 70-80%
+          opacity = 0.85; // First sides: more opaque for solid feel
         } else if (abs === 2) {
-          opacity = 0.35; // Outer sides: 30-40%
+          opacity = 0.5; // Outer sides: medium opacity
         } else {
-          opacity = 0.15; // Far sides: very transparent (faster falloff)
+          opacity = 0.25; // Far sides: low opacity
         }
         
-        // Set side attribute for CSS clipping and lighting
+        // Set side and depth attributes for CSS occlusion
         if (position < 0) {
           item.setAttribute('data-side', 'left');
         } else {
           item.setAttribute('data-side', 'right');
         }
+        item.setAttribute('data-depth', abs.toString());
       }
       
       // Hover effect - make hovered card fully visible
@@ -275,7 +274,16 @@
       
       item.style.opacity = opacity;
       item.style.pointerEvents = 'auto';
-      item.style.zIndex = abs === 0 ? 10 : (10 - abs);
+      // Z-index for true occlusion: center highest, sides behind
+      if (abs === 0) {
+        item.style.zIndex = 20; // Center panel blocks everything
+      } else if (abs === 1) {
+        item.style.zIndex = 5; // First sides behind center
+      } else if (abs === 2) {
+        item.style.zIndex = 3; // Outer sides further back
+      } else {
+        item.style.zIndex = 1; // Far sides furthest back
+      }
       
       // Transform order: translateX, translateY, translateZ, rotateY (creates hexagon illusion)
       item.style.transform = `
