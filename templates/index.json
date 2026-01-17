@@ -9,6 +9,79 @@
  */
 {
   "sections": {
+    "hex_prism_carousel_WDEgJy": {
+      "type": "hex-prism-carousel",
+      "blocks": {
+        "face_JxVWWQ": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/DinoBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_jLktq7": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/Shaboo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_q8Wjqd": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/FoxBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_M7Hj6q": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/GriBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        },
+        "face_QYqcdH": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/BunBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
+        }
+      },
+      "block_order": [
+        "face_JxVWWQ",
+        "face_jLktq7",
+        "face_q8Wjqd",
+        "face_M7Hj6q",
+        "face_QYqcdH"
+      ],
+      "name": "Hex Prism Carousel",
+      "settings": {
+        "perspective": 1400,
+        "radius": 300,
+        "perspective_mobile": 1000,
+        "radius_mobile": 220,
+        "face_width": 320,
+        "face_height": 520,
+        "face_width_mobile": 280,
+        "face_height_mobile": 420,
+        "corner_radius": 14,
+        "side_opacity": 2,
+        "side2_opacity": 2,
+        "image_max_width": 700,
+        "background_color": "#ffffff"
+      }
+    },
     "hers_labs_hero_e6yQVT": {
       "type": "hers-labs-hero",
       "blocks": {
@@ -84,6 +157,7 @@
     },
     "section_editorial_story_mtfY8i": {
       "type": "section-editorial-story",
+      "disabled": true,
       "name": "Editorial Brand Story",
       "settings": {
         "heading": "Made for little moments",
@@ -123,6 +197,7 @@
         "collection_QHYmPf",
         "collection_3AHJB8"
       ],
+      "disabled": true,
       "name": "Featured Collections Grid",
       "settings": {
         "heading": "",
@@ -223,26 +298,6 @@
         "autoplay_speed": 5000
       }
     },
-    "section_window_shopping_card_gxrnLz": {
-      "type": "section-window-shopping-card",
-      "name": "Window Shopping Card",
-      "settings": {
-        "free_shipping_amount": 0,
-        "text_content": "Free shipping over [amount]",
-        "background_image": "shopify://shop_images/GriBoo_Bg_Purple.png",
-        "fallback_color": "#f5f5f5",
-        "text_color": "#000000",
-        "accent_color": "#000000",
-        "glass_enabled": true,
-        "glass_blur": 20,
-        "glass_bg_opacity": 40,
-        "glass_border_opacity": 30,
-        "content_bg_color": "#ffffff",
-        "content_bg_opacity": 90,
-        "padding_top": 60,
-        "padding_bottom": 60
-      }
-    },
     "section_clickable_lookbook_hFFwEK": {
       "type": "section-clickable-lookbook",
       "blocks": {
@@ -289,6 +344,7 @@
         "lookbook_image_eyD3KA",
         "lookbook_image_H7Rtfq"
       ],
+      "disabled": true,
       "name": "Clickable Lookbook",
       "settings": {
         "background_color": "#ffffff",
@@ -338,6 +394,7 @@
         "badge_paQD6M",
         "badge_yyagk4"
       ],
+      "disabled": true,
       "name": "Trust Badges",
       "settings": {
         "heading": "",
@@ -352,6 +409,7 @@
     },
     "section_newsletter_signup_TjQNBp": {
       "type": "section-newsletter-signup",
+      "disabled": true,
       "name": "Newsletter Signup",
       "settings": {
         "heading": "Join Our Community",
@@ -934,11 +992,11 @@
     }
   },
   "order": [
+    "hex_prism_carousel_WDEgJy",
     "hers_labs_hero_e6yQVT",
     "section_editorial_story_mtfY8i",
     "section_featured_collections_c34kVp",
     "3d_card_carousel_x3rUgj",
-    "section_window_shopping_card_gxrnLz",
     "section_clickable_lookbook_hFFwEK",
     "section_trust_badges_qNFxCp",
     "section_newsletter_signup_TjQNBp",
