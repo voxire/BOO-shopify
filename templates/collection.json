@@ -408,7 +408,7 @@
         "perspective": 1600,
         "radius": 300,
         "perspective_mobile": 1000,
-        "radius_mobile": 220,
+        "radius_mobile": 180,
         "face_width": 320,
         "face_height": 320,
         "face_width_mobile": 280,
