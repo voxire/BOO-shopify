@@ -761,22 +761,34 @@
   </div>
 
   {%- comment -%} Build product color mapping from blocks {%- endcomment -%}
-  {%- assign product_color_blocks = section.blocks | where: 'type', 'product_color' -%}
   <script>
-    (function() {
+    (function () {
       window.productHeaderColors = window.productHeaderColors || {};
-      {%- if product_color_blocks.size > 0 -%}
-        {%- for block in product_color_blocks -%}
-          {%- if block.settings.product != blank and block.settings.color != blank -%}
-            {%- assign product_obj = block.settings.product -%}
-            {%- if product_obj and product_obj.handle != blank -%}
-              window.productHeaderColors['{{ product_obj.handle }}'] = '{{ block.settings.color }}';
-              console.log('[Header] Product header color mapped:', '{{ product_obj.handle }}', '->', '{{ block.settings.color }}');
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endif -%}
-      console.log('[Header] Product header colors mapping:', window.productHeaderColors);
+      {% assign product_color_blocks = section.blocks | where: 'type', 'product_color' %}
+
+      {% for block in product_color_blocks %}
+        {% assign product_handle = blank %}
+
+        {%- comment -%}
+        block.settings.product might be:
+        - a product object (has .handle)
+        - OR a handle string
+        {%- endcomment -%}
+        {% if block.settings.product != blank %}
+          {% if block.settings.product.handle != blank %}
+            {% assign product_handle = block.settings.product.handle %}
+          {% else %}
+            {% assign product_handle = block.settings.product %}
+          {% endif %}
+        {% endif %}
+
+        {% if product_handle != blank and block.settings.color != blank %}
+          window.productHeaderColors[{{ product_handle | json }}] = {{ block.settings.color | json }};
+          console.log('[Hero Header] product color map:', {{ product_handle | json }}, '->', {{ block.settings.color | json }});
+        {% endif %}
+      {% endfor %}
+
+      console.log('[Hero Header] productHeaderColors =', window.productHeaderColors);
     })();
   </script>
 
@@ -884,6 +896,8 @@
 <script>
   (function() {
     const sectionId = '{{ section_id }}';
+    const sectionEl = document.querySelector('.hero-header-' + sectionId);
+    if (!sectionEl) return;
     
     function initMobileMenu() {
       // Try multiple selector strategies
@@ -970,8 +984,8 @@
 
     {%- if is_home_page -%}
     // Slideshow functionality (only on home page)
-    const slides = section.querySelectorAll('[class*="__slide"]');
-    const indicators = section.querySelectorAll('[class*="__indicator"]');
+    const slides = sectionEl.querySelectorAll('[class*="__slide"]');
+    const indicators = sectionEl.querySelectorAll('[class*="__indicator"]');
 
     if (slides.length <= 1) return;
 
@@ -1037,7 +1051,7 @@
     }
 
     // Pause on hover
-    const slideshow = section.querySelector('.hero-header-{{ section_id }}__slideshow');
+    const slideshow = sectionEl.querySelector('.hero-header-{{ section_id }}__slideshow');
     if (slideshow) {
       slideshow.addEventListener('mouseenter', stopAutoplay);
       slideshow.addEventListener('mouseleave', startAutoplay);
@@ -1051,103 +1065,56 @@
       // Function to apply color to the whole page (body and header)
       function applyHeroHeaderColor(color) {
         if (!color) return;
-        
-        // Apply to body for the whole page
-        document.body.style.setProperty('background', color, 'important');
-        document.body.style.setProperty('background-color', color, 'important');
-        
-        // Also apply to html element to ensure full coverage
-        document.documentElement.style.setProperty('background', color, 'important');
-        document.documentElement.style.setProperty('background-color', color, 'important');
-        
-        // Apply to main content wrapper if it exists
-        const mainContent = document.querySelector('main, .main-content, #MainContent, [role="main"]');
-        if (mainContent) {
-          mainContent.style.setProperty('background', color, 'important');
-          mainContent.style.setProperty('background-color', color, 'important');
+
+        // Apply to this header section
+        sectionEl.style.setProperty('background-color', color, 'important');
+        sectionEl.style.setProperty('background', color, 'important');
+
+        const headerElement = sectionEl.querySelector('.hero-header-' + sectionId + '__header');
+        if (headerElement) {
+          headerElement.style.setProperty('background-color', color, 'important');
+          headerElement.style.setProperty('background', color, 'important');
         }
-        
-        // Also update the hero header section
-        const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
-        heroHeaders.forEach(heroHeader => {
-          // Skip if it's the home page slideshow header
-          if (heroHeader.querySelector('[class*="__slideshow"]')) {
-            return;
-          }
-          
-          // Update background color on the header container itself
-          heroHeader.style.setProperty('background', color, 'important');
-          heroHeader.style.setProperty('background-color', color, 'important');
-          
-          // Also update the header element inside if it exists
-          const headerElement = heroHeader.querySelector('[class*="__header"]');
-          if (headerElement) {
-            headerElement.style.setProperty('background', color, 'important');
-            headerElement.style.setProperty('background-color', color, 'important');
-          }
-          
-          // Also update the header container element
-          const headerContainer = heroHeader.querySelector('[class*="__header-container"]');
-          if (headerContainer) {
-            headerContainer.style.setProperty('background', color, 'important');
-            headerContainer.style.setProperty('background-color', color, 'important');
-          }
-        });
+
+        const headerContainer = sectionEl.querySelector('.hero-header-' + sectionId + '__header-container');
+        if (headerContainer) {
+          headerContainer.style.setProperty('background-color', color, 'important');
+          headerContainer.style.setProperty('background', color, 'important');
+        }
+
+        // OPTIONAL: also color the page background (removes white strip above)
+        document.documentElement.style.setProperty('background-color', color, 'important');
+        document.body.style.setProperty('background-color', color, 'important');
       }
       
       function updateHeroHeaderBackground() {
         // Only apply on product pages (not home page)
-        {%- if template.name == 'product' and product -%}
-          const productHandle = '{{ product.handle }}';
-          console.log('Checking header color for product:', productHandle);
-          console.log('Available product header colors:', window.productHeaderColors);
-          
-          let bgColor = null;
-          
-          // Method 1: Check product-color mapping from header section (highest priority)
-          if (window.productHeaderColors && typeof window.productHeaderColors === 'object') {
-            const mappedColor = window.productHeaderColors[productHandle];
-            if (mappedColor) {
-              bgColor = mappedColor;
-              console.log('✓ Using product-color mapping for header:', bgColor, 'for product:', productHandle);
-              applyHeroHeaderColor(bgColor);
-              return;
-            } else {
-              console.log('✗ No product-color mapping found for:', productHandle);
-            }
-          } else {
-            console.log('✗ window.productHeaderColors is not available or not an object');
+        {% if template.name == 'product' and product %}
+          const productHandle = {{ product.handle | json }};
+          const mapped = window.productHeaderColors && window.productHeaderColors[productHandle];
+          console.log('[Hero Header] handle:', productHandle, 'mapped color:', mapped);
+
+          if (mapped) {
+            applyHeroHeaderColor(mapped);
+            return;
           }
-          
-          // Method 2: Fallback to product metafield
-          {%- if product.metafields.custom.pgc_header_color and product.metafields.custom.pgc_header_color.value != blank -%}
-            const headerColorValue = '{{ product.metafields.custom.pgc_header_color.value }}';
-            if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
-              bgColor = headerColorValue.trim();
-              console.log('Using header color metafield for header:', bgColor);
-              applyHeroHeaderColor(bgColor);
-              return;
-            }
-          {%- endif -%}
-          
-          // Method 3: Fallback to section settings background color
-          if (!bgColor) {
-            bgColor = '{{ section.settings.background_color | default: 'transparent' }}';
-            if (bgColor !== 'transparent' && bgColor.trim() !== '') {
-              console.log('Using section setting background color for header (fallback):', bgColor);
-              applyHeroHeaderColor(bgColor);
-              return;
-            }
-          }
-        {%- else -%}
+
+          // Fallback: metafield if present
+          {% if product.metafields.custom.pgc_header_color and product.metafields.custom.pgc_header_color.value != blank %}
+            const mf = {{ product.metafields.custom.pgc_header_color.value | json }};
+            if (mf) { applyHeroHeaderColor(mf); return; }
+          {% endif %}
+
+          // Fallback: section setting
+          const fallback = {{ section.settings.background_color | default: 'transparent' | json }};
+          if (fallback && fallback !== 'transparent') applyHeroHeaderColor(fallback);
+        {% else %}
           // Not a product page - use section default or transparent
-          {%- unless is_home_page -%}
-            const bgColor = '{{ section.settings.background_color | default: 'transparent' }}';
-            if (bgColor !== 'transparent' && bgColor.trim() !== '') {
-              applyHeroHeaderColor(bgColor);
-            }
-          {%- endunless -%}
-        {%- endif -%}
+          {% unless is_home_page %}
+            const fallback = {{ section.settings.background_color | default: 'transparent' | json }};
+            if (fallback && fallback !== 'transparent') applyHeroHeaderColor(fallback);
+          {% endunless %}
+        {% endif %}
       }
       
       // Run on page load
@@ -1187,6 +1154,17 @@
           updateHeroHeaderBackground();
         }
       }, 1000);
+
+      // Theme Editor: re-run when section/block changes
+      document.addEventListener('shopify:section:load', function(e) {
+        if (e.detail && e.detail.sectionId === sectionId) updateHeroHeaderBackground();
+      });
+      document.addEventListener('shopify:section:select', function(e) {
+        if (e.detail && e.detail.sectionId === sectionId) updateHeroHeaderBackground();
+      });
+      document.addEventListener('shopify:block:select', function(e) {
+        if (e.detail && e.detail.sectionId === sectionId) updateHeroHeaderBackground();
+      });
     })();
   })();
 </script>
