@@ -519,6 +519,45 @@
     opacity: 0.9;
   }
 
+  /* Size buttons styling */
+  .pgc-minimal__size-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .pgc-minimal__size-btn {
+    padding: 12px 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: {{ section.settings.text_color }};
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 4px;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+
+  .pgc-minimal__size-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  .pgc-minimal__size-btn--selected {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    font-weight: 600;
+  }
+
+  .pgc-minimal__variant-select--hidden {
+    display: none;
+  }
+
   @media (max-width: 900px){
     .pgc-{{ section_id }}{ min-height: auto; }
     .pgc-{{ section_id }}__grid{ grid-template-columns: 1fr; min-height:auto; }
@@ -531,9 +570,20 @@
     }
     .pgc-{{ section_id }}__cardInner{ padding: 34px 22px; max-width: 640px; }
 
+    /* Mobile: Reorder to show FIT first */
+    .pgc-minimal-pdp {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pgc-minimal__header {
+      order: 1;
+    }
+
     .pgc-minimal__fitrow {
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .pgc-minimal__left {
@@ -542,6 +592,35 @@
 
     .pgc-fitscale {
       max-width: none;
+      width: 100%;
+    }
+
+    /* Hide color options on mobile */
+    .pgc-variant-option--color {
+      display: none !important;
+    }
+
+    /* Show size buttons on mobile */
+    .pgc-minimal__size-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pgc-minimal__size-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+    }
+
+    /* Form comes after FIT */
+    form {
+      order: 2;
+    }
+
+    /* Accordions come last */
+    .pgc-minimal__accordion {
+      order: 3;
     }
   }
 {% endstyle %}
@@ -698,21 +777,58 @@
             {% form 'product', product_obj, id: product_form_id %}
               {% unless product_obj.has_only_default_variant %}
                 {% for option in product_obj.options_with_values %}
-                  <label class="pgc-minimal__variant-label" for="Option-{{ section_id }}-{{ forloop.index0 }}">
-                    {{ option.name }}
-                  </label>
-                  <select 
-                    class="pgc-minimal__variant-select" 
-                    id="Option-{{ section_id }}-{{ forloop.index0 }}"
-                    name="options[{{ option.name | escape }}]"
-                    data-option-position="{{ forloop.index0 }}"
-                  >
-                    {% for value in option.values %}
-                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
-                        {{ value }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                  {%- assign opt_name_down = option.name | downcase -%}
+                  {%- assign is_color = false -%}
+                  {%- if opt_name_down == 'color' or opt_name_down == 'colour' -%}
+                    {%- assign is_color = true -%}
+                  {%- endif -%}
+                  
+                  <div class="pgc-variant-option {% if is_color %}pgc-variant-option--color{% endif %}">
+                    <label class="pgc-minimal__variant-label" for="Option-{{ section_id }}-{{ forloop.index0 }}">
+                      {{ option.name }}
+                    </label>
+                    
+                    {%- if opt_name_down contains 'size' -%}
+                      <div class="pgc-minimal__size-buttons">
+                        {% for value in option.values %}
+                          <button 
+                            type="button"
+                            class="pgc-minimal__size-btn {% if option.selected_value == value %}pgc-minimal__size-btn--selected{% endif %}"
+                            data-value="{{ value | escape }}"
+                            data-option-name="{{ option.name | escape }}"
+                            data-option-position="{{ forloop.index0 }}"
+                          >
+                            {{ value }}
+                          </button>
+                        {% endfor %}
+                        <select 
+                          class="pgc-minimal__variant-select pgc-minimal__variant-select--hidden" 
+                          id="Option-{{ section_id }}-{{ forloop.index0 }}"
+                          name="options[{{ option.name | escape }}]"
+                          data-option-position="{{ forloop.index0 }}"
+                        >
+                          {% for value in option.values %}
+                            <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
+                              {{ value }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    {%- else -%}
+                      <select 
+                        class="pgc-minimal__variant-select {% if is_color %}pgc-minimal__variant-select--color{% endif %}" 
+                        id="Option-{{ section_id }}-{{ forloop.index0 }}"
+                        name="options[{{ option.name | escape }}]"
+                        data-option-position="{{ forloop.index0 }}"
+                      >
+                        {% for value in option.values %}
+                          <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
+                            {{ value }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    {%- endif -%}
+                  </div>
                 {% endfor %}
               {% endunless %}
 
@@ -915,6 +1031,28 @@
 
       optionSelects.forEach(select => {
         select.addEventListener('change', updateVariant);
+      });
+      
+      // Handle size button clicks
+      const sizeButtons = root.querySelectorAll('.pgc-minimal__size-btn');
+      sizeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.value;
+          const optionName = btn.dataset.optionName;
+          const optionPos = btn.dataset.optionPosition;
+          
+          // Update hidden select
+          const select = root.querySelector(`select[data-option-position="${optionPos}"]`);
+          if (select) {
+            select.value = value;
+            select.dispatchEvent(new Event('change'));
+          }
+          
+          // Update button states
+          const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
+          allBtns.forEach(b => b.classList.remove('pgc-minimal__size-btn--selected'));
+          btn.classList.add('pgc-minimal__size-btn--selected');
+        });
       });
       
       // Initial update
