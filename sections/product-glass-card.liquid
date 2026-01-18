@@ -48,8 +48,22 @@
 
 {% comment %} Use dedicated header color metafield (pgc_header_color) for header color {% endcomment %}
 {% assign header_color = blank %}
-{% if product_obj and product_obj.metafields.custom.pgc_header_color and product_obj.metafields.custom.pgc_header_color.value != blank %}
-  {% assign header_color = product_obj.metafields.custom.pgc_header_color.value %}
+{% if product_obj and product_obj.metafields.custom.pgc_header_color %}
+  {% assign header_color_raw = product_obj.metafields.custom.pgc_header_color.value %}
+  {% if header_color_raw != blank %}
+    {% comment %} Convert color to hex format if needed {% endcomment %}
+    {% if header_color_raw contains 'rgb' %}
+      {% comment %} If it's RGB, we'll let JavaScript handle it {% endcomment %}
+      {% assign header_color = header_color_raw %}
+    {% else %}
+      {% comment %} Ensure it has # prefix if it's a hex color {% endcomment %}
+      {% if header_color_raw contains '#' %}
+        {% assign header_color = header_color_raw %}
+      {% else %}
+        {% assign header_color = '#' | append: header_color_raw %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endif %}
 
 {% style %}
@@ -1194,12 +1208,21 @@
        let bgColor = null;
        
        // Method 1: Use dedicated header color metafield (highest priority)
-       {%- if header_color != blank and header_color != '#ffffff' -%}
+       {%- if header_color != blank -%}
          const headerColorValue = '{{ header_color }}';
-         if (headerColorValue && headerColorValue !== '#ffffff' && headerColorValue.trim() !== '') {
-           bgColor = headerColorValue;
+         console.log('Header color metafield found:', headerColorValue);
+         if (headerColorValue && headerColorValue.trim() !== '') {
+           bgColor = headerColorValue.trim();
            console.log('Using header color metafield for header:', bgColor);
+           // Apply immediately
+           applyHeroHeaderColor(bgColor);
+           // Don't check fallbacks - header color takes absolute priority
+           return;
+         } else {
+           console.log('Header color value is empty or invalid');
          }
+       {%- else -%}
+         console.log('No header color metafield found');
        {%- endif -%}
        
        // Method 2: Fallback to glass color if header color not set
@@ -1266,11 +1289,22 @@
              return;
            }
            
-           // Update background color
+           // Update background color on the header container itself
+           heroHeader.style.setProperty('background', color, 'important');
+           heroHeader.style.setProperty('background-color', color, 'important');
+           
+           // Also update the header element inside if it exists
            const headerElement = heroHeader.querySelector('[class*="__header"]');
            if (headerElement) {
              headerElement.style.setProperty('background', color, 'important');
              headerElement.style.setProperty('background-color', color, 'important');
+           }
+           
+           // Also update the header container element
+           const headerContainer = heroHeader.querySelector('[class*="__header-container"]');
+           if (headerContainer) {
+             headerContainer.style.setProperty('background', color, 'important');
+             headerContainer.style.setProperty('background-color', color, 'important');
            }
          });
        }
