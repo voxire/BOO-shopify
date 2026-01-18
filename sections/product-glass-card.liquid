@@ -1064,6 +1064,16 @@
 
       // Size button functionality - clean implementation
       function initSizeButtons() {
+        // Find the size display element
+        const sizeDisplayEl = root.querySelector('[data-pgc-size]');
+        
+        // Function to update size display
+        function updateSizeDisplay(value) {
+          if (sizeDisplayEl && value) {
+            sizeDisplayEl.textContent = value;
+          }
+        }
+        
         // Find all size button containers
         const sizeButtonContainers = root.querySelectorAll('.pgc-minimal__size-buttons');
         
@@ -1095,6 +1105,9 @@
               // Add selected class to clicked button
               button.classList.add('pgc-minimal__size-btn--selected');
               
+              // Update size display
+              updateSizeDisplay(selectedValue);
+              
               // Update hidden select value
               select.value = selectedValue;
               
@@ -1117,6 +1130,11 @@
             }
           });
           
+          // Update initial size display
+          if (currentValue) {
+            updateSizeDisplay(currentValue);
+          }
+          
           // Listen for select changes (from other sources) and update buttons
           select.addEventListener('change', function() {
             const newValue = select.value;
@@ -1127,6 +1145,8 @@
                 button.classList.remove('pgc-minimal__size-btn--selected');
               }
             });
+            // Update size display when select changes
+            updateSizeDisplay(newValue);
           });
         });
       }
