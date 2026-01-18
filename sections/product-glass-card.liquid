@@ -1077,7 +1077,7 @@
         const optionSelects = form.querySelectorAll('select[name^="options"]');
         optionSelects.forEach(select => {
           const optionPos = select.dataset.optionPosition;
-          if (optionPos !== undefined) {
+          if (optionPos !== undefined && optionPos !== null) {
             updateSelectedSizeButtonForOption(optionPos);
           }
         });
@@ -1093,16 +1093,34 @@
           const value = btn.dataset.value;
           const optionPos = btn.dataset.optionPosition;
           
-          if (!optionPos) return;
-          
-          // Update hidden select
-          const select = root.querySelector(`select[data-option-position="${optionPos}"]`);
-          if (select) {
-            select.value = value;
-            // Update button states BEFORE dispatching change
-            updateSelectedSizeButtonForOption(optionPos);
-            select.dispatchEvent(new Event('change', { bubbles: true }));
+          // Check if optionPos exists (including "0")
+          if (optionPos === undefined || optionPos === null || optionPos === '') {
+            console.warn('Size button missing option position:', btn);
+            return;
           }
+          
+          // Find the hidden select for this option
+          const select = form.querySelector(`select[data-option-position="${optionPos}"]`);
+          if (!select) {
+            console.warn('Select not found for option position:', optionPos);
+            return;
+          }
+          
+          // Remove selected class from ALL buttons in this option group first
+          const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
+          allBtns.forEach(b => {
+            b.classList.remove('pgc-minimal__size-btn--selected');
+          });
+          
+          // Add selected class to clicked button
+          btn.classList.add('pgc-minimal__size-btn--selected');
+          
+          // Update hidden select value
+          select.value = value;
+          
+          // Trigger change event to update variant
+          const changeEvent = new Event('change', { bubbles: true });
+          select.dispatchEvent(changeEvent);
         });
       });
 
@@ -1111,7 +1129,7 @@
         select.addEventListener('change', () => {
           updateVariant();
           const optionPos = select.dataset.optionPosition;
-          if (optionPos !== undefined) {
+          if (optionPos !== undefined && optionPos !== null) {
             updateSelectedSizeButtonForOption(optionPos);
           }
         });
@@ -1133,7 +1151,9 @@
       }
 
       // Initial button state update
-      updateAllSelectedSizeButtons();
+      setTimeout(() => {
+        updateAllSelectedSizeButtons();
+      }, 100);
       
       // Initial update
       updateVariant();
