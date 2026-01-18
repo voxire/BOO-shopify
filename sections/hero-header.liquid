@@ -734,49 +734,67 @@
 
 <script>
   (function() {
-    const section = document.querySelector('.hero-header-{{ section_id }}');
+    // Find the menu toggle button first (most reliable way)
+    const menuToggle = document.querySelector('[class*="hero-header-"][class*="__menu-toggle"]');
+    if (!menuToggle) return;
+    
+    // Find the section container by traversing up from the button
+    let section = menuToggle.closest('[class*="hero-header-"]');
+    if (!section) {
+      // Fallback: try to find by data-section-id
+      const sectionId = '{{ section_id }}';
+      section = document.querySelector('[data-section-id="' + sectionId + '"]');
+    }
     if (!section) return;
 
-    const menuToggle = section.querySelector('.hero-header-{{ section_id }}__menu-toggle');
-    const mobileNav = section.querySelector('.hero-header-{{ section_id }}__mobile-nav');
+    const mobileNav = section.querySelector('[class*="__mobile-nav"]');
+    if (!mobileNav) return;
 
-    if (menuToggle && mobileNav) {
-      menuToggle.addEventListener('click', function() {
-        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-        menuToggle.setAttribute('aria-expanded', !isExpanded);
-        mobileNav.setAttribute('aria-hidden', isExpanded);
-
-        if (!isExpanded) {
-          mobileNav.style.display = 'block';
-        } else {
-          mobileNav.style.display = 'none';
-        }
-      });
-
-      // Close menu when clicking on a link
-      const mobileLinks = mobileNav.querySelectorAll('.hero-header-{{ section_id }}__mobile-menu-link, .hero-header-{{ section_id }}__mobile-icon');
-      mobileLinks.forEach(function(link) {
-        link.addEventListener('click', function() {
-          menuToggle.setAttribute('aria-expanded', 'false');
-          mobileNav.setAttribute('aria-hidden', 'true');
-          mobileNav.style.display = 'none';
-        });
-      });
-
-      // Close menu when clicking outside
-      document.addEventListener('click', function(event) {
-        if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
-          menuToggle.setAttribute('aria-expanded', 'false');
-          mobileNav.setAttribute('aria-hidden', 'true');
-          mobileNav.style.display = 'none';
-        }
-      });
+    // Ensure mobile nav starts hidden
+    if (mobileNav.getAttribute('aria-hidden') !== 'false') {
+      mobileNav.style.display = 'none';
     }
+
+    menuToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+      const newExpanded = !isExpanded;
+      
+      menuToggle.setAttribute('aria-expanded', newExpanded);
+      mobileNav.setAttribute('aria-hidden', !newExpanded);
+
+      if (newExpanded) {
+        mobileNav.style.display = 'block';
+      } else {
+        mobileNav.style.display = 'none';
+      }
+    });
+
+    // Close menu when clicking on a link
+    const mobileLinks = mobileNav.querySelectorAll('[class*="__mobile-menu-link"], [class*="__mobile-icon"]');
+    mobileLinks.forEach(function(link) {
+      link.addEventListener('click', function() {
+        menuToggle.setAttribute('aria-expanded', 'false');
+        mobileNav.setAttribute('aria-hidden', 'true');
+        mobileNav.style.display = 'none';
+      });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
+        menuToggle.setAttribute('aria-expanded', 'false');
+        mobileNav.setAttribute('aria-hidden', 'true');
+        mobileNav.style.display = 'none';
+      }
+    });
 
     {%- if is_home_page -%}
     // Slideshow functionality (only on home page)
-    const slides = section.querySelectorAll('.hero-header-{{ section_id }}__slide');
-    const indicators = section.querySelectorAll('.hero-header-{{ section_id }}__indicator');
+    const slides = section.querySelectorAll('[class*="__slide"]');
+    const indicators = section.querySelectorAll('[class*="__indicator"]');
 
     if (slides.length <= 1) return;
 
