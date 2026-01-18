@@ -30,12 +30,6 @@
   {% assign bg = product_obj.metafields.custom.pgc_background.value %}
 {% endif %}
 
-{% assign header_color = blank %}
-{% comment %} Use glass color metafield for header color {% endcomment %}
-{% if product_obj and product_obj.metafields.custom.pgc_glass_color and product_obj.metafields.custom.pgc_glass_color.value != blank %}
-  {% assign header_color = product_obj.metafields.custom.pgc_glass_color.value %}
-{% endif %}
-
 {% assign mid_text = blank %}
 {% if product_obj and product_obj.metafields.custom.pgc_middle_text and product_obj.metafields.custom.pgc_middle_text.value != blank %}
   {% assign mid_text = product_obj.metafields.custom.pgc_middle_text.value %}
@@ -51,6 +45,9 @@
 {% if product_obj and product_obj.metafields.custom.pgc_glass_color and product_obj.metafields.custom.pgc_glass_color.value != blank %}
   {% assign glass_color = product_obj.metafields.custom.pgc_glass_color.value %}
 {% endif %}
+
+{% comment %} Use glass color metafield for header color {% endcomment %}
+{% assign header_color = glass_color %}
 
 {% style %}
   .pgc-{{ section_id }}{
@@ -1194,20 +1191,22 @@
        let bgColor = null;
        
        // Method 1: Use glass color metafield (highest priority)
-       {%- if header_color != blank -%}
-         const headerColorValue = '{{ header_color }}';
-         if (headerColorValue) {
-           bgColor = headerColorValue;
+       {%- if glass_color != blank and glass_color != '#ffffff' -%}
+         const glassColorValue = '{{ glass_color }}';
+         if (glassColorValue && glassColorValue !== '#ffffff' && glassColorValue.trim() !== '') {
+           bgColor = glassColorValue;
+           console.log('Using glass color for header:', bgColor);
          }
        {%- endif -%}
        
-       // Method 2: Check if bg is a color (not an image URL)
+       // Method 2: Check if bg is a color (not an image URL) - only if glass color not set
        if (!bgColor) {
          {%- if bg != blank -%}
            const bgValue = '{{ bg }}';
            // Check if it's a color (starts with #, rgb, hsl, or is a named color)
            if (bgValue && (bgValue.startsWith('#') || bgValue.startsWith('rgb') || bgValue.startsWith('hsl') || /^[a-z]+$/i.test(bgValue))) {
              bgColor = bgValue;
+             console.log('Using background color for header (fallback):', bgColor);
            }
          {%- endif -%}
        }
