@@ -323,8 +323,8 @@
   }
 
   .pgc-minimal__title {
-    margin: 0 0 1.25rem 0;
-    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -336,53 +336,60 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 2rem;
     border-top: 1px solid rgba(255,255,255,0.12);
-    padding-top: 1.25rem;
+    padding-top: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .pgc-minimal__left {
-    min-width: 140px;
+    min-width: 180px;
   }
 
   .pgc-minimal__kicker {
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    opacity: 0.7;
+    opacity: 0.8;
     color: {{ section.settings.text_color }};
+    margin-bottom: 0.5rem;
   }
 
   .pgc-minimal__size {
-    margin-top: 0.45rem;
-    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: {{ section.settings.text_color }};
+    font-weight: 500;
   }
 
   .pgc-minimal__price {
-    margin-top: 0.35rem;
+    margin-top: 0.5rem;
     color: {{ section.settings.text_color }};
   }
 
   .pgc-minimal__price .price {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
+  }
+
+  .pgc-minimal__price .price-item {
+    font-size: 1.1rem;
   }
 
   .pgc-fitscale {
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
   }
 
   .pgc-fitscale__labels {
     display: flex;
     justify-content: space-between;
-    gap: 0.75rem;
-    font-size: 0.7rem;
+    gap: 1rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    opacity: 0.75;
+    opacity: 0.8;
     color: {{ section.settings.text_color }};
   }
 
@@ -435,10 +442,50 @@
 
   .pgc-minimal__accordion .accordion__title {
     margin: 0;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: {{ section.settings.text_color }};
+    font-weight: 500;
+  }
+
+  .pgc-minimal__variant-label {
+    display: block;
+    margin: 1.5rem 0 0.75rem 0;
+    color: {{ section.settings.text_color }};
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  .pgc-minimal__variant-select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: {{ section.settings.text_color }};
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .pgc-minimal__quantity-label {
+    display: block;
+    margin: 1.5rem 0 0.75rem 0;
+    color: {{ section.settings.text_color }};
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
   }
 
   .pgc-accordion-icon {
@@ -639,17 +686,42 @@
             {%- assign product_form_id = 'product-form-pgc-' | append: section_id -%}
             {% form 'product', product_obj, id: product_form_id %}
               {% unless product_obj.has_only_default_variant %}
-                {% render 'product-variant-picker', product: product_obj, block: section, product_form_id: product_form_id %}
+                {% for option in product_obj.options_with_values %}
+                  <label class="pgc-minimal__variant-label" for="Option-{{ section_id }}-{{ forloop.index0 }}">
+                    {{ option.name }}
+                  </label>
+                  <select 
+                    class="pgc-minimal__variant-select" 
+                    id="Option-{{ section_id }}-{{ forloop.index0 }}"
+                    name="options[{{ option.name | escape }}]"
+                    data-option-position="{{ forloop.index0 }}"
+                  >
+                    {% for value in option.values %}
+                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
+                        {{ value }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                {% endfor %}
               {% endunless %}
 
-              <div class="product-form__quantity" style="margin: 1.5rem 0;">
-                <label class="form__label" for="Quantity-pgc-{{ section_id }}">Quantity</label>
-                {% render 'quantity-input', id: 'Quantity-pgc-' | append: section_id %}
+              <label class="pgc-minimal__quantity-label" for="Quantity-pgc-{{ section_id }}">Quantity</label>
+              <div class="pgc-{{ section_id }}__qtyRow">
+                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="dec" aria-label="Decrease">−</button>
+                <input 
+                  class="pgc-{{ section_id }}__qtyInput" 
+                  type="number" 
+                  id="Quantity-pgc-{{ section_id }}"
+                  name="quantity" 
+                  value="1" 
+                  min="1"
+                >
+                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="inc" aria-label="Increase">+</button>
               </div>
 
               <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}" data-variant-id>
               
-              <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 1.5rem;">
+              <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 1.5rem; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.1em;">
                 {{ section.settings.button_text }}
               </button>
             {% endform %}
@@ -817,17 +889,11 @@
         });
       }
 
-      // Fallback: listen to direct option changes
-      const optionSelects = form.querySelectorAll('select[name^="options"], input[type="radio"][name^="options"]');
+      // Listen to direct option changes (dropdown selects)
+      const optionSelects = form.querySelectorAll('select[name^="options"]');
       
       function updateVariant() {
-        const selectedOptions = Array.from(optionSelects).map(select => {
-          if (select.type === 'radio') {
-            const checked = form.querySelector(`input[type="radio"][name="${select.name}"]:checked`);
-            return checked ? checked.value : '';
-          }
-          return select.value;
-        });
+        const selectedOptions = Array.from(optionSelects).map(select => select.value);
 
         const variant = productData.variants.find(v => {
           return v.options.every((opt, idx) => opt === selectedOptions[idx]);
@@ -839,6 +905,9 @@
       optionSelects.forEach(select => {
         select.addEventListener('change', updateVariant);
       });
+      
+      // Initial update
+      updateVariant();
     }
   })();
 </script>
