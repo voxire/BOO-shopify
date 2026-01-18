@@ -762,19 +762,23 @@
 
   {%- comment -%} Build product color mapping from blocks {%- endcomment -%}
   {%- assign product_color_blocks = section.blocks | where: 'type', 'product_color' -%}
-  {%- if product_color_blocks.size > 0 -%}
-    <script>
+  <script>
+    (function() {
       window.productHeaderColors = window.productHeaderColors || {};
-      {%- for block in product_color_blocks -%}
-        {%- if block.settings.product != blank and block.settings.color != blank -%}
-          {%- assign product_obj = block.settings.product -%}
-          {%- if product_obj.handle != blank -%}
-            window.productHeaderColors['{{ product_obj.handle }}'] = '{{ block.settings.color }}';
+      {%- if product_color_blocks.size > 0 -%}
+        {%- for block in product_color_blocks -%}
+          {%- if block.settings.product != blank and block.settings.color != blank -%}
+            {%- assign product_obj = block.settings.product -%}
+            {%- if product_obj and product_obj.handle != blank -%}
+              window.productHeaderColors['{{ product_obj.handle }}'] = '{{ block.settings.color }}';
+              console.log('[Header] Product header color mapped:', '{{ product_obj.handle }}', '->', '{{ block.settings.color }}');
+            {%- endif -%}
           {%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-    </script>
-  {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      console.log('[Header] Product header colors mapping:', window.productHeaderColors);
+    })();
+  </script>
 
   {%- if is_home_page and slides.size > 0 -%}
     <!-- Slideshow (only on home page) -->
@@ -1080,14 +1084,24 @@
         // Only apply on product pages (not home page)
         {%- if template.name == 'product' and product -%}
           const productHandle = '{{ product.handle }}';
+          console.log('Checking header color for product:', productHandle);
+          console.log('Available product header colors:', window.productHeaderColors);
+          
           let bgColor = null;
           
           // Method 1: Check product-color mapping from header section (highest priority)
-          if (window.productHeaderColors && window.productHeaderColors[productHandle]) {
-            bgColor = window.productHeaderColors[productHandle];
-            console.log('Using product-color mapping for header:', bgColor);
-            applyHeroHeaderColor(bgColor);
-            return;
+          if (window.productHeaderColors && typeof window.productHeaderColors === 'object') {
+            const mappedColor = window.productHeaderColors[productHandle];
+            if (mappedColor) {
+              bgColor = mappedColor;
+              console.log('✓ Using product-color mapping for header:', bgColor, 'for product:', productHandle);
+              applyHeroHeaderColor(bgColor);
+              return;
+            } else {
+              console.log('✗ No product-color mapping found for:', productHandle);
+            }
+          } else {
+            console.log('✗ window.productHeaderColors is not available or not an object');
           }
           
           // Method 2: Fallback to product metafield
@@ -1126,17 +1140,38 @@
       function runOnce() {
         if (hasRun) return;
         hasRun = true;
+        
+        // Ensure productHeaderColors is initialized
+        if (typeof window.productHeaderColors === 'undefined') {
+          window.productHeaderColors = {};
+        }
+        
         updateHeroHeaderBackground();
       }
       
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', runOnce);
-      } else {
-        runOnce();
+      // Wait for DOM and ensure mapping is available
+      function initHeaderColor() {
+        // Small delay to ensure the mapping script has run
+        setTimeout(function() {
+          runOnce();
+        }, 100);
       }
       
-      // Also run after a short delay to ensure styles are computed
-      setTimeout(runOnce, 500);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeaderColor);
+      } else {
+        initHeaderColor();
+      }
+      
+      // Also run after a longer delay to ensure everything is loaded
+      setTimeout(function() {
+        if (!hasRun) {
+          runOnce();
+        } else {
+          // Re-check in case mapping was added dynamically
+          updateHeroHeaderBackground();
+        }
+      }, 1000);
     })();
   })();
 </script>
