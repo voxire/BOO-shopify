@@ -515,10 +515,35 @@
     const mobileNav = section.querySelector('.hero-header-{{ section_id }}__mobile-nav');
 
     if (menuToggle && mobileNav) {
-      menuToggle.addEventListener('click', () => {
+      menuToggle.addEventListener('click', function() {
         const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
         menuToggle.setAttribute('aria-expanded', !isExpanded);
         mobileNav.setAttribute('aria-hidden', isExpanded);
+
+        if (!isExpanded) {
+          mobileNav.style.display = 'block';
+        } else {
+          mobileNav.style.display = 'none';
+        }
+      });
+
+      // Close menu when clicking on a link
+      const mobileLinks = mobileNav.querySelectorAll('.hero-header-{{ section_id }}__mobile-menu-link, .hero-header-{{ section_id }}__mobile-icon');
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          mobileNav.style.display = 'none';
+        });
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          mobileNav.style.display = 'none';
+        }
       });
     }
   })();
