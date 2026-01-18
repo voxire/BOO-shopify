@@ -3,6 +3,15 @@
   assign logo = section.settings.logo
   assign menu = section.settings.menu
   assign text_color = section.settings.text_color
+  assign is_home_page = false
+  if template.name == 'index'
+    assign is_home_page = true
+  endif
+  assign autoplay_enabled = section.settings.autoplay_enabled
+  assign autoplay_speed = section.settings.autoplay_speed | default: 5000
+  assign slide_height = section.settings.slide_height | default: 'large'
+  assign slides = section.blocks | where: 'type', 'slide'
+  assign first_slide_image = slides.first.settings.image
 -%}
 
 {%- style -%}
@@ -24,11 +33,124 @@
     position: relative;
     width: 100%;
     max-width: 100%;
-    background: {{ section.settings.background_color | default: 'transparent' }};
+    overflow: hidden;
+    border-radius: 0;
+    background: none;
+  }
+
+  {%- if is_home_page and first_slide_image != blank -%}
+    .hero-header-{{ section_id }}__slideshow::before {
+      content: '';
+      display: block;
+      padding-bottom: {{ 1 | divided_by: first_slide_image.aspect_ratio | times: 100 }}%;
+    }
+  {%- endif -%}
+
+  .hero-header-{{ section_id }}__slideshow {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .hero-header-{{ section_id }}__slides {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-header-{{ section_id }}__slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: 1;
+  }
+
+  .hero-header-{{ section_id }}__slide.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hero-header-{{ section_id }}__slide-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    min-width: 120%;
+    min-height: 120%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-header-{{ section_id }}__slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .hero-header-{{ section_id }}__button {
+    position: absolute;
+    padding: 1rem 2rem;
+    background: {{ section.settings.button_bg_color | default: '#ffffff' }};
+    color: {{ section.settings.button_text_color | default: '#000000' }};
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    border: none;
+    cursor: pointer;
+    z-index: 4;
+  }
+
+  .hero-header-{{ section_id }}__button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  .hero-header-{{ section_id }}__indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 5;
+  }
+
+  .hero-header-{{ section_id }}__indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    padding: 0;
+  }
+
+  .hero-header-{{ section_id }}__indicator.active {
+    background: {{ text_color }};
   }
 
   .hero-header-{{ section_id }}__header {
-    position: relative;
+    position: {% if is_home_page %}absolute{% else %}relative{% endif %};
+    inset: {% if is_home_page %}0 auto auto 0{% else %}auto{% endif %};
     width: 100%;
     z-index: 10;
     padding: 1.5rem 0;
@@ -504,6 +626,106 @@
       </div>
     </div>
   </div>
+
+  {%- if is_home_page and slides.size > 0 -%}
+    <!-- Slideshow (only on home page) -->
+    <div class="hero-header-{{ section_id }}__slideshow">
+      <div class="hero-header-{{ section_id }}__slides" id="slides-{{ section_id }}">
+        {%- for block in slides -%}
+          {%- assign slide_image = block.settings.image -%}
+          {%- assign button_text = block.settings.button_text -%}
+          {%- assign button_link = block.settings.button_link -%}
+          {%- assign button_position = block.settings.button_position | default: 'center' -%}
+          {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
+          {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
+
+          <div
+            class="hero-header-{{ section_id }}__slide{% if forloop.first %} active{% endif %}"
+            data-slide-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if slide_image != blank -%}
+              <img
+                class="hero-header-{{ section_id }}__slide-image"
+                src="{{ slide_image | image_url: width: 2400 }}"
+                alt="{{ slide_image.alt | escape }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                width="{{ slide_image.width }}"
+                height="{{ slide_image.height }}"
+              >
+            {%- endif -%}
+
+            <div class="hero-header-{{ section_id }}__slide-content">
+              {%- if button_text != blank and button_link != blank -%}
+                <a
+                  href="{{ button_link }}"
+                  class="hero-header-{{ section_id }}__button"
+                  style="
+                    {%- if button_position == 'custom' -%}
+                      left: {{ button_horizontal }}%;
+                      top: {{ button_vertical }}%;
+                      transform: translate(-50%, -50%);
+                    {%- elsif button_position == 'top-left' -%}
+                      top: 20%;
+                      left: 20%;
+                      transform: translate(-50%, -50%);
+                    {%- elsif button_position == 'top-center' -%}
+                      top: 20%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                    {%- elsif button_position == 'top-right' -%}
+                      top: 20%;
+                      right: 20%;
+                      transform: translate(50%, -50%);
+                    {%- elsif button_position == 'center-left' -%}
+                      top: 50%;
+                      left: 20%;
+                      transform: translate(-50%, -50%);
+                    {%- elsif button_position == 'center-right' -%}
+                      top: 50%;
+                      right: 20%;
+                      transform: translate(50%, -50%);
+                    {%- elsif button_position == 'bottom-left' -%}
+                      bottom: 20%;
+                      left: 20%;
+                      transform: translate(-50%, 50%);
+                    {%- elsif button_position == 'bottom-center' -%}
+                      bottom: 20%;
+                      left: 50%;
+                      transform: translate(-50%, 50%);
+                    {%- elsif button_position == 'bottom-right' -%}
+                      bottom: 20%;
+                      right: 20%;
+                      transform: translate(50%, 50%);
+                    {%- else -%}
+                      top: 50%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                    {%- endif -%}
+                  "
+                >
+                  {{ button_text }}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      {%- if slides.size > 1 -%}
+        <div class="hero-header-{{ section_id }}__indicators">
+          {%- for block in slides -%}
+            <button
+              type="button"
+              class="hero-header-{{ section_id }}__indicator{% if forloop.first %} active{% endif %}"
+              data-slide-index="{{ forloop.index0 }}"
+              aria-label="Go to slide {{ forloop.index }}"
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
 </div>
 
 <script>
@@ -546,6 +768,84 @@
         }
       });
     }
+
+    {%- if is_home_page -%}
+    // Slideshow functionality (only on home page)
+    const slides = section.querySelectorAll('.hero-header-{{ section_id }}__slide');
+    const indicators = section.querySelectorAll('.hero-header-{{ section_id }}__indicator');
+
+    if (slides.length <= 1) return;
+
+    let currentSlide = 0;
+    let autoplayInterval = null;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      indicators.forEach((indicator, i) => {
+        if (i === index) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        showSlide(index);
+      }
+    }
+
+    // Indicator clicks
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        goToSlide(index);
+        resetAutoplay();
+      });
+    });
+
+    // Auto-rotate
+    function startAutoplay() {
+      {% if autoplay_enabled %}
+        autoplayInterval = setInterval(nextSlide, {{ autoplay_speed }});
+      {% endif %}
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    function resetAutoplay() {
+      stopAutoplay();
+      startAutoplay();
+    }
+
+    // Pause on hover
+    const slideshow = section.querySelector('.hero-header-{{ section_id }}__slideshow');
+    if (slideshow) {
+      slideshow.addEventListener('mouseenter', stopAutoplay);
+      slideshow.addEventListener('mouseleave', startAutoplay);
+    }
+
+    startAutoplay();
+    {%- endif -%}
   })();
 </script>
 
@@ -576,7 +876,155 @@
       "type": "color",
       "id": "background_color",
       "label": "Background color",
+      "default": "#000000",
+      "info": "Only used when slideshow is not active (non-home pages)"
+    },
+    {
+      "type": "header",
+      "content": "Slideshow Settings (Home Page Only)"
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "large",
+      "label": "Slide height"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_enabled",
+      "label": "Enable Auto-rotate",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3000,
+      "max": 9500,
+      "step": 500,
+      "unit": "ms",
+      "label": "Auto-rotate Speed",
+      "default": 5000
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
       "default": "#000000"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "select",
+          "id": "button_position",
+          "label": "Button Position",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top-left",
+              "label": "Top Left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top Center"
+            },
+            {
+              "value": "top-right",
+              "label": "Top Right"
+            },
+            {
+              "value": "center-left",
+              "label": "Center Left"
+            },
+            {
+              "value": "center-right",
+              "label": "Center Right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom Left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom Center"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom Right"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Position"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "button_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Horizontal Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        },
+        {
+          "type": "range",
+          "id": "button_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Button Vertical Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        }
+      ]
     }
   ],
   "presets": [
