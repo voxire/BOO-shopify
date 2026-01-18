@@ -1048,12 +1048,27 @@
 
     // Update hero header background color based on product
     (function() {
-      // Function to apply color to hero header
+      // Function to apply color to the whole page (body and header)
       function applyHeroHeaderColor(color) {
         if (!color) return;
         
-        const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
+        // Apply to body for the whole page
+        document.body.style.setProperty('background', color, 'important');
+        document.body.style.setProperty('background-color', color, 'important');
         
+        // Also apply to html element to ensure full coverage
+        document.documentElement.style.setProperty('background', color, 'important');
+        document.documentElement.style.setProperty('background-color', color, 'important');
+        
+        // Apply to main content wrapper if it exists
+        const mainContent = document.querySelector('main, .main-content, #MainContent, [role="main"]');
+        if (mainContent) {
+          mainContent.style.setProperty('background', color, 'important');
+          mainContent.style.setProperty('background-color', color, 'important');
+        }
+        
+        // Also update the hero header section
+        const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
         heroHeaders.forEach(heroHeader => {
           // Skip if it's the home page slideshow header
           if (heroHeader.querySelector('[class*="__slideshow"]')) {
