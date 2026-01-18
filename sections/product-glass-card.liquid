@@ -1051,57 +1051,89 @@
         select.addEventListener('change', updateVariant);
       });
       
+      // Function to update selected button state for a specific option
+      function updateSelectedSizeButtonForOption(optionPosition) {
+        const select = form.querySelector(`select[data-option-position="${optionPosition}"]`);
+        if (!select) return;
+        
+        const selectedValue = select.value;
+        
+        // Remove selected class from ALL size buttons for this option
+        const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPosition}"]`);
+        allBtns.forEach(btn => {
+          btn.classList.remove('pgc-minimal__size-btn--selected');
+        });
+        
+        // Add selected class to the button matching the selected value
+        allBtns.forEach(btn => {
+          if (btn.dataset.value === selectedValue) {
+            btn.classList.add('pgc-minimal__size-btn--selected');
+          }
+        });
+      }
+
+      // Function to update all selected size buttons
+      function updateAllSelectedSizeButtons() {
+        const optionSelects = form.querySelectorAll('select[name^="options"]');
+        optionSelects.forEach(select => {
+          const optionPos = select.dataset.optionPosition;
+          if (optionPos !== undefined) {
+            updateSelectedSizeButtonForOption(optionPos);
+          }
+        });
+      }
+
       // Handle size button clicks
       const sizeButtons = root.querySelectorAll('.pgc-minimal__size-btn');
       sizeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
           const value = btn.dataset.value;
-          const optionName = btn.dataset.optionName;
           const optionPos = btn.dataset.optionPosition;
+          
+          if (!optionPos) return;
           
           // Update hidden select
           const select = root.querySelector(`select[data-option-position="${optionPos}"]`);
           if (select) {
             select.value = value;
-            select.dispatchEvent(new Event('change'));
+            // Update button states BEFORE dispatching change
+            updateSelectedSizeButtonForOption(optionPos);
+            select.dispatchEvent(new Event('change', { bubbles: true }));
           }
-          
-          // Update button states
-          const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
-          allBtns.forEach(b => b.classList.remove('pgc-minimal__size-btn--selected'));
-          btn.classList.add('pgc-minimal__size-btn--selected');
         });
       });
-
-      // Update selected button state when variant changes
-      function updateSelectedSizeButton() {
-        const optionSelects = form.querySelectorAll('select[name^="options"]');
-        optionSelects.forEach(select => {
-          const optionPos = select.dataset.optionPosition;
-          const selectedValue = select.value;
-          
-          // Update all size buttons for this option
-          const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
-          allBtns.forEach(btn => {
-            if (btn.dataset.value === selectedValue) {
-              btn.classList.add('pgc-minimal__size-btn--selected');
-            } else {
-              btn.classList.remove('pgc-minimal__size-btn--selected');
-            }
-          });
-        });
-      }
 
       // Listen for variant changes and update button states
       optionSelects.forEach(select => {
         select.addEventListener('change', () => {
           updateVariant();
-          updateSelectedSizeButton();
+          const optionPos = select.dataset.optionPosition;
+          if (optionPos !== undefined) {
+            updateSelectedSizeButtonForOption(optionPos);
+          }
         });
       });
 
+      // Listen to variant-selects component events and update buttons
+      if (variantSelects) {
+        variantSelects.addEventListener('change', (e) => {
+          const variantId = e.detail?.variant?.id || variantIdInput?.value;
+          if (variantId && productData.variants) {
+            const variant = productData.variants.find(v => v.id.toString() === variantId.toString());
+            if (variant) {
+              updateSizeAndPrice(variant);
+              // Update all size buttons based on variant options
+              updateAllSelectedSizeButtons();
+            }
+          }
+        });
+      }
+
       // Initial button state update
-      updateSelectedSizeButton();
+      updateAllSelectedSizeButtons();
       
       // Initial update
       updateVariant();
