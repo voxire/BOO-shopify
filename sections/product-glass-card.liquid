@@ -1201,6 +1201,38 @@
    
    // Update hero header background color based on product
    (function() {
+     // Function to apply color to hero header (defined first)
+     function applyHeroHeaderColor(color) {
+       if (!color) return;
+       
+       const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
+       
+       heroHeaders.forEach(heroHeader => {
+         // Skip if it's the home page slideshow header
+         if (heroHeader.querySelector('[class*="__slideshow"]')) {
+           return;
+         }
+         
+         // Update background color on the header container itself
+         heroHeader.style.setProperty('background', color, 'important');
+         heroHeader.style.setProperty('background-color', color, 'important');
+         
+         // Also update the header element inside if it exists
+         const headerElement = heroHeader.querySelector('[class*="__header"]');
+         if (headerElement) {
+           headerElement.style.setProperty('background', color, 'important');
+           headerElement.style.setProperty('background-color', color, 'important');
+         }
+         
+         // Also update the header container element
+         const headerContainer = heroHeader.querySelector('[class*="__header-container"]');
+         if (headerContainer) {
+           headerContainer.style.setProperty('background', color, 'important');
+           headerContainer.style.setProperty('background-color', color, 'important');
+         }
+       });
+     }
+     
      function updateHeroHeaderBackground() {
        const pgcSection = document.querySelector('.pgc-{{ section_id }}');
        if (!pgcSection) return;
@@ -1211,7 +1243,7 @@
        {%- if header_color != blank -%}
          const headerColorValue = '{{ header_color }}';
          console.log('Header color metafield found:', headerColorValue);
-         if (headerColorValue && headerColorValue.trim() !== '') {
+         if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
            bgColor = headerColorValue.trim();
            console.log('Using header color metafield for header:', bgColor);
            // Apply immediately
@@ -1219,10 +1251,10 @@
            // Don't check fallbacks - header color takes absolute priority
            return;
          } else {
-           console.log('Header color value is empty or invalid');
+           console.log('Header color value is empty or invalid:', headerColorValue);
          }
        {%- else -%}
-         console.log('No header color metafield found');
+         console.log('No header color metafield found, checking fallbacks...');
        {%- endif -%}
        
        // Method 2: Fallback to glass color if header color not set
@@ -1275,38 +1307,6 @@
            console.warn('Could not extract color from image:', e);
            callback(null);
          }
-       }
-       
-       // Function to apply color to hero header
-       function applyHeroHeaderColor(color) {
-         if (!color) return;
-         
-         const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
-         
-         heroHeaders.forEach(heroHeader => {
-           // Skip if it's the home page slideshow header
-           if (heroHeader.querySelector('[class*="__slideshow"]')) {
-             return;
-           }
-           
-           // Update background color on the header container itself
-           heroHeader.style.setProperty('background', color, 'important');
-           heroHeader.style.setProperty('background-color', color, 'important');
-           
-           // Also update the header element inside if it exists
-           const headerElement = heroHeader.querySelector('[class*="__header"]');
-           if (headerElement) {
-             headerElement.style.setProperty('background', color, 'important');
-             headerElement.style.setProperty('background-color', color, 'important');
-           }
-           
-           // Also update the header container element
-           const headerContainer = heroHeader.querySelector('[class*="__header-container"]');
-           if (headerContainer) {
-             headerContainer.style.setProperty('background', color, 'important');
-             headerContainer.style.setProperty('background-color', color, 'important');
-           }
-         });
        }
        
        // Apply the background color to hero header if we found one
