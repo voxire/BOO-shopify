@@ -175,7 +175,7 @@
         "description",
         "shipping_returns"
       ],
-      "disabled": true,
+      "disabled": false,
       "settings": {
         "enable_sticky_info": true,
         "color_scheme": "scheme-1",

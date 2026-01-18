@@ -312,6 +312,155 @@
     opacity: .95;
   }
 
+  /* Minimalist PDP Styles */
+  .pgc-minimal-pdp {
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-minimal__header {
+    padding-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .pgc-minimal__title {
+    margin: 0 0 1.25rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.25;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-minimal__fitrow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 1.25rem;
+  }
+
+  .pgc-minimal__left {
+    min-width: 140px;
+  }
+
+  .pgc-minimal__kicker {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-minimal__size {
+    margin-top: 0.45rem;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-minimal__price {
+    margin-top: 0.35rem;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-minimal__price .price {
+    font-size: 0.95rem;
+  }
+
+  .pgc-fitscale {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .pgc-fitscale__labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-fitscale__bar {
+    position: relative;
+    height: 2px;
+    margin-top: 0.6rem;
+    background: rgba(255,255,255,0.35);
+  }
+
+  .pgc-fitscale__marker {
+    position: absolute;
+    top: 50%;
+    left: var(--fit-pos, 50%);
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 2px solid {{ section.settings.text_color }};
+    background: rgba(255,255,255,0.1);
+  }
+
+  .pgc-minimal__accordion {
+    margin-top: 0;
+  }
+
+  .pgc-minimal__accordion details {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .pgc-minimal__accordion summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.05rem 0;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .pgc-minimal__accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pgc-minimal__accordion .summary__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .pgc-minimal__accordion .accordion__title {
+    margin: 0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-accordion-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    color: {{ section.settings.text_color }};
+  }
+
+  .pgc-accordion-icon::before {
+    content: "+";
+  }
+
+  .pgc-minimal__accordion details[open] .pgc-accordion-icon::before {
+    content: "–";
+  }
+
+  .pgc-minimal__accordion .accordion__content {
+    padding: 0 0 1.15rem 0;
+    color: {{ section.settings.text_color }};
+    opacity: 0.9;
+  }
+
   @media (max-width: 900px){
     .pgc-{{ section_id }}{ min-height: auto; }
     .pgc-{{ section_id }}__grid{ grid-template-columns: 1fr; min-height:auto; }
@@ -324,63 +473,18 @@
     }
     .pgc-{{ section_id }}__cardInner{ padding: 34px 22px; max-width: 640px; }
 
-    /* Tablet: 750px - 989px */
-@media screen and (min-width: 750px) and (max-width: 989px) {
-  .product-glass-card-wrapper {
-    padding: 2rem 1.5rem;
-  }
-  
-  .product-glass-card-container {
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  .product-glass-card-image,
-  .product-glass-card-content {
-    width: 100%;
-    max-width: 100%;
-  }
-  
-  .product-glass-card-content {
-    padding: 2rem;
-  }
-}
+    .pgc-minimal__fitrow {
+      flex-direction: column;
+      gap: 1rem;
+    }
 
-/* Mobile: < 750px */
-@media screen and (max-width: 749px) {
-  .product-glass-card-wrapper {
-    padding: 1rem;
-    overflow-x: hidden;
-  }
-  
-  .product-glass-card-container {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .product-glass-card-image,
-  .product-glass-card-content {
-    width: 100%;
-    max-width: 100%;
-  }
-  
-  .product-glass-card-content {
-    padding: 1.5rem;
-  }
-  
-  .product-glass-card-title {
-    font-size: 1.5rem;
-  }
-  
-  .product-glass-card-price {
-    font-size: 1.25rem;
-  }
-  
-  .product-glass-card-button {
-    width: 100%;
-  }
-}
+    .pgc-minimal__left {
+      min-width: 0;
+    }
 
+    .pgc-fitscale {
+      max-width: none;
+    }
   }
 {% endstyle %}
 
@@ -463,44 +567,134 @@
             {{ mid_text }}
           </div>
 
-          <div class="pgc-{{ section_id }}__cardInner">
-            <h1 class="pgc-{{ section_id }}__title">{{ product_obj.title }}</h1>
+          <div class="pgc-{{ section_id }}__cardInner pgc-minimal-pdp">
+            {%- liquid
+              assign composed_title = product_obj.title | escape
+              
+              # Optionally append color to title
+              if section.settings.append_color_option
+                assign color_value = ''
+                for opt in product_obj.options_with_values
+                  assign opt_name_down = opt.name | downcase
+                  if opt_name_down == 'color' or opt_name_down == 'colour'
+                    assign color_value = opt.selected_value
+                  endif
+                endfor
+                if color_value != blank
+                  assign composed_title = composed_title | append: ' - ' | append: color_value | escape
+                endif
+              endif
 
-            <div class="pgc-{{ section_id }}__price">
-              {{ product_obj.selected_or_first_available_variant.price | money }}
+              # Get selected size
+              assign selected_size = ''
+              for opt in product_obj.options_with_values
+                assign opt_name_down = opt.name | downcase
+                if opt_name_down contains 'size'
+                  assign selected_size = opt.selected_value
+                endif
+              endfor
+              if selected_size == blank
+                assign selected_size = product_obj.selected_or_first_available_variant.title
+              endif
+              if selected_size == 'Default Title'
+                assign selected_size = ''
+              endif
+            -%}
+
+            <div class="pgc-minimal__header">
+              <h1 class="pgc-minimal__title">{{ composed_title }}</h1>
+
+              <div class="pgc-minimal__fitrow">
+                <div class="pgc-minimal__left">
+                  <div class="pgc-minimal__kicker">{{ section.settings.fit_label | default: 'FIT' }}</div>
+                  {%- if section.settings.show_selected_size and selected_size != blank -%}
+                    <div class="pgc-minimal__size" data-pgc-size>{{ selected_size }}</div>
+                  {%- endif -%}
+
+                  <div class="pgc-minimal__price" id="pgc-price-{{ section_id }}">
+                    {%- render 'price',
+                      product: product_obj,
+                      use_variant: true,
+                      show_badges: false,
+                      price_class: 'price--large'
+                    -%}
+                  </div>
+                </div>
+
+                <div class="pgc-minimal__right">
+                  <div class="pgc-fitscale" style="--fit-pos: {{ section.settings.fit_position }}%;">
+                    <div class="pgc-fitscale__labels">
+                      <span>{{ section.settings.fit_small_label | default: 'SMALL' }}</span>
+                      <span>{{ section.settings.fit_true_label | default: 'TRUE TO SIZE' }}</span>
+                      <span>{{ section.settings.fit_large_label | default: 'LARGE' }}</span>
+                    </div>
+                    <div class="pgc-fitscale__bar" aria-hidden="true">
+                      <span class="pgc-fitscale__marker" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {% form 'product', product_obj %}
-              {% if product_obj.has_only_default_variant == false %}
-                {% for option in product_obj.options_with_values %}
-                  <label class="pgc-{{ section_id }}__label">{{ option.name }}</label>
-                  <select class="pgc-{{ section_id }}__select" name="options[{{ option.name | escape }}]">
-                    {% for value in option.values %}
-                      <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value }}</option>
-                    {% endfor %}
-                  </select>
-                {% endfor %}
-              {% endif %}
+            {% form 'product', product_obj, id: 'product-form-pgc-' | append: section_id %}
+              {% unless product_obj.has_only_default_variant %}
+                {% render 'product-variant-picker', product: product_obj, block: section, product_form_id: 'product-form-pgc-' | append: section_id %}
+              {% endunless %}
 
-              <label class="pgc-{{ section_id }}__label">Quantity</label>
-              <div class="pgc-{{ section_id }}__qtyRow">
-                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="dec" aria-label="Decrease">−</button>
-                <input class="pgc-{{ section_id }}__qtyInput" type="number" name="quantity" value="1" min="1">
-                <button type="button" class="pgc-{{ section_id }}__qtyBtn" data-qty="inc" aria-label="Increase">+</button>
+              <div class="product-form__quantity" style="margin: 1.5rem 0;">
+                <label class="form__label" for="Quantity-pgc-{{ section_id }}">Quantity</label>
+                {% render 'quantity-input', id: 'Quantity-pgc-' | append: section_id %}
               </div>
 
-              <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}">
-
-              <button class="pgc-{{ section_id }}__cta" type="submit">
+              <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}" data-variant-id>
+              
+              <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 1.5rem;">
                 {{ section.settings.button_text }}
               </button>
             {% endform %}
 
             {% if product_obj.description != blank %}
-              <div class="pgc-{{ section_id }}__desc">
-                {{ product_obj.description }}
+              <div class="pgc-minimal__accordion accordion" style="margin-top: 2rem;">
+                <details id="Details-description-pgc-{{ section_id }}">
+                  <summary>
+                    <div class="summary__title">
+                      <h2 class="h4 accordion__title">
+                        {{ section.settings.description_heading | default: 'DESCRIPTION' | escape }}
+                      </h2>
+                    </div>
+                    <span class="pgc-accordion-icon"></span>
+                  </summary>
+                  <div class="accordion__content rte" id="Accordion-description-pgc-{{ section_id }}">
+                    {{ product_obj.description }}
+                  </div>
+                </details>
               </div>
             {% endif %}
+
+            <div class="pgc-minimal__accordion accordion">
+              <details id="Details-shipping-pgc-{{ section_id }}">
+                <summary>
+                  <div class="summary__title">
+                    <h2 class="h4 accordion__title">
+                      {{ section.settings.shipping_heading | default: 'SHIPPING AND RETURNS' | escape }}
+                    </h2>
+                  </div>
+                  <span class="pgc-accordion-icon">+</span>
+                </summary>
+                <div class="accordion__content rte" id="Accordion-shipping-pgc-{{ section_id }}">
+                  {%- if shop.shipping_policy.body != blank -%}
+                    <div class="pgc-minimal__policy">
+                      {{ shop.shipping_policy.body }}
+                    </div>
+                  {%- endif -%}
+                  {%- if shop.refund_policy.body != blank -%}
+                    <div class="pgc-minimal__policy">
+                      {{ shop.refund_policy.body }}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </details>
+            </div>
           </div>
         </div>
       </div>
@@ -566,6 +760,85 @@
     buildDots();
     buildThumbs();
     setSlide(0);
+
+    // Minimalist PDP: Update size and price on variant change
+    const form = root.querySelector('#product-form-pgc-{{ section_id }}');
+    const sizeEl = root.querySelector('[data-pgc-size]');
+    const priceEl = root.querySelector('#pgc-price-{{ section_id }}');
+    const variantIdInput = root.querySelector('[data-variant-id]');
+    const productData = {% if product_obj %}{{ product_obj | json }}{% else %}null{% endif %};
+
+    if (form && productData) {
+      // Listen for variant changes from variant-selects component
+      const variantSelects = root.querySelector('variant-selects');
+      
+      function updateSizeAndPrice(variant) {
+        if (!variant) return;
+        
+        if (variantIdInput) variantIdInput.value = variant.id;
+        
+        // Update size
+        if (sizeEl && variant.options) {
+          const sizeOptionIndex = productData.options.findIndex(opt => 
+            opt.name.toLowerCase().includes('size')
+          );
+          if (sizeOptionIndex !== -1 && variant.options[sizeOptionIndex]) {
+            sizeEl.textContent = variant.options[sizeOptionIndex];
+          } else if (variant.title !== 'Default Title') {
+            sizeEl.textContent = variant.title;
+          }
+        }
+
+        // Update price
+        if (priceEl && variant.price) {
+          const priceText = new Intl.NumberFormat('{{ localization.language.iso_code }}', {
+            style: 'currency',
+            currency: '{{ cart.currency.iso_code }}'
+          }).format(variant.price / 100);
+          
+          const priceContainer = priceEl.querySelector('.price') || priceEl;
+          if (priceContainer.querySelector('.price-item--regular')) {
+            priceContainer.querySelector('.price-item--regular').textContent = priceText;
+          } else {
+            priceContainer.innerHTML = `<span class="price-item price-item--regular">${priceText}</span>`;
+          }
+        }
+      }
+
+      // Listen to variant-selects component events
+      if (variantSelects) {
+        variantSelects.addEventListener('change', (e) => {
+          const variantId = e.detail?.variant?.id || variantIdInput?.value;
+          if (variantId && productData.variants) {
+            const variant = productData.variants.find(v => v.id.toString() === variantId.toString());
+            updateSizeAndPrice(variant);
+          }
+        });
+      }
+
+      // Fallback: listen to direct option changes
+      const optionSelects = form.querySelectorAll('select[name^="options"], input[type="radio"][name^="options"]');
+      
+      function updateVariant() {
+        const selectedOptions = Array.from(optionSelects).map(select => {
+          if (select.type === 'radio') {
+            const checked = form.querySelector(`input[type="radio"][name="${select.name}"]:checked`);
+            return checked ? checked.value : '';
+          }
+          return select.value;
+        });
+
+        const variant = productData.variants.find(v => {
+          return v.options.every((opt, idx) => opt === selectedOptions[idx]);
+        });
+
+        updateSizeAndPrice(variant);
+      }
+
+      optionSelects.forEach(select => {
+        select.addEventListener('change', updateVariant);
+      });
+    }
   })();
 </script>
 
@@ -616,7 +889,18 @@
     { "type": "color", "id": "button_bg_color", "label": "Button background color", "default": "#000000" },
     { "type": "color", "id": "button_hover_bg_color", "label": "Button hover color", "default": "#333333" },
     { "type": "color", "id": "button_text_color", "label": "Button text color", "default": "#ffffff" },
-    { "type": "range", "id": "button_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Button border radius", "default": 12 }
+    { "type": "range", "id": "button_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Button border radius", "default": 12 },
+
+    { "type": "header", "content": "Minimalist PDP" },
+    { "type": "checkbox", "id": "append_color_option", "default": true, "label": "Append Color to title if option exists" },
+    { "type": "text", "id": "fit_label", "default": "FIT", "label": "Fit area label" },
+    { "type": "checkbox", "id": "show_selected_size", "default": true, "label": "Show selected size" },
+    { "type": "text", "id": "fit_small_label", "default": "SMALL", "label": "Fit scale left label" },
+    { "type": "text", "id": "fit_true_label", "default": "TRUE TO SIZE", "label": "Fit scale middle label" },
+    { "type": "text", "id": "fit_large_label", "default": "LARGE", "label": "Fit scale right label" },
+    { "type": "range", "id": "fit_position", "min": 0, "max": 100, "step": 1, "default": 50, "unit": "%", "label": "Fit marker position (%)", "info": "Tip: connect this to a product metafield using dynamic sources for per-product fit." },
+    { "type": "text", "id": "description_heading", "default": "DESCRIPTION", "label": "Description accordion heading" },
+    { "type": "text", "id": "shipping_heading", "default": "SHIPPING AND RETURNS", "label": "Shipping & Returns accordion heading" }
   ],
   "presets": [
     { "name": "Product glass card" }
