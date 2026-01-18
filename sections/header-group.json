@@ -18,7 +18,12 @@
         "logo": "shopify://shop_images/logo_copy.png",
         "menu": "main-menu",
         "text_color": "#ffffff",
-        "background_color": "#0d4c07"
+        "background_color": "#0d4c07",
+        "slide_height": "large",
+        "autoplay_enabled": true,
+        "autoplay_speed": 5000,
+        "button_bg_color": "#ffffff",
+        "button_text_color": "#000000"
       }
     },
     "hero_slideshow_header_TxDMyf": {
@@ -75,7 +80,6 @@
         "slide_9WGLJC",
         "slide_7MJUwU"
       ],
-      "disabled": true,
       "name": "Hero Slideshow Header",
       "settings": {
         "logo": "shopify://shop_images/logo_copy.png",
