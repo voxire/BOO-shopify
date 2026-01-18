@@ -1241,21 +1241,17 @@
        
        // Method 1: Use dedicated header color metafield (highest priority)
        {%- if header_color != blank -%}
-         try {
-           const headerColorValue = '{{ header_color }}';
-           console.log('Header color metafield found:', headerColorValue);
-           if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
-             bgColor = headerColorValue.trim();
-             console.log('Using header color metafield for header:', bgColor);
-             // Apply immediately
-             applyHeroHeaderColor(bgColor);
-             // Don't check fallbacks - header color takes absolute priority
-             return;
-           }
-           console.log('Header color value is empty or invalid');
-         } catch(e) {
-           console.log('Error processing header color:', e);
+         const headerColorValue = '{{ header_color }}';
+         console.log('Header color metafield found:', headerColorValue);
+         if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
+           bgColor = headerColorValue.trim();
+           console.log('Using header color metafield for header:', bgColor);
+           // Apply immediately
+           applyHeroHeaderColor(bgColor);
+           // Don't check fallbacks - header color takes absolute priority
+           return;
          }
+         console.log('Header color value is empty or invalid');
        {%- else -%}
          console.log('No header color metafield found, checking fallbacks...');
        {%- endif -%}
