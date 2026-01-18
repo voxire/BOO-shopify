@@ -257,43 +257,46 @@
     -webkit-backdrop-filter: blur(14px) saturate(160%);
   }
 
-  .pgc-{{ section_id }}__qtyRow{ display:flex; align-items:center; gap:12px; margin: 0 0 30px; }
+  .pgc-{{ section_id }}__qtyRow{ display:flex; align-items:center; gap:16px; margin: 0 0 2rem 0; }
 
   .pgc-{{ section_id }}__qtyBtn{
-    width:42px; height:42px;
-    border-radius: 12px;
-    border:1px solid rgba(255,255,255,.28);
-    background: rgba(255,255,255,.10);
+    width:50px; height:50px;
+    border-radius: 4px;
+    border:1px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.1);
     color: {{ section.settings.text_color }};
-    font-size:20px;
+    font-size:24px;
     cursor:pointer;
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
+    font-weight: 500;
   }
 
   .pgc-{{ section_id }}__qtyInput{
-    width:78px; height:42px;
+    width:90px; height:50px;
     text-align:center;
-    border-radius: 12px;
-    border:1px solid rgba(255,255,255,.28);
-    background: rgba(255,255,255,.10);
+    border-radius: 4px;
+    border:1px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.1);
     color: {{ section.settings.text_color }};
-    font-size:16px;
+    font-size:1.2rem;
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
+    font-weight: 500;
   }
 
   .pgc-{{ section_id }}__cta{
     width:100%;
     margin: 10px 0 26px;
-    padding:16px 22px;
+    padding:20px 24px;
     border:0;
     border-radius: {{ section.settings.button_border_radius }}px;
     cursor:pointer;
     background: {{ section.settings.button_bg_color }};
     color: {{ section.settings.button_text_color }};
-    font-weight: 800;
-    font-size: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
     transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
   }
   .pgc-{{ section_id }}__cta:hover{
@@ -323,12 +326,12 @@
   }
 
   .pgc-minimal__title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.5rem;
-    font-weight: 500;
+    margin: 0 0 2rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1.25;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
     color: {{ section.settings.text_color }};
   }
 
@@ -336,61 +339,68 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 2rem;
+    gap: 3rem;
     border-top: 1px solid rgba(255,255,255,0.12);
-    padding-top: 1.5rem;
-    margin-bottom: 2rem;
+    padding-top: 2rem;
+    margin-bottom: 2.5rem;
   }
 
   .pgc-minimal__left {
-    min-width: 180px;
+    min-width: 220px;
   }
 
   .pgc-minimal__kicker {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.8;
-    color: {{ section.settings.text_color }};
-    margin-bottom: 0.5rem;
-  }
-
-  .pgc-minimal__size {
-    margin-top: 0.5rem;
     font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
     color: {{ section.settings.text_color }};
+    margin-bottom: 0.75rem;
     font-weight: 500;
   }
 
+  .pgc-minimal__size {
+    margin-top: 0.75rem;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: {{ section.settings.text_color }};
+    font-weight: 600;
+  }
+
   .pgc-minimal__price {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     color: {{ section.settings.text_color }};
   }
 
   .pgc-minimal__price .price {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
   }
 
   .pgc-minimal__price .price-item {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .pgc-minimal__price .price-item--regular {
+    font-size: 1.5rem;
   }
 
   .pgc-fitscale {
     width: 100%;
-    max-width: 350px;
+    max-width: 400px;
   }
 
   .pgc-fitscale__labels {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
-    font-size: 0.8rem;
+    gap: 1.5rem;
+    font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.8;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
     color: {{ section.settings.text_color }};
+    font-weight: 500;
   }
 
   .pgc-fitscale__bar {
@@ -442,49 +452,50 @@
 
   .pgc-minimal__accordion .accordion__title {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: {{ section.settings.text_color }};
     font-weight: 500;
   }
 
   .pgc-minimal__variant-label {
     display: block;
-    margin: 1.5rem 0 0.75rem 0;
+    margin: 2rem 0 1rem 0;
     color: {{ section.settings.text_color }};
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     font-weight: 500;
   }
 
   .pgc-minimal__variant-select {
     width: 100%;
-    padding: 14px 16px;
+    padding: 18px 20px;
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.1);
     color: {{ section.settings.text_color }};
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 16px center;
-    padding-right: 40px;
+    background-position: right 20px center;
+    padding-right: 50px;
+    font-weight: 500;
   }
 
   .pgc-minimal__quantity-label {
     display: block;
-    margin: 1.5rem 0 0.75rem 0;
+    margin: 2rem 0 1rem 0;
     color: {{ section.settings.text_color }};
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     font-weight: 500;
   }
 
@@ -721,7 +732,7 @@
 
               <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}" data-variant-id>
               
-              <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 1.5rem; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.1em;">
+              <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 2rem; text-transform: uppercase;">
                 {{ section.settings.button_text }}
               </button>
             {% endform %}
