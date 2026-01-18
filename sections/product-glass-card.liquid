@@ -46,8 +46,11 @@
   {% assign glass_color = product_obj.metafields.custom.pgc_glass_color.value %}
 {% endif %}
 
-{% comment %} Use glass color metafield for header color {% endcomment %}
-{% assign header_color = glass_color %}
+{% comment %} Use dedicated header color metafield (pgc_header_color) for header color {% endcomment %}
+{% assign header_color = blank %}
+{% if product_obj and product_obj.metafields.custom.pgc_header_color and product_obj.metafields.custom.pgc_header_color.value != blank %}
+  {% assign header_color = product_obj.metafields.custom.pgc_header_color.value %}
+{% endif %}
 
 {% style %}
   .pgc-{{ section_id }}{
@@ -1190,16 +1193,27 @@
        
        let bgColor = null;
        
-       // Method 1: Use glass color metafield (highest priority)
-       {%- if glass_color != blank and glass_color != '#ffffff' -%}
-         const glassColorValue = '{{ glass_color }}';
-         if (glassColorValue && glassColorValue !== '#ffffff' && glassColorValue.trim() !== '') {
-           bgColor = glassColorValue;
-           console.log('Using glass color for header:', bgColor);
+       // Method 1: Use dedicated header color metafield (highest priority)
+       {%- if header_color != blank and header_color != '#ffffff' -%}
+         const headerColorValue = '{{ header_color }}';
+         if (headerColorValue && headerColorValue !== '#ffffff' && headerColorValue.trim() !== '') {
+           bgColor = headerColorValue;
+           console.log('Using header color metafield for header:', bgColor);
          }
        {%- endif -%}
        
-       // Method 2: Check if bg is a color (not an image URL) - only if glass color not set
+       // Method 2: Fallback to glass color if header color not set
+       if (!bgColor) {
+         {%- if glass_color != blank and glass_color != '#ffffff' -%}
+           const glassColorValue = '{{ glass_color }}';
+           if (glassColorValue && glassColorValue !== '#ffffff' && glassColorValue.trim() !== '') {
+             bgColor = glassColorValue;
+             console.log('Using glass color for header (fallback):', bgColor);
+           }
+         {%- endif -%}
+       }
+       
+       // Method 3: Check if bg is a color (not an image URL) - only if header/glass color not set
        if (!bgColor) {
          {%- if bg != blank -%}
            const bgValue = '{{ bg }}';
