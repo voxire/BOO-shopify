@@ -542,6 +542,16 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
     position: relative;
+    pointer-events: auto;
+    z-index: 1;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  
+  .pgc-minimal__size-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
   .pgc-minimal__size-btn:hover {
@@ -1083,46 +1093,73 @@
         });
       }
 
-      // Handle size button clicks
-      const sizeButtons = root.querySelectorAll('.pgc-minimal__size-btn');
-      sizeButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const value = btn.dataset.value;
-          const optionPos = btn.dataset.optionPosition;
-          
-          // Check if optionPos exists (including "0")
-          if (optionPos === undefined || optionPos === null || optionPos === '') {
-            console.warn('Size button missing option position:', btn);
-            return;
-          }
-          
-          // Find the hidden select for this option
-          const select = form.querySelector(`select[data-option-position="${optionPos}"]`);
-          if (!select) {
-            console.warn('Select not found for option position:', optionPos);
-            return;
-          }
-          
-          // Remove selected class from ALL buttons in this option group first
-          const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
-          allBtns.forEach(b => {
-            b.classList.remove('pgc-minimal__size-btn--selected');
-          });
-          
-          // Add selected class to clicked button
-          btn.classList.add('pgc-minimal__size-btn--selected');
-          
-          // Update hidden select value
-          select.value = value;
-          
-          // Trigger change event to update variant
-          const changeEvent = new Event('change', { bubbles: true });
-          select.dispatchEvent(changeEvent);
+      // Handle size button clicks - use event delegation for reliability
+      function handleSizeButtonClick(e) {
+        const btn = e.target.closest('.pgc-minimal__size-btn');
+        if (!btn) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const value = btn.dataset.value;
+        const optionPos = btn.dataset.optionPosition;
+        
+        console.log('Size button clicked:', { value, optionPos, btn });
+        
+        // Check if optionPos exists (including "0")
+        if (optionPos === undefined || optionPos === null || optionPos === '') {
+          console.warn('Size button missing option position:', btn);
+          return;
+        }
+        
+        // Find the hidden select for this option
+        const select = form.querySelector(`select[data-option-position="${optionPos}"]`);
+        if (!select) {
+          console.warn('Select not found for option position:', optionPos, 'Available selects:', form.querySelectorAll('select[name^="options"]'));
+          return;
+        }
+        
+        console.log('Found select:', select, 'Current value:', select.value, 'New value:', value);
+        
+        // Remove selected class from ALL buttons in this option group first
+        const allBtns = root.querySelectorAll(`.pgc-minimal__size-btn[data-option-position="${optionPos}"]`);
+        console.log('All buttons for option', optionPos, ':', allBtns.length);
+        allBtns.forEach(b => {
+          b.classList.remove('pgc-minimal__size-btn--selected');
         });
-      });
+        
+        // Add selected class to clicked button
+        btn.classList.add('pgc-minimal__size-btn--selected');
+        console.log('Button state updated');
+        
+        // Update hidden select value
+        select.value = value;
+        console.log('Select value updated to:', select.value);
+        
+        // Trigger change event to update variant
+        const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+        select.dispatchEvent(changeEvent);
+        console.log('Change event dispatched');
+      }
+
+      // Use event delegation on the form for better reliability
+      if (form) {
+        form.addEventListener('click', handleSizeButtonClick);
+        console.log('Event listener attached to form for size buttons');
+      }
+      
+      // Also attach directly to buttons as backup
+      setTimeout(() => {
+        const sizeButtons = root.querySelectorAll('.pgc-minimal__size-btn');
+        console.log('Found', sizeButtons.length, 'size buttons');
+        sizeButtons.forEach(btn => {
+          // Remove any existing listeners by cloning
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+          newBtn.addEventListener('click', handleSizeButtonClick);
+          console.log('Event listener attached to button:', newBtn.dataset.value, 'optionPos:', newBtn.dataset.optionPosition);
+        });
+      }, 100);
 
       // Listen for variant changes and update button states
       optionSelects.forEach(select => {
