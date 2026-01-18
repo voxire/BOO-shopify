@@ -345,7 +345,7 @@
   }
 
   .hero-header-{{ section_id }}__mobile-nav {
-    display: none;
+    display: none !important;
     position: absolute;
     top: 100%;
     left: 0;
@@ -357,7 +357,13 @@
   }
 
   .hero-header-{{ section_id }}__mobile-nav[aria-hidden="true"] {
-    display: none;
+    display: none !important;
+  }
+
+  .hero-header-{{ section_id }}__mobile-nav[aria-hidden="false"],
+  .hero-header-{{ section_id }}__mobile-nav.mobile-nav-open {
+    display: block !important;
+    visibility: visible !important;
   }
 
   .hero-header-{{ section_id }}__mobile-menu {
@@ -476,8 +482,8 @@
       margin-left: auto;
     }
 
-    .hero-header-{{ section_id }}__mobile-nav {
-      display: block;
+    .hero-header-{{ section_id }}__mobile-nav[aria-hidden="false"] {
+      display: block !important;
     }
 
     .hero-header-{{ section_id }}__logo {
@@ -734,62 +740,89 @@
 
 <script>
   (function() {
-    // Find the menu toggle button first (most reliable way)
-    const menuToggle = document.querySelector('[class*="hero-header-"][class*="__menu-toggle"]');
-    if (!menuToggle) return;
-    
-    // Find the section container by traversing up from the button
-    let section = menuToggle.closest('[class*="hero-header-"]');
-    if (!section) {
-      // Fallback: try to find by data-section-id
-      const sectionId = '{{ section_id }}';
-      section = document.querySelector('[data-section-id="' + sectionId + '"]');
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+      initMobileMenu();
     }
-    if (!section) return;
 
-    const mobileNav = section.querySelector('[class*="__mobile-nav"]');
-    if (!mobileNav) return;
+    function initMobileMenu() {
+      // Find the menu toggle button first (most reliable way)
+      const menuToggle = document.querySelector('[class*="hero-header-"][class*="__menu-toggle"]');
+      if (!menuToggle) {
+        console.warn('Hero header: Menu toggle button not found');
+        return;
+      }
+      
+      // Find the section container by traversing up from the button
+      let section = menuToggle.closest('[class*="hero-header-"]');
+      if (!section) {
+        // Fallback: try to find by data-section-id
+        const sectionId = '{{ section_id }}';
+        section = document.querySelector('[data-section-id="' + sectionId + '"]');
+      }
+      if (!section) {
+        console.warn('Hero header: Section container not found');
+        return;
+      }
 
-    // Ensure mobile nav starts hidden
-    if (mobileNav.getAttribute('aria-hidden') !== 'false') {
+      const mobileNav = section.querySelector('[class*="__mobile-nav"]');
+      if (!mobileNav) {
+        console.warn('Hero header: Mobile nav not found');
+        return;
+      }
+
+      // Ensure mobile nav starts hidden
+      mobileNav.setAttribute('aria-hidden', 'true');
+      mobileNav.classList.remove('mobile-nav-open');
       mobileNav.style.display = 'none';
-    }
+      mobileNav.style.visibility = 'hidden';
 
-    menuToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      
-      const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-      const newExpanded = !isExpanded;
-      
-      menuToggle.setAttribute('aria-expanded', newExpanded);
-      mobileNav.setAttribute('aria-hidden', !newExpanded);
+      menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        const newExpanded = !isExpanded;
+        
+        menuToggle.setAttribute('aria-expanded', newExpanded ? 'true' : 'false');
+        mobileNav.setAttribute('aria-hidden', newExpanded ? 'false' : 'true');
 
-      if (newExpanded) {
-        mobileNav.style.display = 'block';
-      } else {
-        mobileNav.style.display = 'none';
-      }
-    });
-
-    // Close menu when clicking on a link
-    const mobileLinks = mobileNav.querySelectorAll('[class*="__mobile-menu-link"], [class*="__mobile-icon"]');
-    mobileLinks.forEach(function(link) {
-      link.addEventListener('click', function() {
-        menuToggle.setAttribute('aria-expanded', 'false');
-        mobileNav.setAttribute('aria-hidden', 'true');
-        mobileNav.style.display = 'none';
+        if (newExpanded) {
+          mobileNav.classList.add('mobile-nav-open');
+          mobileNav.style.display = 'block';
+          mobileNav.style.visibility = 'visible';
+        } else {
+          mobileNav.classList.remove('mobile-nav-open');
+          mobileNav.style.display = 'none';
+          mobileNav.style.visibility = 'hidden';
+        }
       });
-    });
 
-    // Close menu when clicking outside
-    document.addEventListener('click', function(event) {
-      if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
-        menuToggle.setAttribute('aria-expanded', 'false');
-        mobileNav.setAttribute('aria-hidden', 'true');
-        mobileNav.style.display = 'none';
-      }
-    });
+      // Close menu when clicking on a link
+      const mobileLinks = mobileNav.querySelectorAll('[class*="__mobile-menu-link"], [class*="__mobile-icon"]');
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          mobileNav.classList.remove('mobile-nav-open');
+          mobileNav.style.display = 'none';
+          mobileNav.style.visibility = 'hidden';
+        });
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
+          menuToggle.setAttribute('aria-expanded', 'false');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          mobileNav.classList.remove('mobile-nav-open');
+          mobileNav.style.display = 'none';
+          mobileNav.style.visibility = 'hidden';
+        }
+      });
+    }
 
     {%- if is_home_page -%}
     // Slideshow functionality (only on home page)
