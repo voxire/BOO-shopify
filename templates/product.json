@@ -50,7 +50,7 @@
       "type": "apps",
       "blocks": {
         "trustoo_io_reviews_review_widget_Yp3pPN": {
-          "type": "shopify://apps/trustoo-io-reviews/blocks/review-widget/c8f15077-6475-4e86-ad06-b66038d5ba2c",
+          "type": "shopify://apps/trustwill-trustoo/blocks/review-widget/c8f15077-6475-4e86-ad06-b66038d5ba2c",
           "settings": {
             "product": ""
           }
@@ -63,14 +63,9 @@
         "include_margins": true
       }
     },
-    "17672965157e4e587e": {
-      "type": "apps",
-      "settings": {
-        "include_margins": true
-      }
-    },
     "product_glass_card_Ry4WQM": {
       "type": "product-glass-card",
+      "disabled": true,
       "name": "Product glass card",
       "settings": {
         "min_height": 880,
@@ -201,18 +196,7 @@
     },
     "17661676631c74cce8": {
       "type": "_blocks",
-      "settings": {}
-    },
-    "176616999306489daa": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "176617255127c4ddb3": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "1766191069f701efb3": {
-      "type": "_blocks",
+      "disabled": true,
       "settings": {}
     },
     "you_may_also_like_L4cyEY": {
@@ -234,149 +218,15 @@
         "show_badge": false,
         "badge_text": "More"
       }
-    },
-    "product_hotspot_5swap_BwcTBk": {
-      "type": "product-hotspot-5swap",
-      "name": "Product hotspots (5 swap)",
-      "settings": {
-        "section_bg": "#ffffff",
-        "max_width": 1400,
-        "pad_x": 24,
-        "pad_y": 20,
-        "height_desktop": 520,
-        "height_mobile": 360,
-        "radius": 22,
-        "radius_mobile": 18,
-        "card_bg": "#ffffff",
-        "image_fit": "cover",
-        "image_scale": 100,
-        "pos_x": 50,
-        "pos_y": 50,
-        "overlay_opacity": 0,
-        "btn_size": 44,
-        "btn_text_size": 13,
-        "btn_bg": "#ffffffd9",
-        "btn_color": "#111111",
-        "btn_border": "#0000001a"
-      }
-    },
-    "product_hotspot_5swap_7RqYm6": {
-      "type": "product-hotspot-5swap",
-      "name": "Product hotspots (5 swap)",
-      "settings": {
-        "section_bg": "#ffffff",
-        "max_width": 1400,
-        "pad_x": 24,
-        "pad_y": 20,
-        "height_desktop": 520,
-        "height_mobile": 360,
-        "radius": 22,
-        "radius_mobile": 18,
-        "card_bg": "#ffffff",
-        "image_fit": "cover",
-        "image_scale": 100,
-        "pos_x": 50,
-        "pos_y": 50,
-        "overlay_opacity": 0,
-        "btn_size": 44,
-        "btn_text_size": 13,
-        "btn_bg": "#ffffffd9",
-        "btn_color": "#111111",
-        "btn_border": "#0000001a"
-      }
-    },
-    "1767117953f6e8a3e1": {
-      "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_eb4d840_mttAtd": {
-          "type": "ai_gen_block_eb4d840",
-          "settings": {
-            "max_width": 1000,
-            "section_padding": 60,
-            "column_gap": 60,
-            "content_gap": 20,
-            "gradient_top": "#0d4c07",
-            "gradient_bottom": "#1a7a10",
-            "show_bg_text": true,
-            "bg_text_size": 140,
-            "bg_text_color": "#ffffff",
-            "bg_text_opacity": 10,
-            "media_max_width": 550,
-            "media_padding": 30,
-            "media_radius": 25,
-            "glass_bg": "#0d4c0766",
-            "glass_bg_fallback": "#0d4c07d9",
-            "glass_border": "#ffffff33",
-            "glass_shadow": "#00000033",
-            "glass_blur": 15,
-            "glass_radius": 35,
-            "glass_padding": 40,
-            "text_color": "#ffffff",
-            "title_size": 36,
-            "price_size": 22,
-            "label_size": 14,
-            "description_size": 14,
-            "variant_label": "Size (Age)",
-            "quantity_label": "Quantity",
-            "input_bg": "#1a7a1080",
-            "input_border": "#ffffff33",
-            "input_radius": 20,
-            "button_label": "Add to cart",
-            "button_bg": "#000000",
-            "button_text_color": "#ffffff",
-            "button_radius": 30,
-            "button_font_size": 16,
-            "divider_color": "#ffffff",
-            "divider_spacing": 15
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_eb4d840_mttAtd"
-      ],
-      "settings": {}
-    },
-    "17671199805efa083a": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "1767125007fa1243d3": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "1767125175860dbe57": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "176712676756f0026c": {
-      "type": "_blocks",
-      "settings": {}
-    },
-    "17671382213814a023": {
-      "type": "_blocks",
-      "settings": {}
     }
   },
   "order": [
     "product_glass_card_emPGMm",
     "17672968382ad3b9cf",
-    "17672965157e4e587e",
     "product_glass_card_Ry4WQM",
     "main",
     "related-products",
     "17661676631c74cce8",
-    "176616999306489daa",
-    "176617255127c4ddb3",
-    "1766191069f701efb3",
-    "you_may_also_like_L4cyEY",
-    "product_hotspot_5swap_BwcTBk",
-    "product_hotspot_5swap_7RqYm6",
-    "1767117953f6e8a3e1",
-    "17671199805efa083a",
-    "1767125007fa1243d3",
-    "1767125175860dbe57",
-    "176712676756f0026c",
-    "17671382213814a023"
+    "you_may_also_like_L4cyEY"
   ]
 }
