@@ -35,7 +35,11 @@
     max-width: 100%;
     overflow: hidden;
     border-radius: 0;
-    background: none;
+    {%- unless is_home_page -%}
+      background: {{ section.settings.background_color | default: 'transparent' }};
+    {%- else -%}
+      background: none;
+    {%- endunless -%}
   }
 
   {%- if is_home_page and first_slide_image != blank -%}

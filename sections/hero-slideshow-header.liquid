@@ -8,6 +8,10 @@
   assign slide_height = section.settings.slide_height | default: 'large'
   assign slides = section.blocks | where: 'type', 'slide'
   assign first_slide_image = slides.first.settings.image
+  assign is_home_page = false
+  if template.name == 'index'
+    assign is_home_page = true
+  endif
 -%}
 
 {%- style -%}
@@ -432,6 +436,11 @@
   }
 {%- endstyle -%}
 
+{%- comment -%} Only render on home page {%- endcomment -%}
+{%- unless is_home_page -%}
+  {%- comment -%} This section should only be used on home page. Use hero-header section instead. {%- endcomment -%}
+  <div style="display: none;"></div>
+{%- else -%}
 <div class="hero-slideshow-{{ section_id }}">
   <!-- Header -->
   <div class="hero-slideshow-{{ section_id }}__header">
@@ -628,6 +637,7 @@
     {%- endif -%}
   </div>
 </div>
+{%- endunless -%}
 
 <script>
   (function() {
