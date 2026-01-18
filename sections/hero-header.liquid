@@ -347,24 +347,30 @@
 
   .hero-header-{{ section_id }}__mobile-nav {
     display: none !important;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
-    z-index: 20;
+    padding: 5rem 2rem 2rem 2rem;
+    z-index: 9999;
+    overflow-y: auto;
+    max-height: 100vh;
   }
 
   .hero-header-{{ section_id }}__mobile-nav[aria-hidden="true"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 
   .hero-header-{{ section_id }}__mobile-nav[aria-hidden="false"],
   .hero-header-{{ section_id }}__mobile-nav.mobile-nav-open {
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .hero-header-{{ section_id }}__mobile-menu {
@@ -775,8 +781,9 @@
       // Ensure mobile nav starts hidden
       mobileNav.setAttribute('aria-hidden', 'true');
       mobileNav.classList.remove('mobile-nav-open');
-      mobileNav.style.display = 'none';
-      mobileNav.style.visibility = 'hidden';
+      mobileNav.style.setProperty('display', 'none', 'important');
+      mobileNav.style.setProperty('visibility', 'hidden', 'important');
+      mobileNav.style.setProperty('opacity', '0', 'important');
 
       function toggleMenu() {
         const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
@@ -787,12 +794,15 @@
 
         if (newExpanded) {
           mobileNav.classList.add('mobile-nav-open');
-          mobileNav.style.display = 'block';
-          mobileNav.style.visibility = 'visible';
+          // Use setProperty with important flag
+          mobileNav.style.setProperty('display', 'block', 'important');
+          mobileNav.style.setProperty('visibility', 'visible', 'important');
+          mobileNav.style.setProperty('opacity', '1', 'important');
         } else {
           mobileNav.classList.remove('mobile-nav-open');
-          mobileNav.style.display = 'none';
-          mobileNav.style.visibility = 'hidden';
+          mobileNav.style.setProperty('display', 'none', 'important');
+          mobileNav.style.setProperty('visibility', 'hidden', 'important');
+          mobileNav.style.setProperty('opacity', '0', 'important');
         }
       }
 
@@ -809,8 +819,9 @@
           menuToggle.setAttribute('aria-expanded', 'false');
           mobileNav.setAttribute('aria-hidden', 'true');
           mobileNav.classList.remove('mobile-nav-open');
-          mobileNav.style.display = 'none';
-          mobileNav.style.visibility = 'hidden';
+          mobileNav.style.setProperty('display', 'none', 'important');
+          mobileNav.style.setProperty('visibility', 'hidden', 'important');
+          mobileNav.style.setProperty('opacity', '0', 'important');
         });
       });
 
@@ -822,8 +833,9 @@
           menuToggle.setAttribute('aria-expanded', 'false');
           mobileNav.setAttribute('aria-hidden', 'true');
           mobileNav.classList.remove('mobile-nav-open');
-          mobileNav.style.display = 'none';
-          mobileNav.style.visibility = 'hidden';
+          mobileNav.style.setProperty('display', 'none', 'important');
+          mobileNav.style.setProperty('visibility', 'hidden', 'important');
+          mobileNav.style.setProperty('opacity', '0', 'important');
         }
       });
     }
