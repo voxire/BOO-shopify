@@ -104,6 +104,44 @@
     "main": {
       "type": "main-product",
       "blocks": {
+        "pdp_minimal_header": {
+          "type": "pdp_minimal_header",
+          "settings": {
+            "append_color_option": true,
+            "left_label": "Fit",
+            "show_selected_size": true,
+            "small_label": "Small",
+            "true_label": "True to size",
+            "large_label": "Large",
+            "fit_position": 50
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "heading": "DESCRIPTION"
+          }
+        },
+        "shipping_returns": {
+          "type": "shipping_returns",
+          "settings": {
+            "heading": "SHIPPING AND RETURNS"
+          }
+        },
         "vendor": {
           "type": "text",
           "settings": {
@@ -119,26 +157,8 @@
           "type": "price",
           "settings": {}
         },
-        "variant_picker": {
-          "type": "variant_picker",
-          "settings": {
-            "picker_type": "button",
-            "swatch_shape": "circle"
-          }
-        },
         "quantity_selector": {
           "type": "quantity_selector",
-          "settings": {}
-        },
-        "buy_buttons": {
-          "type": "buy_buttons",
-          "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true
-          }
-        },
-        "description": {
-          "type": "description",
           "settings": {}
         },
         "share": {
@@ -149,14 +169,11 @@
         }
       },
       "block_order": [
-        "vendor",
-        "title",
-        "price",
+        "pdp_minimal_header",
         "variant_picker",
-        "quantity_selector",
         "buy_buttons",
         "description",
-        "share"
+        "shipping_returns"
       ],
       "disabled": true,
       "settings": {

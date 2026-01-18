@@ -1488,7 +1488,163 @@ a.product__text {
     border: 0.1rem solid rgb(var(--color-background));
   }
 
-  .recipient-form > input[type='checkbox']:checked + label .icon-checkmark {
-    border: none;
+      .recipient-form > input[type='checkbox']:checked + label .icon-checkmark {
+        border: none;
+      }
+    }
+
+/* =========================
+   PDP Minimal (reference-style)
+   ========================= */
+.product__info-container.pdp-minimal {
+  max-width: 520px;
+}
+
+.pdp-minimal__header {
+  padding-top: 0.75rem;
+}
+
+.pdp-minimal__title {
+  margin: 0 0 1.25rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+}
+
+.pdp-minimal__fitrow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-top: 1px solid rgba(0,0,0,0.12);
+  padding-top: 1.25rem;
+}
+
+.pdp-minimal__left {
+  min-width: 140px;
+}
+
+.pdp-minimal__kicker {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.pdp-minimal__size {
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pdp-minimal__price {
+  margin-top: 0.35rem;
+}
+
+.pdp-minimal__price .price {
+  font-size: 0.95rem;
+}
+
+.pdp-fitscale {
+  width: 100%;
+  max-width: 300px;
+}
+
+.pdp-fitscale__labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.pdp-fitscale__bar {
+  position: relative;
+  height: 2px;
+  margin-top: 0.6rem;
+  background: rgba(0,0,0,0.35);
+}
+
+.pdp-fitscale__marker {
+  position: absolute;
+  top: 50%;
+  left: var(--fit-pos, 50%);
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  background: #fff;
+}
+
+/* Accordion styling to match reference (+ / - on the right) */
+.product__info-container.pdp-minimal .pdp-minimal__accordion details {
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.05rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion .summary__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion .icon-accordion,
+.product__info-container.pdp-minimal .pdp-minimal__accordion .icon-caret {
+  display: none !important;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion .accordion__title {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion summary::after {
+  content: "+";
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion details[open] summary::after {
+  content: "–";
+}
+
+.product__info-container.pdp-minimal .pdp-minimal__accordion .accordion__content {
+  padding: 0 0 1.15rem 0;
+}
+
+/* Mobile: stack left/right like the reference */
+@media screen and (max-width: 749px) {
+  .pdp-minimal__fitrow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pdp-minimal__left {
+    min-width: 0;
+  }
+
+  .pdp-fitscale {
+    max-width: none;
   }
 }
