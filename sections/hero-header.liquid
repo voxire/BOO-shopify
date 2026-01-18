@@ -12,6 +12,14 @@
   assign slide_height = section.settings.slide_height | default: 'large'
   assign slides = section.blocks | where: 'type', 'slide'
   assign first_slide_image = slides.first.settings.image
+  
+  # Get product header color if on product page
+  assign product_header_color = blank
+  if template.name == 'product' and product
+    if product.metafields.custom.pgc_header_color and product.metafields.custom.pgc_header_color.value != blank
+      assign product_header_color = product.metafields.custom.pgc_header_color.value
+    endif
+  endif
 -%}
 
 {%- style -%}
