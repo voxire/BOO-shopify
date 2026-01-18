@@ -56,6 +56,15 @@
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
+        },
+        "face_KWjEEg": {
+          "type": "face",
+          "settings": {
+            "image": "shopify://shop_images/FoxBoo.png",
+            "link": "",
+            "gradient_start": "#4a90e2",
+            "gradient_end": "#7b68ee"
+          }
         }
       },
       "block_order": [
@@ -63,7 +72,8 @@
         "face_jLktq7",
         "face_q8Wjqd",
         "face_M7Hj6q",
-        "face_QYqcdH"
+        "face_QYqcdH",
+        "face_KWjEEg"
       ],
       "name": "Hex Prism Carousel",
       "settings": {
