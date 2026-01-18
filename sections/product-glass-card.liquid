@@ -1240,13 +1240,17 @@
        let bgColor = null;
        
        // Method 1: Use dedicated header color metafield (highest priority)
-       {%- if header_color != blank -%}
-         const headerColorValue = '{{ header_color }}';
-         if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
-           bgColor = headerColorValue.trim();
-           console.log('Using header color metafield for header:', bgColor);
-           // Apply immediately
-           applyHeroHeaderColor(bgColor);
+       {%- if header_color != blank and header_color != '' -%}
+         (function() {
+           const headerColorValue = '{{ header_color }}';
+           if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
+             bgColor = headerColorValue.trim();
+             console.log('Using header color metafield for header:', bgColor);
+             // Apply immediately
+             applyHeroHeaderColor(bgColor);
+           }
+         })();
+         if (bgColor) {
            // Don't check fallbacks - header color takes absolute priority
            return;
          }
