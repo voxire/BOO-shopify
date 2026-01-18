@@ -1241,21 +1241,26 @@
        
        // Method 1: Use dedicated header color metafield (highest priority)
        {%- if header_color != blank -%}
-         const headerColorValue = '{{ header_color }}';
-         console.log('Header color metafield found:', headerColorValue);
-         if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
-           bgColor = headerColorValue.trim();
-           console.log('Using header color metafield for header:', bgColor);
-           // Apply immediately
-           applyHeroHeaderColor(bgColor);
-           // Don't check fallbacks - header color takes absolute priority
-           return;
-         } else {
-           console.log('Header color value is empty or invalid:', headerColorValue);
+         try {
+           const headerColorValue = '{{ header_color }}';
+           console.log('Header color metafield found:', headerColorValue);
+           if (headerColorValue && headerColorValue.trim() !== '' && headerColorValue !== 'blank') {
+             bgColor = headerColorValue.trim();
+             console.log('Using header color metafield for header:', bgColor);
+             // Apply immediately
+             applyHeroHeaderColor(bgColor);
+             // Don't check fallbacks - header color takes absolute priority
+             return;
+           }
+           console.log('Header color value is empty or invalid');
+         } catch(e) {
+           console.log('Error processing header color:', e);
          }
        {%- else -%}
          console.log('No header color metafield found, checking fallbacks...');
        {%- endif -%}
+       
+       // If we got here, header color was not set or was invalid, so continue with fallbacks
        
        // Method 2: Fallback to glass color if header color not set
        if (!bgColor) {
@@ -1337,13 +1342,17 @@
      
      // Run on page load
      if (document.readyState === 'loading') {
-       document.addEventListener('DOMContentLoaded', updateHeroHeaderBackground);
+       document.addEventListener('DOMContentLoaded', function() {
+         updateHeroHeaderBackground();
+       });
      } else {
        updateHeroHeaderBackground();
      }
      
      // Also run after a short delay to ensure styles are computed
-     setTimeout(updateHeroHeaderBackground, 500);
+     setTimeout(function() {
+       updateHeroHeaderBackground();
+     }, 500);
    })();
  </script>
 
