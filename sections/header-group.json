@@ -13,6 +13,18 @@
   "sections": {
     "hero_header_erazHd": {
       "type": "hero-header",
+      "blocks": {
+        "product_color_LerYMh": {
+          "type": "product_color",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "color": "#4a90e2"
+          }
+        }
+      },
+      "block_order": [
+        "product_color_LerYMh"
+      ],
       "name": "Hero Header",
       "settings": {
         "logo": "shopify://shop_images/logo_copy.png",
@@ -128,6 +140,7 @@
   },
   "order": [
     "hero_header_erazHd",
+    "hero_slideshow_header_TxDMyf",
     "header"
   ]
 }
