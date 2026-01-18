@@ -11,6 +11,16 @@
   "name": "t:sections.header.name",
   "type": "header",
   "sections": {
+    "hero_header_erazHd": {
+      "type": "hero-header",
+      "name": "Hero Header",
+      "settings": {
+        "logo": "shopify://shop_images/logo_copy.png",
+        "menu": "main-menu",
+        "text_color": "#ffffff",
+        "background_color": "#0d4c07"
+      }
+    },
     "hero_slideshow_header_TxDMyf": {
       "type": "hero-slideshow-header",
       "blocks": {
@@ -65,6 +75,7 @@
         "slide_9WGLJC",
         "slide_7MJUwU"
       ],
+      "disabled": true,
       "name": "Hero Slideshow Header",
       "settings": {
         "logo": "shopify://shop_images/logo_copy.png",
@@ -112,6 +123,7 @@
     }
   },
   "order": [
+    "hero_header_erazHd",
     "hero_slideshow_header_TxDMyf",
     "header"
   ]
