@@ -44,7 +44,7 @@
         "slide_ETHy6N": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Jan_17_2026_12_28_38_AM.png",
+            "image": "shopify://shop_images/BunBoo.jpg",
             "button_text": "Shop Now",
             "button_link": "",
             "button_position": "center",
@@ -55,7 +55,7 @@
         "slide_jF8PyN": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Jan_17_2026_12_31_20_AM.png",
+            "image": "shopify://shop_images/DinoBoo.jpg",
             "button_text": "Shop Now",
             "button_link": "shopify://products/light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "button_position": "center",
@@ -66,7 +66,7 @@
         "slide_9WGLJC": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Jan_17_2026_12_33_48_AM.png",
+            "image": "shopify://shop_images/FoxBoo.jpg",
             "button_text": "Shop Now",
             "button_link": "",
             "button_position": "center",
@@ -77,7 +77,18 @@
         "slide_7MJUwU": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Jan_17_2026_12_35_25_AM.png",
+            "image": "shopify://shop_images/GriBoo.jpg",
+            "button_text": "Shop Now",
+            "button_link": "",
+            "button_position": "center",
+            "button_horizontal": 50,
+            "button_vertical": 50
+          }
+        },
+        "slide_6QADXU": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Shaboo.jpg",
             "button_text": "Shop Now",
             "button_link": "",
             "button_position": "center",
@@ -90,7 +101,8 @@
         "slide_ETHy6N",
         "slide_jF8PyN",
         "slide_9WGLJC",
-        "slide_7MJUwU"
+        "slide_7MJUwU",
+        "slide_6QADXU"
       ],
       "name": "Hero Slideshow Header",
       "settings": {
