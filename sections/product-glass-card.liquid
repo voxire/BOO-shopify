@@ -31,8 +31,9 @@
 {% endif %}
 
 {% assign header_color = blank %}
-{% if product_obj and product_obj.metafields.custom.pgc_header_color and product_obj.metafields.custom.pgc_header_color.value != blank %}
-  {% assign header_color = product_obj.metafields.custom.pgc_header_color.value %}
+{% comment %} Use glass color metafield for header color {% endcomment %}
+{% if product_obj and product_obj.metafields.custom.pgc_glass_color and product_obj.metafields.custom.pgc_glass_color.value != blank %}
+  {% assign header_color = product_obj.metafields.custom.pgc_glass_color.value %}
 {% endif %}
 
 {% assign mid_text = blank %}
@@ -1192,7 +1193,7 @@
        
        let bgColor = null;
        
-       // Method 1: Use direct header color metafield (highest priority)
+       // Method 1: Use glass color metafield (highest priority)
        {%- if header_color != blank -%}
          const headerColorValue = '{{ header_color }}';
          if (headerColorValue) {
