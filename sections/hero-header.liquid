@@ -12,12 +12,6 @@
   assign slide_height = section.settings.slide_height | default: 'large'
   assign slides = section.blocks | where: 'type', 'slide'
   assign first_slide_image = slides.first.settings.image
-  
-  # Get product glass card background color if on product page
-  assign pgc_bg_color = blank
-  if template.name == 'product' and product.metafields.custom.pgc_background.value != blank
-    assign pgc_bg_color = product.metafields.custom.pgc_background.value
-  endif
 -%}
 
 {%- style -%}
@@ -42,15 +36,10 @@
     overflow: visible;
     border-radius: 0;
     {%- unless is_home_page -%}
-      {%- if pgc_bg_color != blank -%}
-        background: {{ pgc_bg_color }};
-      {%- else -%}
-        background: {{ section.settings.background_color | default: 'transparent' }};
-      {%- endif -%}
+      background: {{ section.settings.background_color | default: 'transparent' }};
     {%- else -%}
       background: none;
     {%- endunless -%}
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   {%- if is_home_page and first_slide_image != blank -%}

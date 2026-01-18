@@ -30,6 +30,11 @@
   {% assign bg = product_obj.metafields.custom.pgc_background.value %}
 {% endif %}
 
+{% assign header_color = blank %}
+{% if product_obj and product_obj.metafields.custom.pgc_header_color and product_obj.metafields.custom.pgc_header_color.value != blank %}
+  {% assign header_color = product_obj.metafields.custom.pgc_header_color.value %}
+{% endif %}
+
 {% assign mid_text = blank %}
 {% if product_obj and product_obj.metafields.custom.pgc_middle_text and product_obj.metafields.custom.pgc_middle_text.value != blank %}
   {% assign mid_text = product_obj.metafields.custom.pgc_middle_text.value %}
@@ -57,19 +62,6 @@
   .pgc-{{ section_id }}__bg{ position:absolute; inset:0; z-index:0; }
   .pgc-{{ section_id }}__bg img{ width:100%; height:100%; object-fit:cover; display:block; }
   .pgc-{{ section_id }}__bgPlaceholder{ width:100%; height:100%; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
-  
-  {%- if bg != blank -%}
-    {%- comment -%} Only set CSS variable if bg is a color, not an image URL {%- endcomment -%}
-    {%- assign bg_is_color = false -%}
-    {%- if bg contains '#' or bg contains 'rgb' or bg contains 'hsl' -%}
-      {%- assign bg_is_color = true -%}
-    {%- endif -%}
-    {%- if bg_is_color -%}
-      :root {
-        --pgc-background-color: {{ bg }};
-      }
-    {%- endif -%}
-  {%- endif -%}
 
   .pgc-{{ section_id }}__container{ position:relative; z-index:1; max-width:100%; margin:0; padding:0; }
 
@@ -667,7 +659,7 @@
 {% endstyle %}
 
 {% if product_obj %}
-<section class="pgc-{{ section_id }}" data-pgc-section-id="{{ section_id }}" {% if bg != blank %}data-pgc-bg="{{ bg }}"{% endif %}>
+<section class="pgc-{{ section_id }}">
   <div class="pgc-{{ section_id }}__bg" aria-hidden="true">
     {% if bg %}
       <img src="{{ bg | image_url: width: 2400 }}" alt="" loading="lazy">
@@ -1187,162 +1179,125 @@
         });
       }
       
-      // Initial update
-      updateVariant();
-    }
-  })();
-  
-  // Update hero header background color based on product glass card background
-  (function() {
-    function updateHeroHeaderBackground() {
-      const pgcSection = document.querySelector('.pgc-{{ section_id }}');
-      if (!pgcSection) return;
-      
-      // Try multiple methods to get the background color
-      let bgColor = null;
-      
-      // Method 1: Check CSS variable
-      const cssVar = getComputedStyle(document.documentElement).getPropertyValue('--pgc-background-color').trim();
-      if (cssVar) {
-        bgColor = cssVar;
-      }
-      
-      // Method 2: Get computed background color from the section
-      if (!bgColor) {
-        const computedStyle = window.getComputedStyle(pgcSection);
-        const sectionBg = computedStyle.backgroundColor;
-        // Check if it's not transparent or white
-        if (sectionBg && sectionBg !== 'rgba(0, 0, 0, 0)' && sectionBg !== 'transparent' && sectionBg !== 'rgb(255, 255, 255)') {
-          bgColor = sectionBg;
-        }
-      }
-      
-      // Method 3: Check the background element
-      if (!bgColor) {
-        const bgElement = pgcSection.querySelector('.pgc-{{ section_id }}__bg');
-        if (bgElement) {
-          const bgComputed = window.getComputedStyle(bgElement);
-          const bgElementColor = bgComputed.backgroundColor;
-          if (bgElementColor && bgElementColor !== 'rgba(0, 0, 0, 0)' && bgElementColor !== 'transparent') {
-            bgColor = bgElementColor;
-          }
-        }
-      }
-      
-      // Method 4: Check background placeholder
-      if (!bgColor) {
-        const bgPlaceholder = pgcSection.querySelector('.pgc-{{ section_id }}__bgPlaceholder');
-        if (bgPlaceholder) {
-          const placeholderComputed = window.getComputedStyle(bgPlaceholder);
-          const placeholderBg = placeholderComputed.backgroundColor;
-          if (placeholderBg && placeholderBg !== 'rgba(0, 0, 0, 0)' && placeholderBg !== 'transparent') {
-            bgColor = placeholderBg;
-          }
-        }
-      }
-      
-      // Method 5: If bg is a color (not an image URL), use it directly
-      {%- if bg != blank -%}
-        const bgValue = '{{ bg }}';
-        // Check if it's a color (starts with #, rgb, hsl, or is a named color)
-        if (bgValue && (bgValue.startsWith('#') || bgValue.startsWith('rgb') || bgValue.startsWith('hsl') || /^[a-z]+$/i.test(bgValue))) {
-          bgColor = bgValue;
-        }
-      {%- endif -%}
-      
-      // Method 6: Extract color from background image using canvas
-      function extractColorFromImage(img, callback) {
-        try {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = 50;
-          canvas.height = 50;
-          ctx.drawImage(img, 0, 0, 50, 50);
-          
-          // Sample center pixel
-          const imageData = ctx.getImageData(25, 25, 1, 1);
-          const pixel = imageData.data;
-          const r = pixel[0];
-          const g = pixel[1];
-          const b = pixel[2];
-          
-          // Convert to hex
-          const hexColor = '#' + [r, g, b].map(x => {
-            const hex = x.toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-          }).join('');
-          
-          callback(hexColor);
-        } catch (e) {
-          console.warn('Could not extract color from image:', e);
-          callback(null);
-        }
-      }
-      
-      // Function to apply color to hero header
-      function applyHeroHeaderColor(color) {
-        if (!color) return;
-        
-        const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
-        
-        heroHeaders.forEach(heroHeader => {
-          // Skip if it's the home page slideshow header
-          if (heroHeader.querySelector('[class*="__slideshow"]')) {
-            return;
-          }
-          
-          // Update background color
-          heroHeader.style.setProperty('background', color, 'important');
-          heroHeader.style.setProperty('background-color', color, 'important');
-          
-          // Also update the header element inside if it exists
-          const headerElement = heroHeader.querySelector('[class*="__header"]');
-          if (headerElement && !heroHeader.querySelector('[class*="__slideshow"]')) {
-            headerElement.style.setProperty('background', color, 'important');
-            headerElement.style.setProperty('background-color', color, 'important');
-          }
-        });
-        
-        console.log('Hero header background updated to:', color);
-      }
-      
-      // Apply the background color to hero header if we found one
-      if (bgColor) {
-        applyHeroHeaderColor(bgColor);
-      } else {
-        // Try to extract color from background image
-        const bgImg = pgcSection.querySelector('.pgc-{{ section_id }}__bg img');
-        if (bgImg) {
-          if (bgImg.complete && bgImg.naturalWidth > 0) {
-            extractColorFromImage(bgImg, function(color) {
-              if (color) {
-                applyHeroHeaderColor(color);
-              }
-            });
-          } else {
-            bgImg.addEventListener('load', function() {
-              extractColorFromImage(bgImg, function(color) {
-                if (color) {
-                  applyHeroHeaderColor(color);
-                }
-              });
-            }, { once: true });
-          }
-        }
-      }
-    }
-    
-    // Run on page load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', updateHeroHeaderBackground);
-    } else {
-      updateHeroHeaderBackground();
-    }
-    
-    // Also run after a short delay to ensure styles are computed
-    setTimeout(updateHeroHeaderBackground, 500);
-  })();
-</script>
+       // Initial update
+       updateVariant();
+     }
+   })();
+   
+   // Update hero header background color based on product
+   (function() {
+     function updateHeroHeaderBackground() {
+       const pgcSection = document.querySelector('.pgc-{{ section_id }}');
+       if (!pgcSection) return;
+       
+       let bgColor = null;
+       
+       // Method 1: Use direct header color metafield (highest priority)
+       {%- if header_color != blank -%}
+         const headerColorValue = '{{ header_color }}';
+         if (headerColorValue) {
+           bgColor = headerColorValue;
+         }
+       {%- endif -%}
+       
+       // Method 2: Check if bg is a color (not an image URL)
+       if (!bgColor) {
+         {%- if bg != blank -%}
+           const bgValue = '{{ bg }}';
+           // Check if it's a color (starts with #, rgb, hsl, or is a named color)
+           if (bgValue && (bgValue.startsWith('#') || bgValue.startsWith('rgb') || bgValue.startsWith('hsl') || /^[a-z]+$/i.test(bgValue))) {
+             bgColor = bgValue;
+           }
+         {%- endif -%}
+       }
+       
+       // Method 2: Extract color from background image using canvas
+       function extractColorFromImage(img, callback) {
+         try {
+           const canvas = document.createElement('canvas');
+           const ctx = canvas.getContext('2d');
+           canvas.width = 50;
+           canvas.height = 50;
+           ctx.drawImage(img, 0, 0, 50, 50);
+           
+           // Sample center pixel
+           const imageData = ctx.getImageData(25, 25, 1, 1);
+           const pixel = imageData.data;
+           const r = pixel[0];
+           const g = pixel[1];
+           const b = pixel[2];
+           
+           // Convert to hex
+           const hexColor = '#' + [r, g, b].map(x => {
+             const hex = x.toString(16);
+             return hex.length === 1 ? '0' + hex : hex;
+           }).join('');
+           
+           callback(hexColor);
+         } catch (e) {
+           console.warn('Could not extract color from image:', e);
+           callback(null);
+         }
+       }
+       
+       // Function to apply color to hero header
+       function applyHeroHeaderColor(color) {
+         if (!color) return;
+         
+         const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
+         
+         heroHeaders.forEach(heroHeader => {
+           // Skip if it's the home page slideshow header
+           if (heroHeader.querySelector('[class*="__slideshow"]')) {
+             return;
+           }
+           
+           // Update background color
+           const headerElement = heroHeader.querySelector('[class*="__header"]');
+           if (headerElement) {
+             headerElement.style.setProperty('background', color, 'important');
+             headerElement.style.setProperty('background-color', color, 'important');
+           }
+         });
+       }
+       
+       // Apply the background color to hero header if we found one
+       if (bgColor) {
+         applyHeroHeaderColor(bgColor);
+       } else {
+         // Try to extract color from background image
+         const bgImg = pgcSection.querySelector('.pgc-{{ section_id }}__bg img');
+         if (bgImg) {
+           if (bgImg.complete && bgImg.naturalWidth > 0) {
+             extractColorFromImage(bgImg, function(color) {
+               if (color) {
+                 applyHeroHeaderColor(color);
+               }
+             });
+           } else {
+             bgImg.addEventListener('load', function() {
+               extractColorFromImage(bgImg, function(color) {
+                 if (color) {
+                   applyHeroHeaderColor(color);
+                 }
+               });
+             }, { once: true });
+           }
+         }
+       }
+     }
+     
+     // Run on page load
+     if (document.readyState === 'loading') {
+       document.addEventListener('DOMContentLoaded', updateHeroHeaderBackground);
+     } else {
+       updateHeroHeaderBackground();
+     }
+     
+     // Also run after a short delay to ensure styles are computed
+     setTimeout(updateHeroHeaderBackground, 500);
+   })();
+ </script>
 
 {% schema %}
 {
