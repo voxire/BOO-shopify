@@ -330,17 +330,18 @@
     height: 2px;
     background-color: {{ text_color }};
     transition: transform 0.3s ease, opacity 0.3s ease;
+    transform-origin: center;
   }
 
-  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-line:nth-child(1) {
+  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-icon .hero-header-{{ section_id }}__menu-toggle-line:nth-child(1) {
     transform: rotate(45deg) translate(7px, 7px);
   }
 
-  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-line:nth-child(2) {
+  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-icon .hero-header-{{ section_id }}__menu-toggle-line:nth-child(2) {
     opacity: 0;
   }
 
-  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-line:nth-child(3) {
+  .hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"] .hero-header-{{ section_id }}__menu-toggle-icon .hero-header-{{ section_id }}__menu-toggle-line:nth-child(3) {
     transform: rotate(-45deg) translate(7px, -7px);
   }
 
@@ -740,36 +741,34 @@
 
 <script>
   (function() {
-    // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileMenu);
-    } else {
-      initMobileMenu();
-    }
-
+    const sectionId = '{{ section_id }}';
+    
     function initMobileMenu() {
-      // Find the menu toggle button first (most reliable way)
-      const menuToggle = document.querySelector('[class*="hero-header-"][class*="__menu-toggle"]');
+      // Try multiple selector strategies
+      let menuToggle = document.querySelector('[id="mobile-nav-' + sectionId + '"]')?.previousElementSibling?.querySelector('[class*="__menu-toggle"]');
+      
       if (!menuToggle) {
-        console.warn('Hero header: Menu toggle button not found');
+        menuToggle = document.querySelector('[aria-controls="mobile-nav-' + sectionId + '"]');
+      }
+      
+      if (!menuToggle) {
+        menuToggle = document.querySelector('[class*="hero-header-"][class*="__menu-toggle"]');
+      }
+      
+      if (!menuToggle) {
+        console.error('Hero header: Menu toggle button not found');
         return;
       }
       
-      // Find the section container by traversing up from the button
-      let section = menuToggle.closest('[class*="hero-header-"]');
-      if (!section) {
-        // Fallback: try to find by data-section-id
-        const sectionId = '{{ section_id }}';
-        section = document.querySelector('[data-section-id="' + sectionId + '"]');
-      }
-      if (!section) {
-        console.warn('Hero header: Section container not found');
+      const mobileNavId = menuToggle.getAttribute('aria-controls');
+      if (!mobileNavId) {
+        console.error('Hero header: Mobile nav ID not found');
         return;
       }
-
-      const mobileNav = section.querySelector('[class*="__mobile-nav"]');
+      
+      const mobileNav = document.getElementById(mobileNavId);
       if (!mobileNav) {
-        console.warn('Hero header: Mobile nav not found');
+        console.error('Hero header: Mobile nav element not found');
         return;
       }
 
@@ -779,10 +778,7 @@
       mobileNav.style.display = 'none';
       mobileNav.style.visibility = 'hidden';
 
-      menuToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        
+      function toggleMenu() {
         const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
         const newExpanded = !isExpanded;
         
@@ -798,6 +794,12 @@
           mobileNav.style.display = 'none';
           mobileNav.style.visibility = 'hidden';
         }
+      }
+
+      menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleMenu();
       });
 
       // Close menu when clicking on a link
@@ -814,7 +816,9 @@
 
       // Close menu when clicking outside
       document.addEventListener('click', function(event) {
-        if (!section.contains(event.target) && mobileNav.getAttribute('aria-hidden') === 'false') {
+        if (mobileNav.getAttribute('aria-hidden') === 'false' && 
+            !menuToggle.contains(event.target) && 
+            !mobileNav.contains(event.target)) {
           menuToggle.setAttribute('aria-expanded', 'false');
           mobileNav.setAttribute('aria-hidden', 'true');
           mobileNav.classList.remove('mobile-nav-open');
@@ -822,6 +826,14 @@
           mobileNav.style.visibility = 'hidden';
         }
       });
+    }
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+      // Small delay to ensure all elements are rendered
+      setTimeout(initMobileMenu, 100);
     }
 
     {%- if is_home_page -%}
