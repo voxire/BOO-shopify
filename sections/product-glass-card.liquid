@@ -636,9 +636,10 @@
               </div>
             </div>
 
-            {% form 'product', product_obj, id: 'product-form-pgc-' | append: section_id %}
+            {%- assign product_form_id = 'product-form-pgc-' | append: section_id -%}
+            {% form 'product', product_obj, id: product_form_id %}
               {% unless product_obj.has_only_default_variant %}
-                {% render 'product-variant-picker', product: product_obj, block: section, product_form_id: 'product-form-pgc-' | append: section_id %}
+                {% render 'product-variant-picker', product: product_obj, block: section, product_form_id: product_form_id %}
               {% endunless %}
 
               <div class="product-form__quantity" style="margin: 1.5rem 0;">
