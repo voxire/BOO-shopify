@@ -18,7 +18,7 @@
           "type": "product_color",
           "settings": {
             "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "color": "#4a90e2"
+            "color": "#0d4c07"
           }
         }
       },
@@ -30,7 +30,7 @@
         "logo": "shopify://shop_images/logo_copy.png",
         "menu": "main-menu",
         "text_color": "#ffffff",
-        "background_color": "#0d4c07",
+        "background_color": "rgba(0,0,0,0)",
         "slide_height": "large",
         "autoplay_enabled": true,
         "autoplay_speed": 5000,
