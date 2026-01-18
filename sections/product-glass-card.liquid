@@ -1009,13 +1009,13 @@
         if (variantIdInput) variantIdInput.value = variant.id;
         
         // Update size
-        if (sizeEl && variant.options) {
+        if (sizeEl && variant.options && productData && productData.options) {
           const sizeOptionIndex = productData.options.findIndex(opt => 
-            opt.name.toLowerCase().includes('size')
+            opt && opt.name && opt.name.toLowerCase().includes('size')
           );
           if (sizeOptionIndex !== -1 && variant.options[sizeOptionIndex]) {
             sizeEl.textContent = variant.options[sizeOptionIndex];
-          } else if (variant.title !== 'Default Title') {
+          } else if (variant.title && variant.title !== 'Default Title') {
             sizeEl.textContent = variant.title;
           }
         }
