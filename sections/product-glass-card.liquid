@@ -57,6 +57,12 @@
   .pgc-{{ section_id }}__bg{ position:absolute; inset:0; z-index:0; }
   .pgc-{{ section_id }}__bg img{ width:100%; height:100%; object-fit:cover; display:block; }
   .pgc-{{ section_id }}__bgPlaceholder{ width:100%; height:100%; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
+  
+  {%- if bg != blank -%}
+    :root {
+      --pgc-background-color: {{ bg }};
+    }
+  {%- endif -%}
 
   .pgc-{{ section_id }}__container{ position:relative; z-index:1; max-width:100%; margin:0; padding:0; }
 
@@ -1177,6 +1183,35 @@
       // Initial update
       updateVariant();
     }
+  })();
+  
+  // Update hero header background color based on product glass card background
+  (function() {
+    {%- if bg != blank -%}
+      const bgColor = '{{ bg }}';
+      if (bgColor) {
+        // Find hero header sections
+        const heroHeaders = document.querySelectorAll('[class*="hero-header"]');
+        
+        heroHeaders.forEach(heroHeader => {
+          // Skip if it's the home page slideshow header
+          if (heroHeader.querySelector('[class*="__slideshow"]')) {
+            return;
+          }
+          
+          // Update background color
+          heroHeader.style.setProperty('background', bgColor, 'important');
+          heroHeader.style.setProperty('background-color', bgColor, 'important');
+          
+          // Also update the header element inside if it exists
+          const headerElement = heroHeader.querySelector('[class*="__header"]');
+          if (headerElement && !heroHeader.querySelector('[class*="__slideshow"]')) {
+            headerElement.style.setProperty('background', bgColor, 'important');
+            headerElement.style.setProperty('background-color', bgColor, 'important');
+          }
+        });
+      }
+    {%- endif -%}
   })();
 </script>
 
