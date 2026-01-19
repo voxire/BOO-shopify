@@ -77,6 +77,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/BunBoo.jpg",
+            "mobile_image": "shopify://shop_images/BunBoo_bd05b705-bf69-4ed9-aa0c-152cd97a861a.jpg",
             "title": "",
             "subtitle": "",
             "text_position": "center",
