@@ -34,7 +34,8 @@
     position: relative;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     border-radius: 0;
     background: none;
   }
@@ -415,13 +416,16 @@
 
   .hero-slideshow-{{ section_id }}__mobile-nav {
     display: block !important;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: var(--hs-header-h, 0px);
     left: 0;
     right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: calc(100vh - var(--hs-header-h, 0px));
     background: #ffffff;
     padding: 2rem;
-    z-index: 9999 !important;
+    z-index: 999999 !important;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -432,6 +436,23 @@
                 padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     will-change: max-height, opacity, transform;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999998;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .hero-slideshow-{{ section_id }}__mobile-backdrop.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .hero-slideshow-{{ section_id }}__mobile-nav[aria-hidden="true"] {
@@ -451,7 +472,7 @@
 
   .hero-slideshow-{{ section_id }}__mobile-nav[aria-hidden="false"],
   .hero-slideshow-{{ section_id }}__mobile-nav.mobile-nav-open {
-    max-height: 80vh !important;
+    max-height: 100vh !important;
     padding: 2rem !important;
     opacity: 1 !important;
     transform: translateY(0) !important;
@@ -459,7 +480,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
-    z-index: 9999 !important;
+    z-index: 999999 !important;
     transition: max-height 0.4s cubic-bezier(0, 0, 0.2, 1), 
                 opacity 0.4s cubic-bezier(0, 0, 0.2, 1), 
                 transform 0.4s cubic-bezier(0, 0, 0.2, 1), 
@@ -714,7 +735,7 @@
 
         <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
           <ul class="hero-slideshow-{{ section_id }}__menu">
-            {%- for link in linklists[menu].links -%}
+            {%- for link in menu.links -%}
               <li class="hero-slideshow-{{ section_id }}__menu-item">
                 <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__menu-link">
                   {{ link.title }}
@@ -766,6 +787,7 @@
     </div>
 
     {%- if menu != blank -%}
+      <div class="hero-slideshow-{{ section_id }}__mobile-backdrop" aria-hidden="true"></div>
       <nav
         class="hero-slideshow-{{ section_id }}__mobile-nav"
         id="mobile-nav-{{ section_id }}"
@@ -774,7 +796,7 @@
         aria-hidden="true"
       >
         <ul class="hero-slideshow-{{ section_id }}__mobile-menu">
-          {%- for link in linklists[menu].links -%}
+          {%- for link in menu.links -%}
             <li>
               <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__mobile-menu-link">
                 {{ link.title }}
@@ -1031,28 +1053,61 @@
       const menuToggle = sectionEl.querySelector('.hero-slideshow-' + sectionId + '__menu-toggle');
       const mobileNavId = menuToggle ? menuToggle.getAttribute('aria-controls') : null;
       const mobileNav = mobileNavId ? document.getElementById(mobileNavId) : null;
+      const header = sectionEl.querySelector('.hero-slideshow-' + sectionId + '__header');
+      const backdrop = sectionEl.querySelector('.hero-slideshow-' + sectionId + '__mobile-backdrop');
       
       if (!menuToggle || !mobileNav) {
         console.warn('Hero Slideshow Header: Mobile menu elements not found');
         return;
       }
 
+      // Calculate header height and set CSS variable
+      function updateHeaderHeight() {
+        if (header) {
+          const h = Math.ceil(header.getBoundingClientRect().height);
+          mobileNav.style.setProperty('--hs-header-h', h + 'px');
+        }
+      }
+      
+      // Initial calculation
+      updateHeaderHeight();
+      
+      // Update on resize
+      window.addEventListener('resize', updateHeaderHeight);
+
       // Ensure mobile nav starts hidden
       mobileNav.setAttribute('aria-hidden', 'true');
       mobileNav.classList.remove('mobile-nav-open');
       menuToggle.setAttribute('aria-expanded', 'false');
+      if (backdrop) {
+        backdrop.setAttribute('aria-hidden', 'true');
+        backdrop.classList.remove('active');
+      }
 
       function toggleMenu() {
         const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
         const newExpanded = !isExpanded;
+        
+        // Update header height before opening
+        if (newExpanded) {
+          updateHeaderHeight();
+        }
         
         menuToggle.setAttribute('aria-expanded', newExpanded ? 'true' : 'false');
         mobileNav.setAttribute('aria-hidden', newExpanded ? 'false' : 'true');
 
         if (newExpanded) {
           mobileNav.classList.add('mobile-nav-open');
+          if (backdrop) {
+            backdrop.setAttribute('aria-hidden', 'false');
+            backdrop.classList.add('active');
+          }
         } else {
           mobileNav.classList.remove('mobile-nav-open');
+          if (backdrop) {
+            backdrop.setAttribute('aria-hidden', 'true');
+            backdrop.classList.remove('active');
+          }
         }
       }
 
@@ -1060,6 +1115,10 @@
         menuToggle.setAttribute('aria-expanded', 'false');
         mobileNav.setAttribute('aria-hidden', 'true');
         mobileNav.classList.remove('mobile-nav-open');
+        if (backdrop) {
+          backdrop.setAttribute('aria-hidden', 'true');
+          backdrop.classList.remove('active');
+        }
       }
 
       // Toggle button click
@@ -1077,7 +1136,7 @@
         });
       });
 
-      // Close menu when clicking outside
+      // Close menu when clicking outside or on backdrop
       document.addEventListener('click', function(event) {
         if (mobileNav.getAttribute('aria-hidden') === 'false' && 
             !menuToggle.contains(event.target) && 
@@ -1085,6 +1144,13 @@
           closeMenu();
         }
       });
+      
+      // Backdrop click handler
+      if (backdrop) {
+        backdrop.addEventListener('click', function() {
+          closeMenu();
+        });
+      }
 
       // Close menu on Escape key
       document.addEventListener('keydown', function(event) {
