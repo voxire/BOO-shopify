@@ -305,8 +305,10 @@
     height:{{ section.settings.tile_h }}px;
     border-radius:{{ section.settings.radius }}px;
     box-shadow:0 18px 45px rgba(0,0,0,.14);
-    transition:filter .35s ease,opacity .35s ease,transform .35s ease;
     background: {{ section.settings.tile_bg }};
+    /* Optimized transitions - only transform and opacity (GPU accelerated) */
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* media fills tile */
@@ -321,8 +323,9 @@
     display:block;
     object-fit:{{ section.settings.image_fit }};
     object-position:{{ section.settings.image_pos_x }}% {{ section.settings.image_pos_y }}%;
-    transform:scale({{ section.settings.image_scale | divided_by: 100.0 }});
-    transition:transform .5s ease;
+    transform: translate3d(0, 0, 0) scale({{ section.settings.image_scale | divided_by: 100.0 }});
+    /* Optimized transition - only transform (GPU accelerated) */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* overlay */
@@ -354,80 +357,121 @@
     pointer-events:none;
   }
 
-  /* === Smooth hover system (no :has) === */
+  /* === Optimized smooth hover system (GPU-accelerated) === */
   .scg-{{ sid }}__wrap {
-    /* helps isolate paint work */
+    /* Isolate paint work and enable GPU acceleration */
     contain: layout paint style;
+    transform: translate3d(0, 0, 0);
+    will-change: contents;
   }
 
   .scg-{{ sid }}__tile {
-    will-change: transform, opacity;
-    transform: translateZ(0);
+    /* GPU acceleration - only set will-change when hovering */
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
+    perspective: 1000px;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Only apply will-change when actually hovering for better performance */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile {
+    will-change: transform, opacity;
   }
 
   .scg-{{ sid }}__media {
-    will-change: transform, filter;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
   }
 
   .scg-{{ sid }}__media img {
-    will-change: transform, filter;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                filter 0.2s ease-out;
   }
 
   /* Active tile hover effects */
-  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__hover-text{opacity:1}
-  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__overlay{opacity:{{ section.settings.overlay_hover_opacity | divided_by: 100.0 }}}
-  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__media img{
-    transform:scale({{ section.settings.image_scale | divided_by: 100.0 }}) scale({{ section.settings.hover_zoom | divided_by: 100.0 }});
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__hover-text {
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+  }
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__overlay {
+    opacity: {{ section.settings.overlay_hover_opacity | divided_by: 100.0 }};
+    transition: opacity 0.2s ease-out;
+  }
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__media img {
+    transform: translate3d(0, 0, 0) scale({{ section.settings.image_scale | divided_by: 100.0 }}) scale({{ section.settings.hover_zoom | divided_by: 100.0 }});
   }
 
-  /* When hovering any tile (JS adds .scg-is-hovering on wrap) */
+  /* When hovering any tile - use opacity and scale instead of blur */
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile {
-    opacity: 0.55;
-    transform: translateZ(0) scale(0.985);
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0) scale(0.98);
   }
 
-  /* Blur ONLY the image layer of non-active tiles (much faster than blurring the whole card) */
+  /* Replace expensive blur with brightness/contrast filter (much faster) */
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
-    filter: blur(5px);
+    filter: brightness(0.7) contrast(0.9);
+    transform: translate3d(0, 0, 0) scale(0.95);
   }
 
-  /* Active tile pops */
+  /* Alternative: Use overlay pseudo-element for dimming effect (even faster) */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+  }
+
+  /* Active tile pops - smooth transform */
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile.scg-is-active {
     opacity: 1;
-    transform: translateY(-14px) scale(1.03) translateZ(0);
+    transform: translate3d(0, -14px, 0) scale(1.03);
     z-index: 3;
   }
 
   /* Show hover text only on active tile */
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__hover-text {
     opacity: 0;
+    transition: opacity 0.15s ease-out;
   }
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__hover-text {
     opacity: 1;
+    transition: opacity 0.2s ease-out 0.1s;
   }
 
   /* Optional: reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
     .scg-{{ sid }}__tile,
-    .scg-{{ sid }}__media img {
+    .scg-{{ sid }}__media img,
+    .scg-{{ sid }}__tile::before {
       transition: none !important;
     }
     .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
       filter: none !important;
+      transform: translate3d(0, 0, 0) !important;
+    }
+    .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active)::before {
+      display: none !important;
     }
   }
 
-  /* Disable blur interaction on touch devices (no hover) */
+  /* Disable hover effects on touch devices (no hover) */
   @media (hover: none) {
     .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile {
       opacity: 1;
-      transform: none;
+      transform: translate3d(0, 0, 0) !important;
     }
     .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
-      filter: none;
+      filter: none !important;
+      transform: translate3d(0, 0, 0) !important;
+    }
+    .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active)::before {
+      display: none !important;
     }
   }
 
@@ -918,35 +962,53 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!tiles.length) return;
 
   let raf = null;
+  let currentActive = null;
+  let isHovering = false;
 
+  // Optimized: batch DOM updates in single RAF
   function setActive(tile) {
+    if (currentActive === tile && isHovering) return; // Skip if already active
+    
     if (raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
-      wrap.classList.add('scg-is-hovering');
-      tiles.forEach(t => t.classList.toggle('scg-is-active', t === tile));
+      if (!isHovering) {
+        wrap.classList.add('scg-is-hovering');
+        isHovering = true;
+      }
+      
+      // Only update if tile changed
+      if (currentActive !== tile) {
+        if (currentActive) currentActive.classList.remove('scg-is-active');
+        tile.classList.add('scg-is-active');
+        currentActive = tile;
+      }
     });
   }
 
   function clearActive() {
+    if (!isHovering) return; // Skip if already cleared
+    
     if (raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
       wrap.classList.remove('scg-is-hovering');
-      tiles.forEach(t => t.classList.remove('scg-is-active'));
+      if (currentActive) {
+        currentActive.classList.remove('scg-is-active');
+        currentActive = null;
+      }
+      isHovering = false;
     });
   }
 
+  // Use mouseenter/leave for better performance than pointer events
   tiles.forEach(tile => {
-    tile.addEventListener('pointerenter', () => setActive(tile), { passive: true });
-    tile.addEventListener('pointerleave', () => {
-      // leave handled by wrap pointerleave for stability
-    }, { passive: true });
+    tile.addEventListener('mouseenter', () => setActive(tile), { passive: true });
   });
 
-  wrap.addEventListener('pointerleave', clearActive, { passive: true });
+  wrap.addEventListener('mouseleave', clearActive, { passive: true });
 
   // Theme editor safety: rebind on section load
   document.addEventListener('shopify:section:load', (e) => {
-    // nothing required here unless you want to fully re-init; this is usually enough since section reloads DOM
+    // Section reloads DOM, so no re-init needed
   });
 })();
 </script>
