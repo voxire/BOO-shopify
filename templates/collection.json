@@ -49,80 +49,6 @@
       "disabled": true,
       "settings": {}
     },
-    "shop_color_grid_HyVwhd": {
-      "type": "shop-color-grid",
-      "blocks": {
-        "tile_KVLHJE": {
-          "type": "tile",
-          "settings": {
-            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "custom_image": "shopify://shop_images/greenpng.png",
-            "text_color": "#ffffff"
-          }
-        },
-        "tile_Wj7did": {
-          "type": "tile",
-          "settings": {
-            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
-            "custom_image": "shopify://shop_images/pinkbunny.png",
-            "text_color": "#ffffff"
-          }
-        },
-        "tile_LHUyy7": {
-          "type": "tile",
-          "settings": {
-            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
-            "custom_image": "shopify://shop_images/blue.png",
-            "text_color": "#ffffff"
-          }
-        },
-        "tile_M34eBP": {
-          "type": "tile",
-          "settings": {
-            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
-            "custom_image": "shopify://shop_images/red.png",
-            "text_color": "#ffffff"
-          }
-        },
-        "tile_4jkKf7": {
-          "type": "tile",
-          "settings": {
-            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
-            "custom_image": "shopify://shop_images/grey.png",
-            "text_color": "#ffffff"
-          }
-        }
-      },
-      "block_order": [
-        "tile_KVLHJE",
-        "tile_Wj7did",
-        "tile_LHUyy7",
-        "tile_M34eBP",
-        "tile_4jkKf7"
-      ],
-      "disabled": true,
-      "custom_css": [],
-      "name": "Shop color grid (full screen)",
-      "settings": {
-        "section_bg": "#ffffff",
-        "max_width": 1500,
-        "outer_padding": 64,
-        "gap": 26,
-        "columns": 5,
-        "height_vh": 95,
-        "tile_h": 540,
-        "tile_h_mobile": 240,
-        "tile_bg": "#ffffff",
-        "image_fit": "cover",
-        "image_scale": 100,
-        "image_pos_x": 50,
-        "image_pos_y": 50,
-        "hover_zoom": 106,
-        "radius": 12,
-        "overlay_opacity": 35,
-        "overlay_hover_opacity": 33
-      }
-    },
     "shop_color_grid_mytb9M": {
       "type": "shop-color-grid",
       "blocks": {
@@ -174,7 +100,6 @@
         "tile_ViQ7GJ",
         "tile_3dYtDP"
       ],
-      "disabled": true,
       "custom_css": [],
       "name": "Shop color grid (full screen)",
       "settings": {
@@ -403,6 +328,7 @@
         "face_FCNhBE",
         "face_3HAW8z"
       ],
+      "disabled": true,
       "name": "Hex Prism Carousel",
       "settings": {
         "perspective": 1600,
@@ -417,7 +343,9 @@
         "side_opacity": 2,
         "side2_opacity": 2,
         "image_max_width": 800,
-        "background_color": "#ffffff"
+        "background_color": "#ffffff",
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     }
   },
@@ -426,7 +354,6 @@
     "product-grid",
     "1766198384ec95d504",
     "17661987485ac72ce4",
-    "shop_color_grid_HyVwhd",
     "shop_color_grid_mytb9M",
     "1767114833c9c201eb",
     "1767115431d2365970",
