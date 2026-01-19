@@ -184,7 +184,7 @@
         "button_bg_color": "#ffffff",
         "button_text_color": "#000000",
         "slide_height": "medium",
-        "autoplay_enabled": false,
+        "autoplay_enabled": true,
         "autoplay_speed": 5000
       }
     },
