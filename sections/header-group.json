@@ -57,6 +57,7 @@
         "product_color_BAhRAH",
         "product_color_LerYMh"
       ],
+      "disabled": true,
       "name": "Hero Header",
       "settings": {
         "logo": "shopify://shop_images/White_Boo.png",
@@ -96,6 +97,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/DinoBoo.jpg",
+            "mobile_image": "shopify://shop_images/DinoBoo_b5030d00-1a35-47b6-92c5-ebed673e9b9b.jpg",
             "title": "",
             "subtitle": "",
             "text_position": "center",
@@ -114,6 +116,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/FoxBoo.jpg",
+            "mobile_image": "shopify://shop_images/FoxBoo_800c2758-f3f9-442f-9f2d-02da01d60c15.jpg",
             "title": "",
             "subtitle": "",
             "text_position": "center",
@@ -132,6 +135,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/GriBoo.jpg",
+            "mobile_image": "shopify://shop_images/Griboo_4a74df2a-c60a-4422-8d13-5d971e43a9c5.jpg",
             "title": "",
             "subtitle": "",
             "text_position": "center",
@@ -150,6 +154,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/Shaboo.jpg",
+            "mobile_image": "shopify://shop_images/Shaboo_7bc83bfb-9318-448b-86b8-2c1367505db9.jpg",
             "title": "Unleash Your Child's Imagination",
             "subtitle": "Cozy animal onesies for endless adventures.Designed for comfort. Loved by kids.",
             "text_position": "custom",
