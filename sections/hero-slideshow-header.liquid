@@ -43,12 +43,12 @@
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
-    z-index: 10;
+    z-index: 1001;
     padding: 1.5rem 0;
     background: transparent;
     border-radius: 0;
     max-width: 100%;
-    overflow: visible;
+    overflow: visible !important;
     transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -66,7 +66,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
-    overflow: hidden;
+    overflow: visible !important;
   }
 
   .hero-slideshow-{{ section_id }}__logo {
@@ -440,6 +440,7 @@
     opacity: 0 !important;
     transform: translateY(-20px) !important;
     visibility: hidden;
+    pointer-events: none;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 1, 1), 
                 opacity 0.3s cubic-bezier(0.4, 0, 1, 1), 
                 transform 0.35s cubic-bezier(0.4, 0, 1, 1), 
@@ -454,6 +455,9 @@
     opacity: 1 !important;
     transform: translateY(0) !important;
     visibility: visible !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
     transition: max-height 0.4s cubic-bezier(0, 0, 0.2, 1), 
                 opacity 0.4s cubic-bezier(0, 0, 0.2, 1), 
                 transform 0.4s cubic-bezier(0, 0, 0.2, 1), 
@@ -717,62 +721,6 @@
             {%- endfor -%}
           </ul>
         </nav>
-
-        <nav
-          class="hero-slideshow-{{ section_id }}__mobile-nav"
-          id="mobile-nav-{{ section_id }}"
-          role="navigation"
-          aria-label="Mobile navigation"
-          aria-hidden="true"
-        >
-          <ul class="hero-slideshow-{{ section_id }}__mobile-menu">
-            {%- for link in linklists[menu].links -%}
-              <li>
-                <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__mobile-menu-link">
-                  {{ link.title }}
-                </a>
-              </li>
-            {%- endfor -%}
-          </ul>
-          
-          <div class="hero-slideshow-{{ section_id }}__mobile-actions">
-            {%- if shop.customer_accounts_enabled -%}
-              <a
-                href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-                class="hero-slideshow-{{ section_id }}__mobile-icon"
-                rel="nofollow"
-                aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
-              >
-                <span class="svg-wrapper">
-                  {{- 'icon-account.svg' | inline_asset_content -}}
-                </span>
-              </a>
-            {%- endif -%}
-
-            <a
-              href="{{ routes.cart_url }}"
-              class="hero-slideshow-{{ section_id }}__mobile-icon"
-              aria-label="{{ 'templates.cart.cart' | t }}"
-            >
-              <span class="svg-wrapper">
-                {%- if cart == empty -%}
-                  {{- 'icon-cart-empty.svg' | inline_asset_content -}}
-                {%- else -%}
-                  {{- 'icon-cart.svg' | inline_asset_content -}}
-                {%- endif -%}
-              </span>
-              {%- if cart != empty -%}
-                <span class="hero-slideshow-{{ section_id }}__mobile-cart-badge" aria-hidden="true">
-                  {%- if cart.item_count < 100 -%}
-                    {{ cart.item_count }}
-                  {%- else -%}
-                    99+
-                  {%- endif -%}
-                </span>
-              {%- endif -%}
-            </a>
-          </div>
-        </nav>
       {%- endif -%}
 
       <div class="hero-slideshow-{{ section_id }}__actions">
@@ -814,6 +762,64 @@
         </a>
       </div>
     </div>
+
+    {%- if menu != blank -%}
+      <nav
+        class="hero-slideshow-{{ section_id }}__mobile-nav"
+        id="mobile-nav-{{ section_id }}"
+        role="navigation"
+        aria-label="Mobile navigation"
+        aria-hidden="true"
+      >
+        <ul class="hero-slideshow-{{ section_id }}__mobile-menu">
+          {%- for link in linklists[menu].links -%}
+            <li>
+              <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__mobile-menu-link">
+                {{ link.title }}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+        
+        <div class="hero-slideshow-{{ section_id }}__mobile-actions">
+          {%- if shop.customer_accounts_enabled -%}
+            <a
+              href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+              class="hero-slideshow-{{ section_id }}__mobile-icon"
+              rel="nofollow"
+              aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-account.svg' | inline_asset_content -}}
+              </span>
+            </a>
+          {%- endif -%}
+
+          <a
+            href="{{ routes.cart_url }}"
+            class="hero-slideshow-{{ section_id }}__mobile-icon"
+            aria-label="{{ 'templates.cart.cart' | t }}"
+          >
+            <span class="svg-wrapper">
+              {%- if cart == empty -%}
+                {{- 'icon-cart-empty.svg' | inline_asset_content -}}
+              {%- else -%}
+                {{- 'icon-cart.svg' | inline_asset_content -}}
+              {%- endif -%}
+            </span>
+            {%- if cart != empty -%}
+              <span class="hero-slideshow-{{ section_id }}__mobile-cart-badge" aria-hidden="true">
+                {%- if cart.item_count < 100 -%}
+                  {{ cart.item_count }}
+                {%- else -%}
+                  99+
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+          </a>
+        </div>
+      </nav>
+    {%- endif -%}
   </div>
 
   <!-- Slideshow -->
