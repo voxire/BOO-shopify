@@ -14,15 +14,47 @@
     "hero_header_erazHd": {
       "type": "hero-header",
       "blocks": {
+        "product_color_XxEHdY": {
+          "type": "product_color",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "color": "#814141"
+          }
+        },
+        "product_color_7angGR": {
+          "type": "product_color",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "color": "#f40b0b"
+          }
+        },
+        "product_color_Xri8Gn": {
+          "type": "product_color",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "color": "#334fb4"
+          }
+        },
+        "product_color_BAhRAH": {
+          "type": "product_color",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "color": "#d71ad7"
+          }
+        },
         "product_color_LerYMh": {
           "type": "product_color",
           "settings": {
             "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "color": "#1d351b"
+            "color": "#22502e"
           }
         }
       },
       "block_order": [
+        "product_color_XxEHdY",
+        "product_color_7angGR",
+        "product_color_Xri8Gn",
+        "product_color_BAhRAH",
         "product_color_LerYMh"
       ],
       "name": "Hero Header",
