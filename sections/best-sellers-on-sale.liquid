@@ -59,10 +59,10 @@
       {%- if heading != blank -%}
         <h2 class="best-sellers-on-sale__heading">{{ heading }}</h2>
       {%- endif -%}
-      {%- if button_label != blank and button_link != blank -%}
-        <a href="{{ button_link }}" class="best-sellers-on-sale__button">
+      {%- if button_label != blank -%}
+        <span class="best-sellers-on-sale__button">
           {{ button_label }} →
-        </a>
+        </span>
       {%- endif -%}
     </div>
 
