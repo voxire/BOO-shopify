@@ -624,8 +624,13 @@
           data-slide-index="{{ forloop.index0 }}"
           {{ block.shopify_attributes }}
         >
-          {%- comment -%} Desktop Image {%- endcomment -%}
+          {%- comment -%} Desktop Image - only add --desktop class if mobile image exists {%- endcomment -%}
           {%- if slide_image != blank -%}
+            {%- if slide_mobile_image != blank -%}
+              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' -%}
+            {%- else -%}
+              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image' -%}
+            {%- endif -%}
             {{
               slide_image
               | image_url: width: 2560
@@ -633,10 +638,15 @@
                 loading: 'eager',
                 fetchpriority: 'high',
                 alt: slide_image.alt | default: '',
-                class: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop'
+                class: desktop_class
             }}
           {%- else -%}
-            {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' }}
+            {%- if slide_mobile_image != blank -%}
+              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' -%}
+            {%- else -%}
+              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image' -%}
+            {%- endif -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: desktop_class }}
           {%- endif -%}
 
           {%- comment -%} Mobile Image (only if provided, otherwise desktop image will show) {%- endcomment -%}
