@@ -57,7 +57,8 @@
           "settings": {
             "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/greenpng.png",
-            "text_color": "#ffffff"
+            "text_color": "#ffffff",
+            "age_range": "0.5-4"
           }
         },
         "tile_GVynen": {
@@ -65,7 +66,8 @@
           "settings": {
             "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/pinkbunny.png",
-            "text_color": "#ffffff"
+            "text_color": "#ffffff",
+            "age_range": "4-7"
           }
         },
         "tile_MBTBfD": {
@@ -73,7 +75,8 @@
           "settings": {
             "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/blue.png",
-            "text_color": "#ffffff"
+            "text_color": "#ffffff",
+            "age_range": "0.5-4"
           }
         },
         "tile_ViQ7GJ": {
@@ -81,7 +84,8 @@
           "settings": {
             "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/red.png",
-            "text_color": "#ffffff"
+            "text_color": "#ffffff",
+            "age_range": "4-7"
           }
         },
         "tile_3dYtDP": {
@@ -89,7 +93,8 @@
           "settings": {
             "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/grey.png",
-            "text_color": "#ffffff"
+            "text_color": "#ffffff",
+            "age_range": "0.5-4"
           }
         }
       },
