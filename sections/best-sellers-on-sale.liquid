@@ -48,10 +48,16 @@
     <div class="best-sellers-on-sale__top-ctas" role="tablist" aria-label="Product filter tabs">
       <button type="button" class="best-sellers-on-sale__top-cta is-active" data-filter="all" role="tab" aria-selected="true">ALL</button>
       {%- if top_cta_1_label != blank -%}
-        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="badge" role="tab" aria-selected="false">{{ top_cta_1_label }}</button>
+        {%- liquid
+          assign age_range_1 = top_cta_1_label | replace: 'Age ', '' | replace: 'AGE ', '' | replace: 'age ', '' | strip | downcase
+        -%}
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="{{ age_range_1 }}" role="tab" aria-selected="false">{{ top_cta_1_label }}</button>
       {%- endif -%}
       {%- if top_cta_2_label != blank -%}
-        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="sale" role="tab" aria-selected="false">{{ top_cta_2_label }}</button>
+        {%- liquid
+          assign age_range_2 = top_cta_2_label | replace: 'Age ', '' | replace: 'AGE ', '' | replace: 'age ', '' | strip | downcase
+        -%}
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="{{ age_range_2 }}" role="tab" aria-selected="false">{{ top_cta_2_label }}</button>
       {%- endif -%}
     </div>
 
@@ -103,9 +109,21 @@
               assign product_image = product.images.first
             endif
 
+            assign product_age_range = 'all'
+            for tag in product.tags
+              assign tag_lower = tag | downcase | strip
+              if tag_lower contains '0.5-4' or tag_lower == 'age-0.5-4' or tag_lower == 'age 0.5-4' or tag_lower == 'age:0.5-4'
+                assign product_age_range = '0.5-4'
+                break
+              elsif tag_lower contains '5-7' or tag_lower == 'age-5-7' or tag_lower == 'age 5-7' or tag_lower == 'age:5-7'
+                assign product_age_range = '5-7'
+                break
+              endif
+            endfor
+
             assign rendered_count = rendered_count | plus: 1
           -%}
-          <div class="best-sellers-on-sale__card" data-sale="{{ is_on_sale }}" data-badge="{{ has_badge_tag }}">
+          <div class="best-sellers-on-sale__card" data-sale="{{ is_on_sale }}" data-badge="{{ has_badge_tag }}" data-age-range="{{ product_age_range }}">
             {%- if show_badge -%}
               <div class="best-sellers-on-sale__badge" style="background-color: {{ badge_bg }}; color: {{ badge_text_color }};">
                 {{ badge_text }}
@@ -344,16 +362,21 @@
 
     function filterProducts(filterType) {
       let visibleCount = 0;
+      const normalizedFilter = filterType ? filterType.toLowerCase().trim() : 'all';
 
       cards.forEach(function(card) {
         let shouldShow = false;
 
-        if (filterType === 'all') {
+        if (normalizedFilter === 'all') {
           shouldShow = true;
-        } else if (filterType === 'sale') {
-          shouldShow = card.getAttribute('data-sale') === 'true';
-        } else if (filterType === 'badge') {
-          shouldShow = card.getAttribute('data-badge') === 'true';
+        } else {
+          // Filter by age range
+          const cardAgeRange = (card.getAttribute('data-age-range') || 'all').toLowerCase().trim();
+          if (normalizedFilter === cardAgeRange || cardAgeRange === 'all') {
+            shouldShow = true;
+          } else {
+            shouldShow = false;
+          }
         }
 
         if (shouldShow) {
