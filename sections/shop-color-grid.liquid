@@ -13,6 +13,12 @@
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 900;
   margin: 0 0 15px 0;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  /* Default gradient - will be overridden if custom color is set */
   background: linear-gradient(90deg, 
     #ff3366 0%, 
     #ff9933 25%, 
@@ -23,14 +29,15 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -0.5px;
-  line-height: 1;
-  text-transform: uppercase;
-  position: relative;
   animation: gradient-shift 4s ease infinite, 
              text-glow 2s ease-in-out infinite alternate;
   text-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
-  font-family: 'Inter', sans-serif;
+}
+
+/* If custom color is set, disable gradient animation */
+.scg-main-heading[style*="color:"] {
+  animation: none;
+  text-shadow: none;
 }
 
 @keyframes gradient-shift {
@@ -550,28 +557,44 @@
 
 <section class="scg-{{ sid }}">
   <div class="scg-heading-wrapper">
-    <h2 class="scg-main-heading">Choose Your Character</h2>
+    <h2 class="scg-main-heading" style="{% if section.settings.heading_color != blank %}color: {{ section.settings.heading_color }}; background: none; -webkit-background-clip: unset; -webkit-text-fill-color: {{ section.settings.heading_color }}; background-clip: unset;{% endif %}">
+      {{ section.settings.heading_text | default: "Choose Your Character" }}
+    </h2>
     
     <!-- Age Filter System -->
     <div class="scg-age-filter">
-      <h3 class="scg-age-filter__title">Select your Age</h3>
+      <h3 class="scg-age-filter__title">{{ section.settings.filter_title | default: "Select your Age" }}</h3>
       <div class="scg-age-filter__buttons">
-        <button 
-          type="button" 
-          class="scg-age-filter__btn" 
-          data-age-range="0.5-4"
-          aria-label="Filter for ages 0.5 to 4 years"
-        >
-          0.5 - 4 Years
-        </button>
-        <button 
-          type="button" 
-          class="scg-age-filter__btn" 
-          data-age-range="4-7"
-          aria-label="Filter for ages 4 to 7 years"
-        >
-          4 - 7 Years
-        </button>
+        {%- if section.settings.filter_button_1_text != blank -%}
+          <button 
+            type="button" 
+            class="scg-age-filter__btn" 
+            data-age-range="{{ section.settings.filter_button_1_range | default: '0.5-4' }}"
+            aria-label="{{ section.settings.filter_button_1_text }}"
+          >
+            {{ section.settings.filter_button_1_text }}
+          </button>
+        {%- endif -%}
+        {%- if section.settings.filter_button_2_text != blank -%}
+          <button 
+            type="button" 
+            class="scg-age-filter__btn" 
+            data-age-range="{{ section.settings.filter_button_2_range | default: '4-7' }}"
+            aria-label="{{ section.settings.filter_button_2_text }}"
+          >
+            {{ section.settings.filter_button_2_text }}
+          </button>
+        {%- endif -%}
+        {%- if section.settings.filter_button_3_text != blank -%}
+          <button 
+            type="button" 
+            class="scg-age-filter__btn" 
+            data-age-range="{{ section.settings.filter_button_3_range | default: 'all' }}"
+            aria-label="{{ section.settings.filter_button_3_text }}"
+          >
+            {{ section.settings.filter_button_3_text }}
+          </button>
+        {%- endif -%}
         <button 
           type="button" 
           class="scg-age-filter__reset" 
@@ -1028,6 +1051,87 @@ document.addEventListener('DOMContentLoaded', function() {
   "name": "Shop color grid",
   "tag": "section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Heading Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading Text",
+      "default": "Choose Your Character"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "info": "Leave blank to use animated gradient. Set a color to use solid color instead."
+    },
+    {
+      "type": "header",
+      "content": "Age Filter Settings"
+    },
+    {
+      "type": "text",
+      "id": "filter_title",
+      "label": "Filter Title",
+      "default": "Select your Age"
+    },
+    {
+      "type": "header",
+      "content": "Filter Button 1"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_1_text",
+      "label": "Button 1 Text",
+      "default": "0.5 - 4 Years"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_1_range",
+      "label": "Button 1 Age Range",
+      "default": "0.5-4",
+      "info": "Enter the age range value (e.g., '0.5-4', '4-7', 'all'). This must match the age range set on product tiles."
+    },
+    {
+      "type": "header",
+      "content": "Filter Button 2"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_2_text",
+      "label": "Button 2 Text",
+      "default": "4 - 7 Years"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_2_range",
+      "label": "Button 2 Age Range",
+      "default": "4-7",
+      "info": "Enter the age range value (e.g., '0.5-4', '4-7', 'all'). This must match the age range set on product tiles."
+    },
+    {
+      "type": "header",
+      "content": "Filter Button 3 (Optional)"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_3_text",
+      "label": "Button 3 Text",
+      "info": "Leave blank to hide this button"
+    },
+    {
+      "type": "text",
+      "id": "filter_button_3_range",
+      "label": "Button 3 Age Range",
+      "default": "all",
+      "info": "Enter the age range value (e.g., '0.5-4', '4-7', 'all'). This must match the age range set on product tiles."
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
     { "type": "color", "id": "section_bg", "label": "Section background", "default": "#ffffff" },
 
     {
@@ -1175,16 +1279,11 @@ document.addEventListener('DOMContentLoaded', function() {
         { "type": "image_picker", "id": "custom_image", "label": "Custom image" },
         { "type": "color", "id": "text_color", "label": "Hover text color", "default": "#ffffff" },
         {
-          "type": "select",
+          "type": "text",
           "id": "age_range",
           "label": "Age Range",
-          "options": [
-            { "value": "all", "label": "All Ages" },
-            { "value": "0.5-4", "label": "0.5 - 4 Years" },
-            { "value": "4-7", "label": "4 - 7 Years" }
-          ],
           "default": "all",
-          "info": "Select the age range for this product. Used for filtering."
+          "info": "Enter the age range value (e.g., '0.5-4', '4-7', 'all'). This must match the age range set on filter buttons."
         }
       ]
     }
