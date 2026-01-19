@@ -27,11 +27,7 @@
 
   assign products_array = blank
   if collection != blank
-    if only_sale
-      assign products_array = collection.products
-    else
-      assign products_array = collection.products
-    endif
+    assign products_array = collection.products
   endif
 
   assign products_count = 0
@@ -49,12 +45,13 @@
   style="background-color: {{ section_bg }};"
 >
   <div class="page-width">
-    <div class="best-sellers-on-sale__top-ctas" role="navigation" aria-label="Sale navigation">
-      {%- if top_cta_1_link != blank -%}
-        <a class="best-sellers-on-sale__top-cta" href="{{ top_cta_1_link }}">{{ top_cta_1_label }}</a>
+    <div class="best-sellers-on-sale__top-ctas" role="tablist" aria-label="Product filter tabs">
+      <button type="button" class="best-sellers-on-sale__top-cta is-active" data-filter="all" role="tab" aria-selected="true">ALL</button>
+      {%- if top_cta_1_label != blank -%}
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="badge" role="tab" aria-selected="false">{{ top_cta_1_label }}</button>
       {%- endif -%}
-      {%- if top_cta_2_link != blank -%}
-        <a class="best-sellers-on-sale__top-cta" href="{{ top_cta_2_link }}">{{ top_cta_2_label }}</a>
+      {%- if top_cta_2_label != blank -%}
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="sale" role="tab" aria-selected="false">{{ top_cta_2_label }}</button>
       {%- endif -%}
     </div>
 
@@ -70,46 +67,46 @@
     </div>
 
     {%- if collection != blank and products_count > 0 -%}
-      <div class="best-sellers-on-sale__grid">
+      <div class="best-sellers-on-sale__grid" id="best-sellers-grid-{{ section_id }}">
         {%- assign rendered_count = 0 -%}
         {%- for product in products_array -%}
+          {%- if rendered_count >= products_to_show -%}
+            {%- break -%}
+          {%- endif -%}
           {%- liquid
-            assign should_show = true
-            if only_sale
-              if product.compare_at_price_max <= product.price
-                assign should_show = false
-              endif
+            assign is_on_sale = false
+            if product.compare_at_price_max > product.price
+              assign is_on_sale = true
             endif
 
-            if should_show
-              assign rendered_count = rendered_count | plus: 1
-              if rendered_count > products_to_show
-                break
-              endif
-
-              assign show_badge = false
+            assign has_badge_tag = false
             if badge_tag == blank
-              assign show_badge = true
+              assign has_badge_tag = true
             else
               assign badge_tag_lower = badge_tag | downcase
               for tag in product.tags
                 assign tag_lower = tag | downcase
                 if tag_lower == badge_tag_lower
-                  assign show_badge = true
+                  assign has_badge_tag = true
                   break
                 endif
               endfor
             endif
 
-              assign product_image = product.featured_image
-              if product_image == blank
-                assign product_image = product.images.first
-              endif
+            assign show_badge = false
+            if has_badge_tag and badge_text != blank
+              assign show_badge = true
             endif
+
+            assign product_image = product.featured_image
+            if product_image == blank
+              assign product_image = product.images.first
+            endif
+
+            assign rendered_count = rendered_count | plus: 1
           -%}
-          {%- if should_show -%}
-            <div class="best-sellers-on-sale__card">
-            {%- if show_badge and badge_text != blank -%}
+          <div class="best-sellers-on-sale__card" data-sale="{{ is_on_sale }}" data-badge="{{ has_badge_tag }}">
+            {%- if show_badge -%}
               <div class="best-sellers-on-sale__badge" style="background-color: {{ badge_bg }}; color: {{ badge_text_color }};">
                 {{ badge_text }}
               </div>
@@ -132,9 +129,11 @@
                 {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
               </div>
             {%- endif -%}
-            </div>
-          {%- endif -%}
+          </div>
         {%- endfor -%}
+      </div>
+      <div class="best-sellers-on-sale__empty" id="best-sellers-empty-{{ section_id }}" style="display: none;">
+        <p>{{ 'sections.best_sellers_on_sale.no_products' | t | default: 'No products found.' }}</p>
       </div>
     {%- else -%}
       <div class="best-sellers-on-sale__empty">
@@ -203,26 +202,26 @@
     border-radius: 0;
     white-space: nowrap;
     transition: opacity 0.2s;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
   }
 
   .best-sellers-on-sale__top-cta:hover {
     opacity: 0.8;
   }
 
-  .best-sellers-on-sale__grid {
-    display: flex;
-    overflow-x: auto;
-    gap: 50px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding: 6px 2px 14px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    width: 100%;
+  .best-sellers-on-sale__top-cta.is-active {
+    opacity: 1;
+    outline: 2px solid {{ top_cta_text }};
+    outline-offset: 2px;
   }
 
-  .best-sellers-on-sale__grid::-webkit-scrollbar {
-    display: none;
+  .best-sellers-on-sale__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
   }
 
   .best-sellers-on-sale__card {
@@ -234,16 +233,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 280px;
-    width: 280px;
-    scroll-snap-align: start;
+    width: 100%;
   }
 
-  @media (min-width: 1200px) {
-    .best-sellers-on-sale__card {
-      flex: 0 0 320px;
-      width: 320px;
-    }
+  .best-sellers-on-sale__card[style*="display: none"] {
+    display: none !important;
   }
 
   .best-sellers-on-sale__badge {
@@ -295,13 +289,12 @@
 
   @media (min-width: 750px) and (max-width: 989px) {
     .best-sellers-on-sale__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 24px;
     }
 
     .best-sellers-on-sale__card {
       height: {{ card_height_tablet }}px;
-      flex: 0 0 300px;
-      width: 300px;
     }
   }
 
@@ -320,17 +313,91 @@
     }
 
     .best-sellers-on-sale__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
 
     .best-sellers-on-sale__card {
-      flex: 0 0 80vw;
-      max-width: 340px;
       height: {{ card_height_mobile }}px;
-      scroll-snap-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .best-sellers-on-sale__grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
+
+<script>
+  (function() {
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector('[data-section-id="' + sectionId + '"]');
+    if (!section) return;
+
+    const grid = section.querySelector('#best-sellers-grid-' + sectionId);
+    const emptyState = section.querySelector('#best-sellers-empty-' + sectionId);
+    const tabs = section.querySelectorAll('.best-sellers-on-sale__top-cta[data-filter]');
+    const cards = grid ? grid.querySelectorAll('.best-sellers-on-sale__card') : [];
+
+    if (!grid || tabs.length === 0) return;
+
+    function filterProducts(filterType) {
+      let visibleCount = 0;
+
+      cards.forEach(function(card) {
+        let shouldShow = false;
+
+        if (filterType === 'all') {
+          shouldShow = true;
+        } else if (filterType === 'sale') {
+          shouldShow = card.getAttribute('data-sale') === 'true';
+        } else if (filterType === 'badge') {
+          shouldShow = card.getAttribute('data-badge') === 'true';
+        }
+
+        if (shouldShow) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Show/hide empty state
+      if (emptyState) {
+        if (visibleCount === 0) {
+          emptyState.style.display = 'block';
+          if (grid) grid.style.display = 'none';
+        } else {
+          emptyState.style.display = 'none';
+          if (grid) grid.style.display = 'grid';
+        }
+      }
+    }
+
+    // Add click handlers to tabs
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        const filterType = this.getAttribute('data-filter');
+
+        // Update active state
+        tabs.forEach(function(t) {
+          t.classList.remove('is-active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        this.classList.add('is-active');
+        this.setAttribute('aria-selected', 'true');
+
+        // Filter products
+        filterProducts(filterType);
+      });
+    });
+
+    // Initialize: show all products (all tab is active by default)
+    filterProducts('all');
+  })();
+</script>
 
 {% schema %}
 {
