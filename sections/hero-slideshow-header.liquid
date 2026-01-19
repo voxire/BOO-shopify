@@ -241,6 +241,26 @@
     transform: translate(-50%, -50%);
   }
 
+  /* Desktop image - hidden on mobile if mobile image exists */
+  .hero-slideshow-{{ section_id }}__slide-image--desktop {
+    display: block;
+  }
+
+  /* Mobile image - hidden on desktop */
+  .hero-slideshow-{{ section_id }}__slide-image--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 768px) {
+    .hero-slideshow-{{ section_id }}__slide-image--desktop {
+      display: none;
+    }
+
+    .hero-slideshow-{{ section_id }}__slide-image--mobile {
+      display: block;
+    }
+  }
+
   .hero-slideshow-{{ section_id }}__slide-content {
     position: absolute;
     top: 0;
@@ -585,6 +605,7 @@
     <div class="hero-slideshow-{{ section_id }}__slides" id="slides-{{ section_id }}">
       {%- for block in slides -%}
         {%- assign slide_image = block.settings.image -%}
+        {%- assign slide_mobile_image = block.settings.mobile_image -%}
         {%- assign slide_title = block.settings.title -%}
         {%- assign slide_subtitle = block.settings.subtitle -%}
         {%- assign text_position = block.settings.text_position | default: 'center' -%}
@@ -603,6 +624,7 @@
           data-slide-index="{{ forloop.index0 }}"
           {{ block.shopify_attributes }}
         >
+          {%- comment -%} Desktop Image {%- endcomment -%}
           {%- if slide_image != blank -%}
             {{
               slide_image
@@ -611,10 +633,23 @@
                 loading: 'eager',
                 fetchpriority: 'high',
                 alt: slide_image.alt | default: '',
-                class: 'hero-slideshow-' | append: section_id | append: '__slide-image'
+                class: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop'
             }}
           {%- else -%}
-            {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-slideshow-' | append: section_id | append: '__slide-image' }}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' }}
+          {%- endif -%}
+
+          {%- comment -%} Mobile Image (only if provided, otherwise desktop image will show) {%- endcomment -%}
+          {%- if slide_mobile_image != blank -%}
+            {{
+              slide_mobile_image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: slide_mobile_image.alt | default: slide_image.alt | default: '',
+                class: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--mobile'
+            }}
           {%- endif -%}
 
           <div class="hero-slideshow-{{ section_id }}__slide-content">
@@ -953,7 +988,13 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "Image (Desktop)"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Image (Mobile)",
+          "info": "Optional: Upload a separate image for mobile devices. If not provided, the desktop image will be used on mobile."
         },
         {
           "type": "text",
