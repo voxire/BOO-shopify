@@ -15,9 +15,7 @@
   assign badge_bg = section.settings.badge_bg | default: '#d8d0c8'
   assign badge_text_color = section.settings.badge_text_color | default: '#4b4b4b'
   assign top_cta_1_label = section.settings.top_cta_1_label | default: 'SHOP BEST SELLERS'
-  assign top_cta_1_link = section.settings.top_cta_1_link
   assign top_cta_2_label = section.settings.top_cta_2_label | default: 'SHOP ALL AW25'
-  assign top_cta_2_link = section.settings.top_cta_2_link
   assign top_cta_bg = section.settings.top_cta_bg | default: button_bg
   assign top_cta_text = section.settings.top_cta_text | default: button_text
   assign card_height_desktop = section.settings.card_height_desktop | default: 520
@@ -430,23 +428,15 @@
       "type": "text",
       "id": "top_cta_1_label",
       "label": "Top CTA 1 Label",
-      "default": "SHOP BEST SELLERS"
-    },
-    {
-      "type": "url",
-      "id": "top_cta_1_link",
-      "label": "Top CTA 1 Link"
+      "default": "SHOP BEST SELLERS",
+      "info": "Filter tab for products with badge tag"
     },
     {
       "type": "text",
       "id": "top_cta_2_label",
       "label": "Top CTA 2 Label",
-      "default": "SHOP ALL AW25"
-    },
-    {
-      "type": "url",
-      "id": "top_cta_2_link",
-      "label": "Top CTA 2 Link"
+      "default": "SHOP ALL AW25",
+      "info": "Filter tab for products on sale"
     },
     {
       "type": "color",
