@@ -232,23 +232,81 @@
     pointer-events:none;
   }
 
-  .scg-{{ sid }}__tile:hover .scg-{{ sid }}__hover-text{opacity:1}
-  .scg-{{ sid }}__tile:hover .scg-{{ sid }}__overlay{opacity:{{ section.settings.overlay_hover_opacity | divided_by: 100.0 }}}
-  .scg-{{ sid }}__tile:hover .scg-{{ sid }}__media img{
+  /* === Smooth hover system (no :has) === */
+  .scg-{{ sid }}__wrap {
+    /* helps isolate paint work */
+    contain: layout paint style;
+  }
+
+  .scg-{{ sid }}__tile {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .scg-{{ sid }}__media {
+    will-change: transform, filter;
+    transform: translateZ(0);
+  }
+
+  .scg-{{ sid }}__media img {
+    will-change: transform, filter;
+    transform: translateZ(0);
+  }
+
+  /* Active tile hover effects */
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__hover-text{opacity:1}
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__overlay{opacity:{{ section.settings.overlay_hover_opacity | divided_by: 100.0 }}}
+  .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__media img{
     transform:scale({{ section.settings.image_scale | divided_by: 100.0 }}) scale({{ section.settings.hover_zoom | divided_by: 100.0 }});
   }
 
-  /* blur others ONLY when a tile is hovered */
-  .scg-{{ sid }}__wrap:has(.scg-{{ sid }}__tile:hover) .scg-{{ sid }}__tile{
-    filter:blur(6px);
-    opacity:.6;
-    transform:none;
+  /* When hovering any tile (JS adds .scg-is-hovering on wrap) */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile {
+    opacity: 0.55;
+    transform: translateZ(0) scale(0.985);
   }
-  .scg-{{ sid }}__wrap:has(.scg-{{ sid }}__tile:hover) .scg-{{ sid }}__tile:hover{
-    filter:none;
-    opacity:1;
-    transform:translateY(-14px) scale(1.03);
-    z-index:3;
+
+  /* Blur ONLY the image layer of non-active tiles (much faster than blurring the whole card) */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
+    filter: blur(5px);
+  }
+
+  /* Active tile pops */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile.scg-is-active {
+    opacity: 1;
+    transform: translateY(-14px) scale(1.03) translateZ(0);
+    z-index: 3;
+  }
+
+  /* Show hover text only on active tile */
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__hover-text {
+    opacity: 0;
+  }
+  .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile.scg-is-active .scg-{{ sid }}__hover-text {
+    opacity: 1;
+  }
+
+  /* Optional: reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .scg-{{ sid }}__tile,
+    .scg-{{ sid }}__media img {
+      transition: none !important;
+    }
+    .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
+      filter: none !important;
+    }
+  }
+
+  /* Disable blur interaction on touch devices (no hover) */
+  @media (hover: none) {
+    .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile {
+      opacity: 1;
+      transform: none;
+    }
+    .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
+      filter: none;
+    }
   }
 
     /* ===== MOBILE CAROUSEL - HIDDEN BY DEFAULT ===== */
@@ -369,12 +427,7 @@
     display: block !important;
   }
   
-  /* Optionally disable hover effects on mobile grid (if still shown) */
-  .scg-{{ sid }}__wrap:has(.scg-{{ sid }}__tile:hover) .scg-{{ sid }}__tile {
-    filter: none;
-    opacity: 1;
-    transform: none;
-  }
+  /* Hover effects disabled on mobile via @media (hover: none) rule above */
 }
 
 
@@ -404,9 +457,9 @@
           >
             <div class="scg-carousel__media">
               {% if img %}
-                <img src="{{ img | image_url: width: 800 }}" loading="lazy" alt="{{ p.title }}">
+                <img src="{{ img | image_url: width: 800 }}" loading="lazy" decoding="async" alt="{{ p.title }}">
               {% elsif p.featured_image %}
-                <img src="{{ p.featured_image | image_url: width: 800 }}" loading="lazy" alt="{{ p.title }}">
+                <img src="{{ p.featured_image | image_url: width: 800 }}" loading="lazy" decoding="async" alt="{{ p.title }}">
               {% endif %}
             </div>
             <div class="scg-carousel__overlay"></div>
@@ -439,9 +492,9 @@
         >
           <div class="scg-{{ sid }}__media" aria-hidden="true">
             {% if img %}
-              <img src="{{ img | image_url: width: 2400 }}" alt="">
+              <img src="{{ img | image_url: width: 1600 }}" alt="" loading="lazy" decoding="async">
             {% elsif p.featured_image %}
-              <img src="{{ p.featured_image | image_url: width: 2400 }}" alt="">
+              <img src="{{ p.featured_image | image_url: width: 1600 }}" alt="" loading="lazy" decoding="async">
             {% endif %}
           </div>
 
@@ -654,6 +707,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+</script>
+
+<script>
+(function() {
+  const wrap = document.querySelector('.scg-{{ sid }}__wrap');
+  if (!wrap) return;
+
+  const tiles = Array.from(wrap.querySelectorAll('.scg-{{ sid }}__tile'));
+  if (!tiles.length) return;
+
+  let raf = null;
+
+  function setActive(tile) {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      wrap.classList.add('scg-is-hovering');
+      tiles.forEach(t => t.classList.toggle('scg-is-active', t === tile));
+    });
+  }
+
+  function clearActive() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      wrap.classList.remove('scg-is-hovering');
+      tiles.forEach(t => t.classList.remove('scg-is-active'));
+    });
+  }
+
+  tiles.forEach(tile => {
+    tile.addEventListener('pointerenter', () => setActive(tile), { passive: true });
+    tile.addEventListener('pointerleave', () => {
+      // leave handled by wrap pointerleave for stability
+    }, { passive: true });
+  });
+
+  wrap.addEventListener('pointerleave', clearActive, { passive: true });
+
+  // Theme editor safety: rebind on section load
+  document.addEventListener('shopify:section:load', (e) => {
+    // nothing required here unless you want to fully re-init; this is usually enough since section reloads DOM
+  });
+})();
 </script>
 </section>
 
