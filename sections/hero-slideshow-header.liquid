@@ -253,6 +253,32 @@
     z-index: 3;
   }
 
+  .hero-slideshow-{{ section_id }}__slide-text {
+    position: absolute;
+    text-align: center;
+    z-index: 4;
+    max-width: 80%;
+    padding: 2rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide-title {
+    margin: 0 0 1rem 0;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.02em;
+  }
+
+  .hero-slideshow-{{ section_id }}__slide-subtitle {
+    margin: 0;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-weight: 400;
+    line-height: 1.5;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0.95;
+  }
+
   .hero-slideshow-{{ section_id }}__button {
     position: absolute;
     padding: 1rem 2rem;
@@ -433,6 +459,20 @@
     .hero-slideshow-{{ section_id }}__actions {
       margin-left: 0.5rem;
     }
+
+    .hero-slideshow-{{ section_id }}__slide-text {
+      max-width: 90%;
+      padding: 1.5rem;
+    }
+
+    .hero-slideshow-{{ section_id }}__slide-title {
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-slideshow-{{ section_id }}__slide-subtitle {
+      font-size: clamp(0.875rem, 3vw, 1.25rem);
+    }
   }
 {%- endstyle -%}
 
@@ -545,6 +585,13 @@
     <div class="hero-slideshow-{{ section_id }}__slides" id="slides-{{ section_id }}">
       {%- for block in slides -%}
         {%- assign slide_image = block.settings.image -%}
+        {%- assign slide_title = block.settings.title -%}
+        {%- assign slide_subtitle = block.settings.subtitle -%}
+        {%- assign text_position = block.settings.text_position | default: 'center' -%}
+        {%- assign text_horizontal = block.settings.text_horizontal | default: 50 -%}
+        {%- assign text_vertical = block.settings.text_vertical | default: 50 -%}
+        {%- assign title_color = block.settings.title_color | default: '#ffffff' -%}
+        {%- assign subtitle_color = block.settings.subtitle_color | default: '#ffffff' -%}
         {%- assign button_text = block.settings.button_text -%}
         {%- assign button_link = block.settings.button_link -%}
         {%- assign button_position = block.settings.button_position | default: 'center' -%}
@@ -571,6 +618,71 @@
           {%- endif -%}
 
           <div class="hero-slideshow-{{ section_id }}__slide-content">
+            {%- if slide_title != blank or slide_subtitle != blank -%}
+              <div
+                class="hero-slideshow-{{ section_id }}__slide-text"
+                style="
+                  {%- if text_position == 'custom' -%}
+                    left: {{ text_horizontal }}%;
+                    top: {{ text_vertical }}%;
+                    transform: translate(-50%, -50%);
+                  {%- elsif text_position == 'top-left' -%}
+                    top: 20%;
+                    left: 20%;
+                    transform: translate(-50%, -50%);
+                  {%- elsif text_position == 'top-center' -%}
+                    top: 20%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                  {%- elsif text_position == 'top-right' -%}
+                    top: 20%;
+                    right: 20%;
+                    transform: translate(50%, -50%);
+                  {%- elsif text_position == 'center-left' -%}
+                    top: 50%;
+                    left: 20%;
+                    transform: translate(-50%, -50%);
+                  {%- elsif text_position == 'center-right' -%}
+                    top: 50%;
+                    right: 20%;
+                    transform: translate(50%, -50%);
+                  {%- elsif text_position == 'bottom-left' -%}
+                    bottom: 20%;
+                    left: 20%;
+                    transform: translate(-50%, 50%);
+                  {%- elsif text_position == 'bottom-center' -%}
+                    bottom: 20%;
+                    left: 50%;
+                    transform: translate(-50%, 50%);
+                  {%- elsif text_position == 'bottom-right' -%}
+                    bottom: 20%;
+                    right: 20%;
+                    transform: translate(50%, 50%);
+                  {%- else -%}
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                  {%- endif -%}
+                "
+              >
+                {%- if slide_title != blank -%}
+                  <h2
+                    class="hero-slideshow-{{ section_id }}__slide-title"
+                    style="color: {{ title_color }};"
+                  >
+                    {{ slide_title }}
+                  </h2>
+                {%- endif -%}
+                {%- if slide_subtitle != blank -%}
+                  <p
+                    class="hero-slideshow-{{ section_id }}__slide-subtitle"
+                    style="color: {{ subtitle_color }};"
+                  >
+                    {{ slide_subtitle }}
+                  </p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
             {%- if button_text != blank and button_link != blank -%}
               <a
                 href="{{ button_link }}"
@@ -842,6 +954,98 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Title & Subtitle Position",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top-left",
+              "label": "Top Left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top Center"
+            },
+            {
+              "value": "top-right",
+              "label": "Top Right"
+            },
+            {
+              "value": "center-left",
+              "label": "Center Left"
+            },
+            {
+              "value": "center-right",
+              "label": "Center Right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom Left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom Center"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom Right"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Position"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "text_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Text Horizontal Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        },
+        {
+          "type": "range",
+          "id": "text_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Text Vertical Position",
+          "default": 50,
+          "info": "Only applies when position is set to Custom"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title Color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "subtitle_color",
+          "label": "Subtitle Color",
+          "default": "#ffffff"
         },
         {
           "type": "text",

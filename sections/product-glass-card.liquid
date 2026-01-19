@@ -621,26 +621,26 @@
     /* Mobile: Reorder to show FIT first */
     .pgc-minimal-pdp {
       display: flex;
-      flex-direction: column;
-    }
-
+    flex-direction: column;
+  }
+  
     .pgc-minimal__header {
       order: 1;
-    }
-
+  }
+  
     .pgc-minimal__fitrow {
-      flex-direction: column;
-      gap: 1.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
       margin-bottom: 2rem;
-    }
-
+  }
+  
     .pgc-minimal__left {
       min-width: 0;
     }
 
     .pgc-fitscale {
       max-width: none;
-      width: 100%;
+    width: 100%;
     }
 
     /* Hide color options on mobile */
@@ -652,24 +652,24 @@
     .pgc-minimal__size-buttons {
       display: flex;
       gap: 0.5rem;
-    }
-
+  }
+  
     .pgc-minimal__size-btn {
       flex: 1;
       min-width: 60px;
       padding: 14px 16px;
       font-size: 0.95rem;
-    }
-
+  }
+  
     /* Form comes after FIT */
     form {
       order: 2;
-    }
-
+  }
+  
     /* Accordions come last */
     .pgc-minimal__accordion {
       order: 3;
-    }
+  }
   }
 {% endstyle %}
 
@@ -804,7 +804,7 @@
                       price_class: 'price--large'
                     -%}
                   </div>
-                </div>
+            </div>
 
                 <div class="pgc-minimal__right">
                   <div class="pgc-fitscale" style="--fit-pos: {{ section.settings.fit_position }}%;">
@@ -838,7 +838,7 @@
                     
                     {%- if opt_name_down contains 'size' -%}
                       <div class="pgc-minimal__size-buttons">
-                        {% for value in option.values %}
+                    {% for value in option.values %}
                           <button 
                             type="button"
                             class="pgc-minimal__size-btn {% if option.selected_value == value %}pgc-minimal__size-btn--selected{% endif %}"
@@ -859,8 +859,8 @@
                             <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
                               {{ value }}
                             </option>
-                          {% endfor %}
-                        </select>
+                    {% endfor %}
+                  </select>
                       </div>
                     {%- else -%}
                       <select 
@@ -873,7 +873,7 @@
                           <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>
                             {{ value }}
                           </option>
-                        {% endfor %}
+                {% endfor %}
                       </select>
                     {%- endif -%}
                   </div>
@@ -895,7 +895,7 @@
               </div>
 
               <input type="hidden" name="id" value="{{ product_obj.selected_or_first_available_variant.id }}" data-variant-id>
-              
+
               <button class="pgc-{{ section_id }}__cta" type="submit" style="width: 100%; margin-top: 2rem; text-transform: uppercase;">
                 {{ section.settings.button_text }}
               </button>
@@ -913,7 +913,7 @@
                     <span class="pgc-accordion-icon"></span>
                   </summary>
                   <div class="accordion__content rte" id="Accordion-description-pgc-{{ section_id }}">
-                    {{ product_obj.description }}
+                {{ product_obj.description }}
                   </div>
                 </details>
               </div>
@@ -926,7 +926,7 @@
                     <h2 class="h4 accordion__title">
                       {{ section.settings.shipping_heading | default: 'SHIPPING AND RETURNS' | escape }}
                     </h2>
-                  </div>
+          </div>
                   <span class="pgc-accordion-icon">+</span>
                 </summary>
                 <div class="accordion__content rte" id="Accordion-shipping-pgc-{{ section_id }}">
@@ -1197,9 +1197,9 @@
        // Initial update
        updateVariant();
      }
-   })();
+  })();
    
- </script>
+</script>
 
 {% schema %}
 {
