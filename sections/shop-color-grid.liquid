@@ -125,6 +125,121 @@
   position: relative;
   z-index: 2;
 }
+
+/* ===== AGE FILTER STYLES ===== */
+.scg-age-filter {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.scg-age-filter__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4a4a4a;
+  margin: 0 0 16px 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.scg-age-filter__buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.scg-age-filter__btn {
+  padding: 12px 24px;
+  background: #4a4a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  text-align: center;
+}
+
+.scg-age-filter__btn:hover {
+  background: #333333;
+  transform: translateY(-1px);
+}
+
+.scg-age-filter__btn.scg-age-filter__btn--active {
+  background: #2a2a2a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.scg-age-filter__reset {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4a4a4a;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.scg-age-filter__reset:hover {
+  background: #333333;
+  transform: rotate(90deg);
+}
+
+.scg-age-filter__reset svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 768px) {
+  .scg-age-filter__buttons {
+    gap: 10px;
+  }
+  
+  .scg-age-filter__btn {
+    min-width: 120px;
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .scg-age-filter__reset {
+    width: 36px;
+    height: 36px;
+  }
+}
+/* ===== END AGE FILTER STYLES ===== */
+
+/* ===== AGE FILTER FUNCTIONALITY ===== */
+.scg-{{ sid }}__tile,
+.scg-carousel__slide {
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.scg-{{ sid }}__tile.scg-filtered-out,
+.scg-carousel__slide.scg-filtered-out {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.9);
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.scg-{{ sid }}__wrap.scg-filtering {
+  min-height: auto;
+}
+/* ===== END AGE FILTER FUNCTIONALITY ===== */
+
 /* ===== END GAMING STYLE ===== */
   #shopify-section-{{ section.id }},
   #shopify-section-{{ section.id }} *{
@@ -436,7 +551,39 @@
 <section class="scg-{{ sid }}">
   <div class="scg-heading-wrapper">
     <h2 class="scg-main-heading">Choose Your Character</h2>
-    <p class="scg-subheading">Select from our exclusive collection of personalities</p>
+    
+    <!-- Age Filter System -->
+    <div class="scg-age-filter">
+      <h3 class="scg-age-filter__title">Select your Age</h3>
+      <div class="scg-age-filter__buttons">
+        <button 
+          type="button" 
+          class="scg-age-filter__btn" 
+          data-age-range="0.5-4"
+          aria-label="Filter for ages 0.5 to 4 years"
+        >
+          0.5 - 4 Years
+        </button>
+        <button 
+          type="button" 
+          class="scg-age-filter__btn" 
+          data-age-range="4-7"
+          aria-label="Filter for ages 4 to 7 years"
+        >
+          4 - 7 Years
+        </button>
+        <button 
+          type="button" 
+          class="scg-age-filter__reset" 
+          aria-label="Reset age filter"
+          title="Reset filter"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 3V1M10 3C7.239 3 5 5.239 5 8C5 10.761 7.239 13 10 13C12.761 13 15 10.761 15 8M10 3L12 1M10 3L8 1M15 8V10M15 8H17M15 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   {% comment %} Mobile View {% endcomment %}
@@ -448,7 +595,7 @@
       {% assign p = block.settings.product %}
       {% assign img = block.settings.custom_image %}
       {% if p %}
-        <div class="scg-carousel__slide">
+        <div class="scg-carousel__slide" data-age-range="{{ block.settings.age_range | default: 'all' }}">
           <a
             href="{{ p.url }}"
             class="scg-carousel__link"
@@ -488,6 +635,7 @@
           href="{{ p.url }}"
           class="scg-{{ sid }}__tile"
           style="--scg-text: {{ block.settings.text_color }};"
+          data-age-range="{{ block.settings.age_range | default: 'all' }}"
           {{ block.shopify_attributes }}
         >
           <div class="scg-{{ sid }}__media" aria-hidden="true">
@@ -706,6 +854,35 @@ document.addEventListener('DOMContentLoaded', function() {
       updateCarousel(true);
     }
   });
+
+  // Handle filter updates - skip filtered slides
+  carousel.addEventListener('scg-filter-updated', function() {
+    // Get only visible (non-filtered) slides
+    const visibleSlides = Array.from(slides).filter(slide => !slide.classList.contains('scg-filtered-out'));
+    
+    // If current slide is filtered, move to first visible
+    if (slides[currentIndex] && slides[currentIndex].classList.contains('scg-filtered-out')) {
+      const firstVisibleIndex = Array.from(slides).indexOf(visibleSlides[0]);
+      if (firstVisibleIndex >= 0) {
+        currentIndex = firstVisibleIndex;
+        updateCarousel(true);
+      }
+    }
+    
+    // Recreate dots based on visible slides only
+    dotsContainer.innerHTML = '';
+    visibleSlides.forEach((slide, index) => {
+      const originalIndex = Array.from(slides).indexOf(slide);
+      const dot = document.createElement('div');
+      dot.className = 'scg-carousel__dot';
+      if (originalIndex === currentIndex) dot.classList.add('active');
+      dot.addEventListener('click', () => {
+        currentIndex = originalIndex;
+        updateCarousel();
+      });
+      dotsContainer.appendChild(dot);
+    });
+  });
 });
 </script>
 
@@ -748,6 +925,100 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('shopify:section:load', (e) => {
     // nothing required here unless you want to fully re-init; this is usually enough since section reloads DOM
   });
+})();
+</script>
+
+<script>
+// Age Filter Functionality
+(function() {
+  const ageFilter = document.querySelector('.scg-age-filter');
+  if (!ageFilter) return;
+
+  const filterButtons = ageFilter.querySelectorAll('.scg-age-filter__btn');
+  const resetButton = ageFilter.querySelector('.scg-age-filter__reset');
+  const desktopTiles = document.querySelectorAll('.scg-{{ sid }}__tile');
+  const mobileSlides = document.querySelectorAll('.scg-carousel__slide');
+  const desktopWrap = document.querySelector('.scg-{{ sid }}__wrap');
+  const mobileCarousel = document.querySelector('.scg-mobile-carousel');
+
+  let currentFilter = null;
+
+  function filterByAge(ageRange) {
+    currentFilter = ageRange;
+    
+    // Update button states
+    filterButtons.forEach(btn => {
+      if (btn.dataset.ageRange === ageRange) {
+        btn.classList.add('scg-age-filter__btn--active');
+      } else {
+        btn.classList.remove('scg-age-filter__btn--active');
+      }
+    });
+
+    // Filter desktop tiles
+    desktopTiles.forEach(tile => {
+      const tileAgeRange = tile.dataset.ageRange || 'all';
+      if (ageRange === 'all' || tileAgeRange === 'all' || tileAgeRange === ageRange) {
+        tile.classList.remove('scg-filtered-out');
+      } else {
+        tile.classList.add('scg-filtered-out');
+      }
+    });
+
+    // Filter mobile carousel slides
+    mobileSlides.forEach(slide => {
+      const slideAgeRange = slide.dataset.ageRange || 'all';
+      if (ageRange === 'all' || slideAgeRange === 'all' || slideAgeRange === ageRange) {
+        slide.classList.remove('scg-filtered-out');
+      } else {
+        slide.classList.add('scg-filtered-out');
+      }
+    });
+
+    // Update carousel if on mobile
+    if (mobileCarousel && window.matchMedia('(max-width: 989px)').matches) {
+      // Trigger carousel update if needed
+      const carouselUpdateEvent = new Event('scg-filter-updated');
+      mobileCarousel.dispatchEvent(carouselUpdateEvent);
+    }
+  }
+
+  function resetFilter() {
+    currentFilter = null;
+    
+    // Remove active state from all buttons
+    filterButtons.forEach(btn => {
+      btn.classList.remove('scg-age-filter__btn--active');
+    });
+
+    // Show all tiles
+    desktopTiles.forEach(tile => {
+      tile.classList.remove('scg-filtered-out');
+    });
+
+    // Show all mobile slides
+    mobileSlides.forEach(slide => {
+      slide.classList.remove('scg-filtered-out');
+    });
+  }
+
+  // Add click handlers to filter buttons
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ageRange = btn.dataset.ageRange;
+      if (currentFilter === ageRange) {
+        // Clicking same button resets filter
+        resetFilter();
+      } else {
+        filterByAge(ageRange);
+      }
+    });
+  });
+
+  // Add click handler to reset button
+  if (resetButton) {
+    resetButton.addEventListener('click', resetFilter);
+  }
 })();
 </script>
 </section>
@@ -902,7 +1173,19 @@ document.addEventListener('DOMContentLoaded', function() {
       "settings": [
         { "type": "product", "id": "product", "label": "Product" },
         { "type": "image_picker", "id": "custom_image", "label": "Custom image" },
-        { "type": "color", "id": "text_color", "label": "Hover text color", "default": "#ffffff" }
+        { "type": "color", "id": "text_color", "label": "Hover text color", "default": "#ffffff" },
+        {
+          "type": "select",
+          "id": "age_range",
+          "label": "Age Range",
+          "options": [
+            { "value": "all", "label": "All Ages" },
+            { "value": "0.5-4", "label": "0.5 - 4 Years" },
+            { "value": "4-7", "label": "4 - 7 Years" }
+          ],
+          "default": "all",
+          "info": "Select the age range for this product. Used for filtering."
+        }
       ]
     }
   ],
