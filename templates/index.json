@@ -257,11 +257,82 @@
         "card_height_mobile": 440,
         "image_max_width": 900
       }
+    },
+    "hers_labs_hero_CXpcfC": {
+      "type": "hers-labs-hero",
+      "blocks": {
+        "sliding_image_gFEqnX": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/greenpng.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_kC47Jb": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/pinkbunny.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_3f6UGN": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_kPVhRT": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_EifLDV": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_EMVALK": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_4XrzrH": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "sliding_image_gFEqnX",
+        "sliding_image_kC47Jb",
+        "sliding_image_3f6UGN",
+        "sliding_image_kPVhRT",
+        "sliding_image_EifLDV",
+        "sliding_image_EMVALK",
+        "sliding_image_4XrzrH"
+      ],
+      "name": "Hers Labs Hero",
+      "settings": {
+        "label": "labs by hers",
+        "headline": "Test what your body's been telling you",
+        "primary_button_label": "Start my labs",
+        "primary_button_link": "",
+        "secondary_button_label": "Learn more",
+        "secondary_button_link": "",
+        "woman_image": "shopify://shop_images/Element_1_pink.png",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
     }
   },
   "order": [
     "hex_prism_carousel_WDEgJy",
     "3d_card_carousel_x3rUgj",
-    "best_sellers_on_sale_ygnM6X"
+    "best_sellers_on_sale_ygnM6X",
+    "hers_labs_hero_CXpcfC"
   ]
 }
