@@ -157,12 +157,12 @@
             "title": "Unleash Your Child's Imagination",
             "subtitle": "Cozy animal onesies for endless adventures.Designed for comfort. Loved by kids.",
             "text_position": "custom",
-            "text_horizontal": 20,
-            "text_vertical": 40,
+            "text_horizontal": 21,
+            "text_vertical": 36,
             "title_color": "#ffffff",
             "subtitle_color": "#ffffff",
             "button_text": "Shop Now",
-            "button_link": "shopify://products/dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "button_link": "shopify://collections/all",
             "button_position": "custom",
             "button_horizontal": 19,
             "button_vertical": 52
@@ -184,7 +184,7 @@
         "button_bg_color": "#ffffff",
         "button_text_color": "#000000",
         "slide_height": "medium",
-        "autoplay_enabled": true,
+        "autoplay_enabled": false,
         "autoplay_speed": 5000
       }
     },
