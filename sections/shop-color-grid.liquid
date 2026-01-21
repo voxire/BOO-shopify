@@ -230,16 +230,28 @@
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
 
+/* Filtered items remain visible but inactive */
 .scg-{{ sid }}__tile.scg-filtered-out,
 .scg-carousel__slide.scg-filtered-out {
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(0.9);
+  opacity: 0.55;
+  transform: scale(0.985);
   pointer-events: none;
-  height: 0;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
+}
+
+/* Desktop: filtered tiles stay blurred/dimmed */
+.scg-{{ sid }}__tile.scg-filtered-out .scg-{{ sid }}__media img {
+  filter: blur(var(--scg-blur));
+  transform: scale({{ section.settings.image_scale | divided_by: 100.0 }});
+}
+
+/* Prevent filtered tiles from becoming active */
+.scg-{{ sid }}__tile.scg-filtered-out.scg-is-active {
+  transform: scale(0.985);
+  opacity: 0.55;
+}
+
+.scg-{{ sid }}__tile.scg-filtered-out .scg-{{ sid }}__hover-text {
+  opacity: 0;
 }
 
 .scg-{{ sid }}__wrap.scg-filtering {
@@ -273,6 +285,7 @@
     background: {{ section.settings.section_bg }};
     margin:0;
     padding:0;
+    --scg-blur: 3px;
   }
 
   /* grid centered in the section */
@@ -367,12 +380,12 @@
   }
 
   .scg-{{ sid }}__media {
-    will-change: transform, filter;
+    will-change: transform;
     transform: translateZ(0);
   }
 
   .scg-{{ sid }}__media img {
-    will-change: transform, filter;
+    will-change: transform;
     transform: translateZ(0);
   }
 
@@ -391,7 +404,7 @@
 
   /* Blur ONLY the image layer of non-active tiles (much faster than blurring the whole card) */
   .scg-{{ sid }}__wrap.scg-is-hovering .scg-{{ sid }}__tile:not(.scg-is-active) .scg-{{ sid }}__media img {
-    filter: blur(5px);
+    filter: blur(var(--scg-blur));
   }
 
   /* Active tile pops */
@@ -663,9 +676,9 @@
         >
           <div class="scg-{{ sid }}__media" aria-hidden="true">
             {% if img %}
-              <img src="{{ img | image_url: width: 1600 }}" alt="" loading="lazy" decoding="async">
+              {{ img | image_url: width: 1200 | image_tag: widths: '400,600,800,1000,1200', sizes: '(min-width: 990px) 20vw, 100vw', loading: 'lazy', decoding: 'async', alt: '' }}
             {% elsif p.featured_image %}
-              <img src="{{ p.featured_image | image_url: width: 1600 }}" alt="" loading="lazy" decoding="async">
+              {{ p.featured_image | image_url: width: 1200 | image_tag: widths: '400,600,800,1000,1200', sizes: '(min-width: 990px) 20vw, 100vw', loading: 'lazy', decoding: 'async', alt: '' }}
             {% endif %}
           </div>
 
@@ -878,33 +891,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Handle filter updates - skip filtered slides
+  // Handle filter updates - filtered slides remain visible but inactive
   carousel.addEventListener('scg-filter-updated', function() {
-    // Get only visible (non-filtered) slides
-    const visibleSlides = Array.from(slides).filter(slide => !slide.classList.contains('scg-filtered-out'));
-    
-    // If current slide is filtered, move to first visible
+    // If current slide is filtered, move to first non-filtered slide
     if (slides[currentIndex] && slides[currentIndex].classList.contains('scg-filtered-out')) {
-      const firstVisibleIndex = Array.from(slides).indexOf(visibleSlides[0]);
+      const firstVisibleIndex = Array.from(slides).findIndex(slide => !slide.classList.contains('scg-filtered-out'));
       if (firstVisibleIndex >= 0) {
         currentIndex = firstVisibleIndex;
         updateCarousel(true);
       }
     }
     
-    // Recreate dots based on visible slides only
-    dotsContainer.innerHTML = '';
-    visibleSlides.forEach((slide, index) => {
-      const originalIndex = Array.from(slides).indexOf(slide);
-      const dot = document.createElement('div');
-      dot.className = 'scg-carousel__dot';
-      if (originalIndex === currentIndex) dot.classList.add('active');
-      dot.addEventListener('click', () => {
-        currentIndex = originalIndex;
-        updateCarousel();
-      });
-      dotsContainer.appendChild(dot);
-    });
+    // Dots always represent all slides (filtered items remain visible)
+    // No need to recreate dots - they already represent all slides
   });
 });
 </script>
@@ -918,12 +917,20 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!tiles.length) return;
 
   let raf = null;
+  let hoverTimeout = null;
+  let currentActiveTile = null;
 
   function setActive(tile) {
+    // Ignore filtered-out tiles
+    if (tile.classList.contains('scg-filtered-out')) {
+      return;
+    }
+
     if (raf) cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
       wrap.classList.add('scg-is-hovering');
       tiles.forEach(t => t.classList.toggle('scg-is-active', t === tile));
+      currentActiveTile = tile;
     });
   }
 
@@ -932,17 +939,42 @@ document.addEventListener('DOMContentLoaded', function() {
     raf = requestAnimationFrame(() => {
       wrap.classList.remove('scg-is-hovering');
       tiles.forEach(t => t.classList.remove('scg-is-active'));
+      currentActiveTile = null;
     });
   }
 
   tiles.forEach(tile => {
-    tile.addEventListener('pointerenter', () => setActive(tile), { passive: true });
+    tile.addEventListener('pointerenter', () => {
+      // Clear any pending timeout
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+
+      // Add 60ms hover-intent delay
+      hoverTimeout = setTimeout(() => {
+        setActive(tile);
+      }, 60);
+    }, { passive: true });
+
     tile.addEventListener('pointerleave', () => {
+      // Clear hover timeout if pointer leaves before delay
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
       // leave handled by wrap pointerleave for stability
     }, { passive: true });
   });
 
-  wrap.addEventListener('pointerleave', clearActive, { passive: true });
+  wrap.addEventListener('pointerleave', () => {
+    // Clear hover timeout
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = null;
+    }
+    clearActive();
+  }, { passive: true });
 
   // Theme editor safety: rebind on section load
   document.addEventListener('shopify:section:load', (e) => {
@@ -978,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    // Filter desktop tiles
+    // Filter desktop tiles (add/remove scg-filtered-out class)
     desktopTiles.forEach(tile => {
       const tileAgeRange = tile.dataset.ageRange || 'all';
       if (ageRange === 'all' || tileAgeRange === 'all' || tileAgeRange === ageRange) {
@@ -988,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    // Filter mobile carousel slides
+    // Filter mobile carousel slides (add/remove scg-filtered-out class)
     mobileSlides.forEach(slide => {
       const slideAgeRange = slide.dataset.ageRange || 'all';
       if (ageRange === 'all' || slideAgeRange === 'all' || slideAgeRange === ageRange) {
@@ -997,6 +1029,16 @@ document.addEventListener('DOMContentLoaded', function() {
         slide.classList.add('scg-filtered-out');
       }
     });
+
+    // Clear active state if currently active tile becomes filtered
+    const desktopWrap = document.querySelector('.scg-{{ sid }}__wrap');
+    if (desktopWrap) {
+      const activeTile = desktopWrap.querySelector('.scg-{{ sid }}__tile.scg-is-active');
+      if (activeTile && activeTile.classList.contains('scg-filtered-out')) {
+        desktopWrap.classList.remove('scg-is-hovering');
+        activeTile.classList.remove('scg-is-active');
+      }
+    }
 
     // Update carousel if on mobile
     if (mobileCarousel && window.matchMedia('(max-width: 989px)').matches) {
