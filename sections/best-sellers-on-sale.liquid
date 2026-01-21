@@ -3,9 +3,6 @@
   assign heading = section.settings.heading | default: 'Best Sellers on Sale'
   assign button_label = section.settings.button_label | default: 'SHOP NOW'
   assign button_link = section.settings.button_link | default: '#'
-  assign collection = section.settings.collection
-  assign products_to_show = section.settings.products_to_show | default: 8
-  assign only_sale = section.settings.only_sale | default: true
   assign badge_text = section.settings.badge_text | default: 'Best Seller'
   assign badge_tag = section.settings.badge_tag | default: 'Best Seller'
   assign section_bg = section.settings.section_bg | default: '#ffffff'
@@ -23,17 +20,17 @@
   assign card_height_mobile = section.settings.card_height_mobile | default: 440
   assign image_max_width = section.settings.image_max_width | default: 900
 
-  assign products_array = blank
-  if collection != blank
-    assign products_array = collection.products
+  comment
+    Extract age range values from button labels for filter matching
+    Pattern: "Age 0.5-4" -> "0.5-4", "AGE 5-7" -> "5-7"
+  endcomment
+  assign age_range_1 = 'all'
+  if top_cta_1_label != blank
+    assign age_range_1 = top_cta_1_label | replace: 'Age ', '' | replace: 'AGE ', '' | replace: 'age ', '' | strip | downcase
   endif
-
-  assign products_count = 0
-  if products_array != blank
-    assign products_count = products_array.size
-    if products_count > products_to_show
-      assign products_count = products_to_show
-    endif
+  assign age_range_2 = 'all'
+  if top_cta_2_label != blank
+    assign age_range_2 = top_cta_2_label | replace: 'Age ', '' | replace: 'AGE ', '' | replace: 'age ', '' | strip | downcase
   endif
 -%}
 
@@ -43,13 +40,14 @@
   style="background-color: {{ section_bg }};"
 >
   <div class="page-width">
+    {%- comment -%} Age Filter Buttons - matches SCG pattern {%- endcomment -%}
     <div class="best-sellers-on-sale__top-ctas" role="tablist" aria-label="Product filter tabs">
       <button type="button" class="best-sellers-on-sale__top-cta is-active" data-filter="all" role="tab" aria-selected="true">ALL</button>
       {%- if top_cta_1_label != blank -%}
-        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="badge" role="tab" aria-selected="false">{{ top_cta_1_label }}</button>
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="{{ age_range_1 }}" role="tab" aria-selected="false">{{ top_cta_1_label }}</button>
       {%- endif -%}
       {%- if top_cta_2_label != blank -%}
-        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="sale" role="tab" aria-selected="false">{{ top_cta_2_label }}</button>
+        <button type="button" class="best-sellers-on-sale__top-cta" data-filter="{{ age_range_2 }}" role="tab" aria-selected="false">{{ top_cta_2_label }}</button>
       {%- endif -%}
     </div>
 
@@ -64,70 +62,92 @@
       {%- endif -%}
     </div>
 
-    {%- if collection != blank and products_count > 0 -%}
+    {%- comment -%} Product Grid - rendered from section blocks (not collection) {%- endcomment -%}
+    {%- assign blocks_with_products = section.blocks | where: 'type', 'product_card' -%}
+    {%- if blocks_with_products.size > 0 -%}
       <div class="best-sellers-on-sale__grid" id="best-sellers-grid-{{ section_id }}">
-        {%- assign rendered_count = 0 -%}
-        {%- for product in products_array -%}
-          {%- if rendered_count >= products_to_show -%}
-            {%- break -%}
+        {%- for block in blocks_with_products -%}
+          {%- assign product = block.settings.product -%}
+          {%- if product != blank -%}
+            {%- liquid
+              comment
+                Sale detection - check if product has compare_at_price > price
+              endcomment
+              assign is_on_sale = false
+              if product.compare_at_price_max > product.price
+                assign is_on_sale = true
+              endif
+
+              comment
+                Badge tag detection - check if product has the specified badge tag
+              endcomment
+              assign has_badge_tag = false
+              if badge_tag == blank
+                assign has_badge_tag = true
+              else
+                assign badge_tag_lower = badge_tag | downcase
+                for tag in product.tags
+                  assign tag_lower = tag | downcase
+                  if tag_lower == badge_tag_lower
+                    assign has_badge_tag = true
+                    break
+                  endif
+                endfor
+              endif
+
+              assign show_badge = false
+              if has_badge_tag and badge_text != blank
+                assign show_badge = true
+              endif
+
+              comment
+                Image selection: custom image from block, or product featured image
+              endcomment
+              assign product_image = block.settings.custom_image
+              if product_image == blank
+                assign product_image = product.featured_image
+              endif
+              if product_image == blank
+                assign product_image = product.images.first
+              endif
+
+              comment
+                Age range comes directly from block settings (not from product tags)
+              endcomment
+              assign product_age_range = block.settings.age_range | default: 'all' | downcase | strip
+            -%}
+            <div 
+              class="best-sellers-on-sale__card" 
+              data-sale="{{ is_on_sale }}" 
+              data-badge="{{ has_badge_tag }}" 
+              data-age-range="{{ product_age_range }}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if show_badge -%}
+                <div class="best-sellers-on-sale__badge" style="background-color: {{ badge_bg }}; color: {{ badge_text_color }};">
+                  {{ badge_text }}
+                </div>
+              {%- endif -%}
+              {%- if product_image != blank -%}
+                {%- assign image_width_2x = image_max_width | times: 2 -%}
+                {%- assign image_1x_url = product_image | image_url: width: image_max_width -%}
+                {%- assign image_2x_url = product_image | image_url: width: image_width_2x -%}
+                <a href="{{ product.url }}" class="best-sellers-on-sale__image-link">
+                  <img
+                    src="{{ image_1x_url }}"
+                    srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
+                    alt="{{ product_image.alt | default: product.title }}"
+                    loading="lazy"
+                    class="best-sellers-on-sale__image"
+                  >
+                </a>
+              {%- else -%}
+                <div class="best-sellers-on-sale__placeholder">
+                  {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
           {%- endif -%}
-          {%- liquid
-            assign is_on_sale = false
-            if product.compare_at_price_max > product.price
-              assign is_on_sale = true
-            endif
-
-            assign has_badge_tag = false
-            if badge_tag == blank
-              assign has_badge_tag = true
-            else
-              assign badge_tag_lower = badge_tag | downcase
-              for tag in product.tags
-                assign tag_lower = tag | downcase
-                if tag_lower == badge_tag_lower
-                  assign has_badge_tag = true
-                  break
-                endif
-              endfor
-            endif
-
-            assign show_badge = false
-            if has_badge_tag and badge_text != blank
-              assign show_badge = true
-            endif
-
-            assign product_image = product.featured_image
-            if product_image == blank
-              assign product_image = product.images.first
-            endif
-
-            assign rendered_count = rendered_count | plus: 1
-          -%}
-          <div class="best-sellers-on-sale__card" data-sale="{{ is_on_sale }}" data-badge="{{ has_badge_tag }}">
-            {%- if show_badge -%}
-              <div class="best-sellers-on-sale__badge" style="background-color: {{ badge_bg }}; color: {{ badge_text_color }};">
-                {{ badge_text }}
-              </div>
-            {%- endif -%}
-            {%- if product_image != blank -%}
-              {%- assign image_width_2x = image_max_width | times: 2 -%}
-              {%- assign image_1x_url = product_image | image_url: width: image_max_width -%}
-              {%- assign image_2x_url = product_image | image_url: width: image_width_2x -%}
-              <a href="{{ product.url }}" class="best-sellers-on-sale__image-link">
-                <img
-                  src="{{ image_1x_url }}"
-                  srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
-                  alt="{{ product_image.alt | default: product.title }}"
-                  loading="lazy"
-                  class="best-sellers-on-sale__image"
-                >
-              </a>
-            {%- else -%}
-              <div class="best-sellers-on-sale__placeholder">
-                {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
-              </div>
-            {%- endif -%}
-          </div>
         {%- endfor -%}
       </div>
       <div class="best-sellers-on-sale__empty" id="best-sellers-empty-{{ section_id }}" style="display: none;">
@@ -234,7 +254,8 @@
     width: 100%;
   }
 
-  .best-sellers-on-sale__card[style*="display: none"] {
+  {%- comment -%} Filtered out cards are hidden via JS {%- endcomment -%}
+  .best-sellers-on-sale__card.best-sellers-on-sale__card--filtered-out {
     display: none !important;
   }
 
@@ -335,34 +356,58 @@
 
     const grid = section.querySelector('#best-sellers-grid-' + sectionId);
     const emptyState = section.querySelector('#best-sellers-empty-' + sectionId);
-    const tabs = section.querySelectorAll('.best-sellers-on-sale__top-cta[data-filter]');
+    const filterButtons = section.querySelectorAll('.best-sellers-on-sale__top-cta[data-filter]');
     const cards = grid ? grid.querySelectorAll('.best-sellers-on-sale__card') : [];
 
-    if (!grid || tabs.length === 0) return;
+    if (!grid || filterButtons.length === 0) return;
 
-    function filterProducts(filterType) {
+    let currentFilter = null;
+
+    {%- comment -%} Filter function - matches SCG pattern exactly {%- endcomment -%}
+    function filterByAge(ageRange) {
+      currentFilter = ageRange;
       let visibleCount = 0;
+      const normalizedFilter = ageRange ? ageRange.toLowerCase().trim() : 'all';
 
+      {%- comment -%} Update button active states {%- endcomment -%}
+      filterButtons.forEach(function(btn) {
+        const btnFilter = btn.getAttribute('data-filter') ? btn.getAttribute('data-filter').toLowerCase().trim() : 'all';
+        if (btnFilter === normalizedFilter) {
+          btn.classList.add('is-active');
+          btn.setAttribute('aria-selected', 'true');
+        } else {
+          btn.classList.remove('is-active');
+          btn.setAttribute('aria-selected', 'false');
+        }
+      });
+
+      {%- comment -%} Filter cards by age range {%- endcomment -%}
       cards.forEach(function(card) {
+        const cardAgeRange = (card.getAttribute('data-age-range') || 'all').toLowerCase().trim();
         let shouldShow = false;
 
-        if (filterType === 'all') {
+        if (normalizedFilter === 'all') {
           shouldShow = true;
-        } else if (filterType === 'sale') {
-          shouldShow = card.getAttribute('data-sale') === 'true';
-        } else if (filterType === 'badge') {
-          shouldShow = card.getAttribute('data-badge') === 'true';
+        } else {
+          {%- comment -%} Show if age range matches OR if card has age_range="all" (always visible) {%- endcomment -%}
+          if (normalizedFilter === cardAgeRange || cardAgeRange === 'all') {
+            shouldShow = true;
+          } else {
+            shouldShow = false;
+          }
         }
 
         if (shouldShow) {
+          card.classList.remove('best-sellers-on-sale__card--filtered-out');
           card.style.display = 'flex';
           visibleCount++;
         } else {
+          card.classList.add('best-sellers-on-sale__card--filtered-out');
           card.style.display = 'none';
         }
       });
 
-      // Show/hide empty state
+      {%- comment -%} Show/hide empty state {%- endcomment -%}
       if (emptyState) {
         if (visibleCount === 0) {
           emptyState.style.display = 'block';
@@ -374,26 +419,33 @@
       }
     }
 
-    // Add click handlers to tabs
-    tabs.forEach(function(tab) {
-      tab.addEventListener('click', function() {
+    {%- comment -%} Reset filter function - shows all products {%- endcomment -%}
+    function resetFilter() {
+      currentFilter = null;
+      filterButtons.forEach(function(btn) {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      filterByAge('all');
+    }
+
+    {%- comment -%} Add click handlers - matches SCG pattern: clicking same button resets to ALL {%- endcomment -%}
+    filterButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
         const filterType = this.getAttribute('data-filter');
-
-        // Update active state
-        tabs.forEach(function(t) {
-          t.classList.remove('is-active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        this.classList.add('is-active');
-        this.setAttribute('aria-selected', 'true');
-
-        // Filter products
-        filterProducts(filterType);
+        const normalizedFilter = filterType ? filterType.toLowerCase().trim() : 'all';
+        
+        {%- comment -%} If clicking the same active filter, reset to ALL {%- endcomment -%}
+        if (currentFilter && currentFilter.toLowerCase().trim() === normalizedFilter) {
+          resetFilter();
+        } else {
+          filterByAge(filterType);
+        }
       });
     });
 
-    // Initialize: show all products (all tab is active by default)
-    filterProducts('all');
+    {%- comment -%} Initialize: show all products {%- endcomment -%}
+    filterByAge('all');
   })();
 </script>
 
@@ -449,31 +501,6 @@
       "id": "top_cta_text",
       "label": "Top CTA Text",
       "default": "#ffffff"
-    },
-    {
-      "type": "header",
-      "content": "Product Settings"
-    },
-    {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection"
-    },
-    {
-      "type": "range",
-      "id": "products_to_show",
-      "label": "Products to Show",
-      "min": 4,
-      "max": 12,
-      "step": 1,
-      "default": 8
-    },
-    {
-      "type": "checkbox",
-      "id": "only_sale",
-      "label": "Only Show Sale Products",
-      "default": true,
-      "info": "Only display products with a compare at price higher than the current price"
     },
     {
       "type": "header",
@@ -578,6 +605,33 @@
       "info": "Maximum image width for performance optimization"
     }
   ],
+  "blocks": [
+    {
+      "type": "product_card",
+      "name": "Product Card",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Custom Image",
+          "info": "Optional: Override product featured image"
+        },
+        {
+          "type": "text",
+          "id": "age_range",
+          "label": "Age Range",
+          "default": "all",
+          "info": "Enter the age range value (e.g., '0.5-4', '5-7', 'all'). This must match the age range set on filter buttons."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 5,
   "presets": [
     {
       "name": "Best Sellers on Sale"
@@ -585,4 +639,3 @@
   ]
 }
 {% endschema %}
-

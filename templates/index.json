@@ -80,7 +80,7 @@
         "perspective": 1400,
         "radius": 300,
         "perspective_mobile": 1000,
-        "radius_mobile": 180,
+        "radius_mobile": 200,
         "face_width": 320,
         "face_height": 520,
         "face_width_mobile": 240,
@@ -184,6 +184,55 @@
     },
     "best_sellers_on_sale_ygnM6X": {
       "type": "best-sellers-on-sale",
+      "blocks": {
+        "product_card_EtKQgj": {
+          "type": "product_card",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/Shaboo.png",
+            "age_range": "0.5-4"
+          }
+        },
+        "product_card_qYRQw6": {
+          "type": "product_card",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/GriBoo.png",
+            "age_range": "5-7"
+          }
+        },
+        "product_card_PxWG8Y": {
+          "type": "product_card",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/DinoBoo.png",
+            "age_range": "0.5-4"
+          }
+        },
+        "product_card_eVYzbK": {
+          "type": "product_card",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/BunBoo.png",
+            "age_range": "5-7"
+          }
+        },
+        "product_card_f4yNcW": {
+          "type": "product_card",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/FoxBoo.png",
+            "age_range": "0.5-4"
+          }
+        }
+      },
+      "block_order": [
+        "product_card_EtKQgj",
+        "product_card_qYRQw6",
+        "product_card_PxWG8Y",
+        "product_card_eVYzbK",
+        "product_card_f4yNcW"
+      ],
       "name": "Best Sellers on Sale",
       "settings": {
         "heading": "Best Sellers on Sale",
@@ -195,9 +244,6 @@
         "top_cta_2_link": "",
         "top_cta_bg": "#0d4c07",
         "top_cta_text": "#ffffff",
-        "collection": "frontpage",
-        "products_to_show": 5,
-        "only_sale": true,
         "badge_text": "Best Seller",
         "badge_tag": "Best Seller",
         "section_bg": "#ffffff",
@@ -211,11 +257,82 @@
         "card_height_mobile": 440,
         "image_max_width": 900
       }
+    },
+    "hers_labs_hero_CXpcfC": {
+      "type": "hers-labs-hero",
+      "blocks": {
+        "sliding_image_gFEqnX": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/greenpng.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_kC47Jb": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/pinkbunny.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_3f6UGN": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_kPVhRT": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_EifLDV": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_EMVALK": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_4XrzrH": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "sliding_image_gFEqnX",
+        "sliding_image_kC47Jb",
+        "sliding_image_3f6UGN",
+        "sliding_image_kPVhRT",
+        "sliding_image_EifLDV",
+        "sliding_image_EMVALK",
+        "sliding_image_4XrzrH"
+      ],
+      "name": "Hers Labs Hero",
+      "settings": {
+        "label": "labs by hers",
+        "headline": "Test what your body's been telling you",
+        "primary_button_label": "Start my labs",
+        "primary_button_link": "",
+        "secondary_button_label": "Learn more",
+        "secondary_button_link": "",
+        "woman_image": "shopify://shop_images/Foreground_77f221b7-0ee3-46cf-912b-9efeb2f8d2fd.png",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
     }
   },
   "order": [
     "hex_prism_carousel_WDEgJy",
     "3d_card_carousel_x3rUgj",
-    "best_sellers_on_sale_ygnM6X"
+    "best_sellers_on_sale_ygnM6X",
+    "hers_labs_hero_CXpcfC"
   ]
 }
