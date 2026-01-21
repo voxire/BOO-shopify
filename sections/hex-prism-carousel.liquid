@@ -265,10 +265,19 @@
       border-radius: {{ corner_radius }}px;
     }
 
+    .hex-prism-carousel__face-inner--{{ section_id }} {
+      border-radius: {{ corner_radius }}px;
+    }
+
     .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
     .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }},
     .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
       padding: 14px;
+    }
+
+    .hex-prism-carousel__image--{{ section_id }},
+    .hex-prism-carousel__gradient--{{ section_id }} {
+      border-radius: {{ corner_radius }}px;
     }
 
     .hex-prism-carousel__image--{{ section_id }} {
