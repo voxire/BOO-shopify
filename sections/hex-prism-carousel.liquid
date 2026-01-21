@@ -153,6 +153,8 @@
     outline: none;
     pointer-events: auto;
     opacity: 1;
+    /* Ensure CSS variable is available to children */
+    --card-r: var(--card-r, {{ corner_radius }}px);
   }
 
   .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }}::after {
@@ -178,6 +180,8 @@
     border-radius: 0 !important;
     overflow: visible !important;
     background: transparent !important;
+    /* Pass CSS variable down */
+    --card-r: var(--card-r, {{ corner_radius }}px);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] {
@@ -282,19 +286,34 @@
   .hex-prism-carousel__clip--{{ section_id }}{
     width: 100%;
     height: 100%;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
 
-    /* The actual radius + clip */
-    border-radius: var(--card-r) !important;
+    /* The actual radius + clip - use direct value as fallback */
+    border-radius: {{ corner_radius }}px !important;
     overflow: hidden !important;
-    clip-path: inset(0 round var(--card-r));
-    -webkit-clip-path: inset(0 round var(--card-r));
+    clip-path: inset(0 round {{ corner_radius }}px) !important;
+    -webkit-clip-path: inset(0 round {{ corner_radius }}px) !important;
 
     /* Helps avoid compositor weirdness */
     transform: translateZ(0);
     contain: paint;
     isolation: isolate;
     background: rgba(255,255,255,0.02);
+    /* Force hardware acceleration */
+    will-change: transform;
+    
+    /* DEBUG: temporary outline to verify clip wrapper exists */
+    outline: 2px solid rgba(255,0,0,0.5) !important;
+  }
+
+  /* Force border-radius on image/gradient inside clip */
+  .hex-prism-carousel__clip--{{ section_id }} .hex-prism-carousel__image--{{ section_id }},
+  .hex-prism-carousel__clip--{{ section_id }} .hex-prism-carousel__gradient--{{ section_id }} {
+    border-radius: {{ corner_radius }}px !important;
+    display: block;
   }
 
   /* Kill theme link overlays that can draw square layers */
