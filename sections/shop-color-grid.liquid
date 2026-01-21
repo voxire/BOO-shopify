@@ -293,7 +293,7 @@
     width:100%;
     max-width:{{ section.settings.max_width }}px;
     margin:0 auto;
-    padding:{{ section.settings.outer_padding }}px;
+    padding:0 {{ section.settings.outer_padding }}px {{ section.settings.outer_padding }}px;
     min-height:{{ section.settings.height_vh }}vh;
     display:grid;
     grid-template-columns:repeat({{ section.settings.columns }}, minmax(0,1fr));
