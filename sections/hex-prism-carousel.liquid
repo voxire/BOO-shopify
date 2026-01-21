@@ -29,7 +29,7 @@
   data-face-height="{{ face_height }}"
   data-corner-radius="{{ corner_radius }}"
   data-side-opacity="{{ side_opacity }}"
-  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px;"
+  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --faces: {{ blocks_count }};"
 >
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
@@ -134,19 +134,18 @@
     transform: translateZ(0) rotateY(var(--rot, 0deg));
     transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1);
     --radius: var(--radius-d);
+    --step: calc(360deg / var(--faces));
   }
 
   .hex-prism-carousel__face--{{ section_id }} {
     position: absolute;
     width: var(--card-w);
     height: var(--card-h);
-    border-radius: {{ corner_radius }}px;
-    overflow: hidden;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
-    transform: rotateY(calc(var(--i) * 60deg)) translateZ(calc(var(--radius) + var(--z, 0px)));
+    transform: rotateY(calc(var(--i) * var(--step))) translateZ(calc(var(--radius) + var(--z, 0px)));
     display: block;
     text-decoration: none;
     outline: none;
@@ -173,7 +172,11 @@
     height: 100%;
     position: relative;
     transition: transform 650ms cubic-bezier(0.23, 1, 0.32, 1), opacity 650ms cubic-bezier(0.23, 1, 0.32, 1);
-    border-radius: inherit;
+    border-radius: {{ corner_radius }}px;
+    overflow: hidden;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    transform: translateZ(0);
+    background: rgba(255, 255, 255, 0.02);
   }
 
   .hex-prism-carousel__face--{{ section_id }}[data-state="active"] {
@@ -231,11 +234,6 @@
     display: block;
   }
 
-  .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
-  .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }},
-  .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
-    padding: 0;
-  }
 
 
   @media (max-width: 768px) {
@@ -262,33 +260,11 @@
     .hex-prism-carousel__face--{{ section_id }} {
       width: min(var(--card-w-m), calc(100vw - 72px));
       height: var(--card-h-m);
-      border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
-      overflow: hidden !important;
-      -webkit-border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
-    }
-
-    .hex-prism-carousel__face-inner--{{ section_id }} {
-      border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
-      overflow: hidden;
-    }
-
-    .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__face-inner--{{ section_id }},
-    .hex-prism-carousel__face--{{ section_id }}[data-state="side"] .hex-prism-carousel__face-inner--{{ section_id }},
-    .hex-prism-carousel__face--{{ section_id }}[data-state="side2"] .hex-prism-carousel__face-inner--{{ section_id }} {
-      padding: 14px;
-      border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
-      overflow: hidden;
-    }
-
-    .hex-prism-carousel__image--{{ section_id }},
-    .hex-prism-carousel__gradient--{{ section_id }} {
-      border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
     }
 
     .hex-prism-carousel__image--{{ section_id }} {
       object-fit: contain;
       background: transparent;
-      border-radius: {% if corner_radius > 0 %}{{ corner_radius }}px{% else %}14px{% endif %} !important;
     }
   }
 
@@ -313,6 +289,7 @@
     
     if (!prism || faces.length === 0) return;
     
+    let rotationIndex = 0;
     let activeIndex = 0;
     let isDragging = false;
     let startX = 0;
@@ -322,12 +299,11 @@
     let lastClickTarget = null;
     let clickTimer = null;
     const numFaces = faces.length;
+    const degPerFace = 360 / numFaces;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    function wrapIndex(index) {
-      if (index < 0) return numFaces + index;
-      if (index >= numFaces) return index - numFaces;
-      return index;
+    function mod(n, m) {
+      return ((n % m) + m) % m;
     }
     
     function getWrappedDiff(faceIndex, activeIndex) {
@@ -338,7 +314,9 @@
     }
     
     function updateUI() {
-      const rotation = -activeIndex * 60;
+      activeIndex = mod(rotationIndex, numFaces);
+      
+      const rotation = -rotationIndex * degPerFace;
       prism.style.setProperty('--rot', `${rotation}deg`);
       
       faces.forEach((face, index) => {
@@ -365,12 +343,11 @@
       });
     }
     
-    function setActive(index, animate = true) {
+    function goNext() {
       if (numFaces <= 1) return;
+      rotationIndex += 1;
       
-      activeIndex = wrapIndex(index);
-      
-      if (!animate || prefersReducedMotion) {
+      if (prefersReducedMotion) {
         prism.style.transition = 'none';
         updateUI();
         requestAnimationFrame(() => {
@@ -381,12 +358,19 @@
       }
     }
     
-    function goNext() {
-      setActive(activeIndex + 1);
-    }
-    
     function goPrev() {
-      setActive(activeIndex - 1);
+      if (numFaces <= 1) return;
+      rotationIndex -= 1;
+      
+      if (prefersReducedMotion) {
+        prism.style.transition = 'none';
+        updateUI();
+        requestAnimationFrame(() => {
+          prism.style.transition = '';
+        });
+      } else {
+        updateUI();
+      }
     }
     
     function handlePointerDown(e) {
@@ -494,6 +478,8 @@
     
     function init() {
       if (faces.length === 0) return;
+      
+      section.style.setProperty('--faces', String(numFaces));
       
       faces.forEach((face, index) => {
         face.style.setProperty('--i', index);
