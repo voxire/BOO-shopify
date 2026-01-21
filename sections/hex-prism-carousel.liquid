@@ -271,7 +271,7 @@
     }
 
     .hex-prism-carousel__image--{{ section_id }} {
-      object-fit: contain;
+      object-fit: cover;
       background: transparent;
     }
   }
@@ -304,9 +304,6 @@
     background: rgba(255,255,255,0.02);
     /* Force hardware acceleration */
     will-change: transform;
-    
-    /* DEBUG: temporary outline to verify clip wrapper exists */
-    outline: 2px solid rgba(255,0,0,0.5) !important;
   }
 
   /* Force border-radius on image/gradient inside clip */
