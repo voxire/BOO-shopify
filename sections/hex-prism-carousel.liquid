@@ -117,6 +117,7 @@
     background-image: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
     padding-top: {{ padding_top }}px;
     padding-bottom: {{ padding_bottom }}px;
+    display: none;
   }
 
   .hex-prism-carousel__scene--{{ section_id }} {
@@ -302,6 +303,7 @@
 
   @media (max-width: 768px) {
     .hex-prism-carousel--{{ section_id }} {
+      display: block;
       min-height: auto;
       --radius: var(--radius-m);
       --card-w: min(var(--card-w-m), calc(100vw - 72px));
