@@ -29,7 +29,7 @@
   data-face-height="{{ face_height }}"
   data-corner-radius="{{ corner_radius }}"
   data-side-opacity="{{ side_opacity }}"
-  style="background-color: {{ background_color }}; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --faces: {{ blocks_count }};"
+  style="background-color: {{ background_color }}; --card-r: {{ corner_radius }}px; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --faces: {{ blocks_count }};"
 >
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
@@ -273,6 +273,38 @@
     .hex-prism-carousel__face-inner--{{ section_id }} {
       transition: none !important;
     }
+  }
+
+  /* ==== HARD CLIP (wins theme overrides) ==== */
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }},
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face-inner--{{ section_id }},
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__image--{{ section_id }},
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__gradient--{{ section_id }}{
+    border-radius: var(--card-r) !important;
+  }
+
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }},
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face-inner--{{ section_id }}{
+    overflow: hidden !important;
+
+    /* Chromium-safe rounding even if overflow gets weird */
+    clip-path: inset(0 round var(--card-r));
+    -webkit-clip-path: inset(0 round var(--card-r));
+
+    /* prevent any square background "frame" */
+    background: transparent !important;
+  }
+
+  /* Kill theme link overlays that can draw square layers */
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }}::before,
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }}::after{
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Debug (TEMP): confirm these rules are applied */
+  .hex-prism-carousel--{{ section_id }} .hex-prism-carousel__face--{{ section_id }}{
+    outline: 2px solid rgba(0,255,0,0.6);
   }
 </style>
 
