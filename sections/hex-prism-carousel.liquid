@@ -20,7 +20,7 @@
   assign blocks_count = section.blocks.size
   assign show_age_filter = section.settings.show_age_filter
   assign age_filter_title = section.settings.age_filter_title | default: 'Choose Age'
-  assign age_filter_values = section.settings.age_filter_values | default: '0-1,1-2,2-4,4-7'
+  assign age_filter_values = section.settings.age_filter_values | default: '0.5-4,4-7'
   assign age_filters = age_filter_values | split: ','
 -%}
 
@@ -976,8 +976,8 @@
       "type": "text",
       "id": "age_filter_values",
       "label": "Age filter values (comma-separated)",
-      "default": "0-1,1-2,2-4,4-7",
-      "info": "These are the filter buttons. Example: 0-1,1-2,2-4,4-7"
+      "default": "0.5-4,4-7",
+      "info": "These are the filter buttons. Example: 0.5-4,4-7"
     }
   ],
   "blocks": [
