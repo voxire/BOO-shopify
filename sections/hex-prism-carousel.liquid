@@ -18,6 +18,10 @@
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
   assign blocks_count = section.blocks.size
+  assign show_age_filter = section.settings.show_age_filter
+  assign age_filter_title = section.settings.age_filter_title | default: 'Choose Age'
+  assign age_filter_values = section.settings.age_filter_values | default: '0-1,1-2,2-4,4-7'
+  assign age_filters = age_filter_values | split: ','
 -%}
 
 <section
@@ -31,6 +35,31 @@
   data-side-opacity="{{ side_opacity }}"
   style="background-color: {{ background_color }}; --card-r: {{ corner_radius }}px; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --faces: {{ blocks_count }};"
 >
+  {%- if show_age_filter -%}
+    <div class="hex-prism-carousel__filters hex-prism-carousel__filters--{{ section_id }}" data-filters>
+      <div class="hex-prism-carousel__filters-title hex-prism-carousel__filters-title--{{ section_id }}">
+        {{ age_filter_title }}
+      </div>
+      <div class="hex-prism-carousel__filters-row hex-prism-carousel__filters-row--{{ section_id }}">
+        <button type="button"
+          class="hex-prism-carousel__chip hex-prism-carousel__chip--{{ section_id }} is-active"
+          data-age-filter="all">
+          All
+        </button>
+
+        {%- for f in age_filters -%}
+          {%- assign v = f | strip -%}
+          {%- if v != blank -%}
+            <button type="button"
+              class="hex-prism-carousel__chip hex-prism-carousel__chip--{{ section_id }}"
+              data-age-filter="{{ v | escape }}">
+              {{ v }}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
   <div class="hex-prism-carousel__scene hex-prism-carousel__scene--{{ section_id }}">
     <div class="hex-prism-carousel__prism hex-prism-carousel__prism--{{ section_id }}" data-prism>
       {%- for block in section.blocks -%}
@@ -57,12 +86,16 @@
           if block.settings.gradient_end != blank
             assign gradient_end = block.settings.gradient_end
           endif
+          
+          assign face_name = block.settings.name | default: face_alt
+          assign face_ages = block.settings.ages | default: ''
         -%}
         <a
           href="{{ face_link }}"
           class="hex-prism-carousel__face hex-prism-carousel__face--{{ section_id }}"
           data-face
           data-face-index="{{ forloop.index0 }}"
+          data-ages="{{ face_ages | escape }}"
           aria-label="{{ face_alt }}"
           tabindex="0"
           style="--i: {{ forloop.index0 }};"
@@ -88,6 +121,9 @@
                 ></div>
               {%- endif -%}
             </div>
+            <span class="hex-prism-carousel__name hex-prism-carousel__name--{{ section_id }}" aria-hidden="true">
+              {{ face_name }}
+            </span>
           </div>
         </a>
       {%- endfor -%}
@@ -319,6 +355,106 @@
     content: none !important;
     display: none !important;
   }
+
+  /* ===== Filters UI ===== */
+  .hex-prism-carousel__filters--{{ section_id }}{
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 18px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hex-prism-carousel__filters-title--{{ section_id }}{
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .hex-prism-carousel__filters-row--{{ section_id }}{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .hex-prism-carousel__chip--{{ section_id }}{
+    appearance: none;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.25);
+    color: rgba(255,255,255,0.9);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+  }
+
+  .hex-prism-carousel__chip--{{ section_id }}:hover{
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  .hex-prism-carousel__chip--{{ section_id }}.is-active{
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.55);
+  }
+
+  /* Push scene down slightly when filters exist */
+  .hex-prism-carousel__filters--{{ section_id }} + .hex-prism-carousel__scene--{{ section_id }}{
+    min-height: 520px;
+  }
+
+  /* ===== Inactive faces (filtered out) ===== */
+  .hex-prism-carousel__face--{{ section_id }}[data-filtered="true"]{
+    pointer-events: none !important;
+  }
+
+  .hex-prism-carousel__face--{{ section_id }}[data-filtered="true"] .hex-prism-carousel__face-inner--{{ section_id }}{
+    opacity: 0.35 !important;
+    filter: blur(1.5px) grayscale(0.2);
+    transform: scale(0.95);
+  }
+
+  /* ===== Name label (vertical, bottom-right) ===== */
+  .hex-prism-carousel__name--{{ section_id }}{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 5;
+    padding: 8px 6px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.45);
+    color: rgba(255,255,255,0.95);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 180ms ease, transform 180ms ease;
+    pointer-events: none;
+  }
+
+  /* Desktop hover shows label */
+  @media (hover:hover) and (pointer:fine){
+    .hex-prism-carousel__face--{{ section_id }}:hover .hex-prism-carousel__name--{{ section_id }}{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mobile: show label on active card */
+  @media (max-width: 768px){
+    .hex-prism-carousel__face--{{ section_id }}[data-state="active"] .hex-prism-carousel__name--{{ section_id }}{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <script>
@@ -347,8 +483,27 @@
     const degPerFace = 360 / numFaces;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
+    const filterWrap = section.querySelector('[data-filters]');
+    const chips = filterWrap ? Array.from(filterWrap.querySelectorAll('[data-age-filter]')) : [];
+    let activeFilter = 'all';
+    
     function mod(n, m) {
       return ((n % m) + m) % m;
+    }
+    
+    function faceMatchesFilter(faceEl, filterValue) {
+      if (!filterValue || filterValue === 'all') return true;
+      const raw = (faceEl.getAttribute('data-ages') || '').toLowerCase();
+      if (!raw) return false;
+      const list = raw.split(',').map(s => s.trim()).filter(Boolean);
+      return list.includes(String(filterValue).toLowerCase());
+    }
+    
+    function applyFilter() {
+      faces.forEach(face => {
+        const match = faceMatchesFilter(face, activeFilter);
+        face.setAttribute('data-filtered', match ? 'false' : 'true');
+      });
     }
     
     function getWrappedDiff(faceIndex, activeIndex) {
@@ -390,7 +545,11 @@
     
     function goNext() {
       if (numFaces <= 1) return;
-      rotationIndex += 1;
+      for (let i = 0; i < numFaces; i++) {
+        rotationIndex += 1;
+        const idx = mod(rotationIndex, numFaces);
+        if (faceMatchesFilter(faces[idx], activeFilter)) break;
+      }
       
       if (prefersReducedMotion) {
         prism.style.transition = 'none';
@@ -405,7 +564,11 @@
     
     function goPrev() {
       if (numFaces <= 1) return;
-      rotationIndex -= 1;
+      for (let i = 0; i < numFaces; i++) {
+        rotationIndex -= 1;
+        const idx = mod(rotationIndex, numFaces);
+        if (faceMatchesFilter(faces[idx], activeFilter)) break;
+      }
       
       if (prefersReducedMotion) {
         prism.style.transition = 'none';
@@ -474,6 +637,13 @@
       const faceLink = e.target.closest('[data-face]');
       if (!faceLink) return;
       
+      // Don't allow clicks on filtered cards
+      if (faceLink.getAttribute('data-filtered') === 'true') {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      
       const currentTime = Date.now();
       const timeSinceLastClick = currentTime - lastClickTime;
       const isDoubleClick = timeSinceLastClick < 300 && faceLink === lastClickTarget;
@@ -537,6 +707,30 @@
       section.addEventListener('click', handleClick, true);
       section.addEventListener('keydown', handleKeydown);
       
+      // Wire filter chip clicks
+      if (chips.length) {
+        chips.forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeFilter = btn.getAttribute('data-age-filter') || 'all';
+            chips.forEach(c => c.classList.toggle('is-active', c === btn));
+            applyFilter();
+            // Keep the current activeIndex but if it becomes filtered, advance until you find a match
+            if (!faceMatchesFilter(faces[activeIndex], activeFilter)) {
+              // advance up to numFaces to find a match
+              for (let i = 0; i < numFaces; i++) {
+                rotationIndex += 1;
+                const nextIdx = mod(rotationIndex, numFaces);
+                if (faceMatchesFilter(faces[nextIdx], activeFilter)) break;
+              }
+              updateUI();
+            } else {
+              updateUI();
+            }
+          });
+        });
+      }
+      
+      applyFilter();
       updateUI();
     }
     
@@ -761,6 +955,29 @@
       "unit": "px",
       "default": 0,
       "info": "Bottom padding for the section"
+    },
+    {
+      "type": "header",
+      "content": "Filtering"
+    },
+    {
+      "type": "text",
+      "id": "age_filter_title",
+      "label": "Age filter title",
+      "default": "Choose Age"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_age_filter",
+      "label": "Show age filter",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "age_filter_values",
+      "label": "Age filter values (comma-separated)",
+      "default": "0-1,1-2,2-4,4-7",
+      "info": "These are the filter buttons. Example: 0-1,1-2,2-4,4-7"
     }
   ],
   "blocks": [
@@ -769,6 +986,19 @@
       "name": "Card",
       "limit": 6,
       "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Card name",
+          "default": "Bunny Set"
+        },
+        {
+          "type": "text",
+          "id": "ages",
+          "label": "Ages (comma-separated)",
+          "default": "2-4",
+          "info": "Must match filter values above. Example: 0-1,1-2"
+        },
         {
           "type": "image_picker",
           "id": "image",
