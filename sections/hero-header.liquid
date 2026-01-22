@@ -694,23 +694,6 @@
             </span>
           </a>
         {%- endif -%}
-          <span class="svg-wrapper">
-            {%- if cart == empty -%}
-              {{- 'icon-cart-empty.svg' | inline_asset_content -}}
-            {%- else -%}
-              {{- 'icon-cart.svg' | inline_asset_content -}}
-            {%- endif -%}
-          </span>
-          {%- if cart != empty -%}
-            <span class="hero-header-{{ section_id }}__cart-badge" aria-hidden="true">
-              {%- if cart.item_count < 100 -%}
-                {{ cart.item_count }}
-              {%- else -%}
-                99+
-              {%- endif -%}
-            </span>
-          {%- endif -%}
-        </a>
       </div>
     </div>
   </div>
