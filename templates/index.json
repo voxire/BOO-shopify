@@ -424,6 +424,18 @@
         "overlay_opacity": 0,
         "overlay_hover_opacity": 15
       }
+    },
+    "two_images_T89VLn": {
+      "type": "two-images",
+      "name": "Two Images",
+      "settings": {
+        "top_image": "shopify://shop_images/Untitled-1_cxxxopy.png",
+        "top_image_alt": "",
+        "bottom_image": "shopify://shop_images/Dino_BK.png",
+        "bottom_image_alt": "",
+        "full_width": true,
+        "spacing": 0
+      }
     }
   },
   "order": [
@@ -431,6 +443,7 @@
     "3d_card_carousel_x3rUgj",
     "best_sellers_on_sale_ygnM6X",
     "hers_labs_hero_AAQ9WT",
-    "shop_color_grid_ifdnEa"
+    "shop_color_grid_ifdnEa",
+    "two_images_T89VLn"
   ]
 }
