@@ -41,7 +41,13 @@
 
       {%- if hero_image != blank -%}
         <div class="dino-hero__image-wrapper">
-          {{ hero_image | image_url: width: 800 | image_tag: loading: 'eager', alt: heading | escape, class: 'dino-hero__image' }}
+          <img
+            src="{{ hero_image | image_url: width: 800 }}"
+            srcset="{{ hero_image | image_url: width: 800 }} 1x, {{ hero_image | image_url: width: 1600 }} 2x"
+            alt="{{ heading | escape }}"
+            class="dino-hero__image"
+            loading="eager"
+          >
         </div>
       {%- endif -%}
 
@@ -64,7 +70,13 @@
           
           {%- if box_1_image != blank -%}
             <div class="dino-hero__box-1-image">
-              {{ box_1_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: '', class: 'dino-hero__box-1-img' }}
+              <img
+                src="{{ box_1_image | image_url: width: 600 }}"
+                srcset="{{ box_1_image | image_url: width: 600 }} 1x, {{ box_1_image | image_url: width: 1200 }} 2x"
+                alt=""
+                class="dino-hero__box-1-img"
+                loading="lazy"
+              >
             </div>
           {%- endif -%}
           
@@ -85,7 +97,13 @@
           <div class="dino-hero__box dino-hero__box--2">
             {%- if box_2_tail_image != blank -%}
               <div class="dino-hero__box-2-tail">
-                {{ box_2_tail_image | image_url: width: 300 | image_tag: loading: 'lazy', alt: '', class: 'dino-hero__box-2-tail-img' }}
+                <img
+                  src="{{ box_2_tail_image | image_url: width: 300 }}"
+                  srcset="{{ box_2_tail_image | image_url: width: 300 }} 1x, {{ box_2_tail_image | image_url: width: 600 }} 2x"
+                  alt=""
+                  class="dino-hero__box-2-tail-img"
+                  loading="lazy"
+                >
               </div>
             {%- endif -%}
             
@@ -121,7 +139,13 @@
 
             {%- if box_3_head_image != blank -%}
               <div class="dino-hero__box-3-head">
-                {{ box_3_head_image | image_url: width: 300 | image_tag: loading: 'lazy', alt: '', class: 'dino-hero__box-3-head-img' }}
+                <img
+                  src="{{ box_3_head_image | image_url: width: 300 }}"
+                  srcset="{{ box_3_head_image | image_url: width: 300 }} 1x, {{ box_3_head_image | image_url: width: 600 }} 2x"
+                  alt=""
+                  class="dino-hero__box-3-head-img"
+                  loading="lazy"
+                >
               </div>
             {%- endif -%}
           </div>
