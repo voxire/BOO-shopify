@@ -196,8 +196,8 @@
         "shared_button_horizontal": 20,
         "shared_button_vertical": 60,
         "slide_height": "medium",
-        "autoplay_enabled": false,
-        "autoplay_speed": 5000
+        "autoplay_enabled": true,
+        "autoplay_speed": 3000
       }
     },
     "header": {
