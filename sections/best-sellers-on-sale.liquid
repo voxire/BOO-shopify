@@ -128,24 +128,56 @@
                   {{ badge_text }}
                 </div>
               {%- endif -%}
-              {%- if product_image != blank -%}
-                {%- assign image_width_2x = image_max_width | times: 2 -%}
-                {%- assign image_1x_url = product_image | image_url: width: image_max_width -%}
-                {%- assign image_2x_url = product_image | image_url: width: image_width_2x -%}
-                <a href="{{ product.url }}" class="best-sellers-on-sale__image-link">
-                  <img
-                    src="{{ image_1x_url }}"
-                    srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
-                    alt="{{ product_image.alt | default: product.title }}"
-                    loading="lazy"
-                    class="best-sellers-on-sale__image"
-                  >
-                </a>
-              {%- else -%}
-                <div class="best-sellers-on-sale__placeholder">
-                  {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
+
+              {%- assign first_variant = product.selected_or_first_available_variant -%}
+
+              <div class="best-sellers-on-sale__media">
+                {%- if product_image != blank -%}
+                  {%- assign image_width_2x = image_max_width | times: 2 -%}
+                  {%- assign image_1x_url = product_image | image_url: width: image_max_width -%}
+                  {%- assign image_2x_url = product_image | image_url: width: image_width_2x -%}
+
+                  <a href="{{ product.url }}" class="best-sellers-on-sale__image-link" aria-label="{{ product.title | escape }}">
+                    <img
+                      src="{{ image_1x_url }}"
+                      srcset="{{ image_1x_url }} 1x, {{ image_2x_url }} 2x"
+                      alt="{{ product_image.alt | default: product.title | escape }}"
+                      loading="lazy"
+                      class="best-sellers-on-sale__image"
+                    >
+                  </a>
+                {%- else -%}
+                  <div class="best-sellers-on-sale__placeholder">
+                    {{ 'product-1' | placeholder_svg_tag: 'best-sellers-on-sale__placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+
+                <!-- Hover / Tap overlay -->
+                <div class="best-sellers-on-sale__overlay" aria-hidden="true">
+                  <div class="best-sellers-on-sale__overlay-content">
+                    <div class="best-sellers-on-sale__overlay-title">{{ product.title }}</div>
+
+                    <div class="best-sellers-on-sale__overlay-price">
+                      {%- if first_variant.compare_at_price and first_variant.compare_at_price > first_variant.price -%}
+                        <span class="best-sellers-on-sale__price--sale">{{ first_variant.price | money }}</span>
+                        <span class="best-sellers-on-sale__price--compare">{{ first_variant.compare_at_price | money }}</span>
+                      {%- else -%}
+                        <span class="best-sellers-on-sale__price">{{ first_variant.price | money }}</span>
+                      {%- endif -%}
+                    </div>
+
+                    <button
+                      type="button"
+                      class="best-sellers-on-sale__atc"
+                      data-variant-id="{{ first_variant.id }}"
+                      {% unless first_variant.available %}disabled{% endunless %}
+                      aria-label="{% if first_variant.available %}Add {{ product.title | escape }} to cart{% else %}Sold out{% endif %}"
+                    >
+                      {% if first_variant.available %}Add to cart{% else %}Sold out{% endif %}
+                    </button>
+                  </div>
                 </div>
-              {%- endif -%}
+              </div>
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -247,10 +279,9 @@
     background-color: {{ card_bg }};
     border-radius: 2px;
     height: {{ card_height_desktop }}px;
-    padding: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0;              /* remove inner padding to eliminate white space */
+    overflow: hidden;         /* crop image to card */
+    display: block;           /* no flex centering */
     width: 100%;
   }
 
@@ -267,23 +298,110 @@
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.3px;
-    z-index: 2;
+    z-index: 3;               /* ensure above overlay */
+  }
+
+  .best-sellers-on-sale__media {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
   .best-sellers-on-sale__image-link {
-    display: flex;
+    display: block;
     width: 100%;
     height: 100%;
-    align-items: center;
-    justify-content: center;
   }
 
   .best-sellers-on-sale__image {
-    max-width: 75%;
-    max-height: 60%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;        /* full-bleed cover */
+    object-position: center;
+    transform: scale(1);
+    transition: transform 0.35s ease;
+  }
+
+  .best-sellers-on-sale__card:hover .best-sellers-on-sale__image {
+    transform: scale(1.03);
+  }
+
+  .best-sellers-on-sale__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.15), rgba(0,0,0,0));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 2;
+  }
+
+  .best-sellers-on-sale__overlay-content {
+    width: 100%;
+    color: #fff;
+    display: grid;
+    gap: 10px;
+  }
+
+  .best-sellers-on-sale__overlay-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.2px;
+    text-transform: none;
+  }
+
+  .best-sellers-on-sale__overlay-price {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 13px;
+  }
+
+  .best-sellers-on-sale__price--sale {
+    font-weight: 700;
+  }
+
+  .best-sellers-on-sale__price--compare {
+    opacity: 0.7;
+    text-decoration: line-through;
+    font-size: 12px;
+  }
+
+  .best-sellers-on-sale__atc {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: {{ button_bg }};
+    color: {{ button_text }};
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .best-sellers-on-sale__atc:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  .best-sellers-on-sale__atc:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .best-sellers-on-sale__card:hover .best-sellers-on-sale__overlay {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .best-sellers-on-sale__placeholder {
@@ -338,6 +456,11 @@
 
     .best-sellers-on-sale__card {
       height: {{ card_height_mobile }}px;
+    }
+
+    .best-sellers-on-sale__overlay {
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 
@@ -399,7 +522,7 @@
 
         if (shouldShow) {
           card.classList.remove('best-sellers-on-sale__card--filtered-out');
-          card.style.display = 'flex';
+          card.style.display = 'block';
           visibleCount++;
         } else {
           card.classList.add('best-sellers-on-sale__card--filtered-out');
@@ -446,6 +569,69 @@
 
     {%- comment -%} Initialize: show all products {%- endcomment -%}
     filterByAge('all');
+
+    // ===== AJAX ADD TO CART =====
+    async function addToCart(variantId, qty) {
+      const res = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ id: Number(variantId), quantity: qty || 1 })
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error('Add to cart failed: ' + txt);
+      }
+      return res.json();
+    }
+
+    async function fetchCart() {
+      const res = await fetch('/cart.js', { headers: { 'Accept': 'application/json' }});
+      if (!res.ok) throw new Error('Cart fetch failed');
+      return res.json();
+    }
+
+    function updateHeaderCartCount(count) {
+      // Try common selectors (your hero header uses .hero-slideshow__cart-badge / mobile-cart-badge)
+      const sectionIdStr = sectionId;
+      const badges = document.querySelectorAll(
+        '.hero-slideshow-' + sectionIdStr + '__cart-badge, .hero-slideshow-' + sectionIdStr + '__mobile-cart-badge, .cart-count-bubble span, [data-cart-count]'
+      );
+      badges.forEach((b) => {
+        if (b) b.textContent = String(count);
+      });
+    }
+
+    const atcButtons = section.querySelectorAll('.best-sellers-on-sale__atc[data-variant-id]');
+    atcButtons.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const variantId = btn.getAttribute('data-variant-id');
+        if (!variantId || btn.disabled) return;
+
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+
+        try {
+          await addToCart(variantId, 1);
+          const cart = await fetchCart();
+          updateHeaderCartCount(cart.item_count);
+
+          btn.textContent = 'Added';
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.disabled = false;
+          }, 900);
+        } catch (err) {
+          console.error(err);
+          btn.textContent = 'Error';
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.disabled = false;
+          }, 1200);
+        }
+      });
+    });
   })();
 </script>
 
