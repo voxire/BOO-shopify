@@ -11,6 +11,8 @@
   .hers-labs-hero {
     padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+    position: relative;
+    min-height: 500px;
   }
 
   @media screen and (min-width: 750px) {
@@ -43,14 +45,22 @@
     object-position: center;
   }
 
+  .hers-labs-hero__background {
+    position: relative;
+    width: 100%;
+    min-height: 500px;
+  }
+
   .hers-labs-hero__characters-wrapper {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
+    z-index: 3;
     pointer-events: none;
+    width: 100%;
+    height: 100%;
   }
 
   .hers-labs-hero__characters {
@@ -72,6 +82,21 @@
     max-height: 400px;
     object-fit: contain;
     display: block;
+  }
+
+  @media screen and (min-width: 750px) {
+    .hers-labs-hero {
+      min-height: 600px;
+    }
+
+    .hers-labs-hero__background {
+      min-height: 600px;
+    }
+
+    .hers-labs-hero__character-image {
+      max-width: 250px;
+      max-height: 500px;
+    }
   }
 
   @media screen and (max-width: 749px) {
@@ -279,6 +304,36 @@
     {
       "name": "Hers Labs Hero",
       "blocks": [
+        {
+          "type": "character_image",
+          "settings": {
+            "image": null
+          }
+        },
+        {
+          "type": "character_image",
+          "settings": {
+            "image": null
+          }
+        },
+        {
+          "type": "character_image",
+          "settings": {
+            "image": null
+          }
+        },
+        {
+          "type": "character_image",
+          "settings": {
+            "image": null
+          }
+        },
+        {
+          "type": "character_image",
+          "settings": {
+            "image": null
+          }
+        },
         {
           "type": "sliding_image",
           "settings": {
