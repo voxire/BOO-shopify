@@ -42,6 +42,48 @@
     object-fit: cover;
     object-position: center;
   }
+
+  .hers-labs-hero__characters-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .hers-labs-hero__characters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .hers-labs-hero__character {
+    flex-shrink: 0;
+  }
+
+  .hers-labs-hero__character-image {
+    width: auto;
+    height: auto;
+    max-width: 200px;
+    max-height: 400px;
+    object-fit: contain;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .hers-labs-hero__characters {
+      gap: 12px;
+    }
+
+    .hers-labs-hero__character-image {
+      max-width: 120px;
+      max-height: 250px;
+    }
+  }
 {%- endstyle -%}
 
 <section class="hers-labs-hero" data-section-id="{{ section.id }}">
@@ -53,11 +95,18 @@
     {%- endif -%}
     <div class="hers-labs-hero__gradient"></div>
     
-    {%- if section.settings.woman_image != blank -%}
-      <div class="hers-labs-hero__woman-image-wrapper">
-        {{ section.settings.woman_image | image_url: width: 1200 | image_tag: loading: 'eager', alt: '', class: 'hers-labs-hero__woman-image' }}
-        <div class="hers-labs-hero__woman-mask-left"></div>
-        <div class="hers-labs-hero__woman-mask-right"></div>
+    {%- assign character_blocks = section.blocks | where: 'type', 'character_image' -%}
+    {%- if character_blocks.size > 0 -%}
+      <div class="hers-labs-hero__characters-wrapper">
+        <div class="hers-labs-hero__characters">
+          {%- for block in character_blocks -%}
+            {%- if block.settings.image != blank -%}
+              <div class="hers-labs-hero__character" {{ block.shopify_attributes }}>
+                {{ block.settings.image | image_url: width: 400 | image_tag: loading: 'eager', alt: block.settings.alt_text | default: '', class: 'hers-labs-hero__character-image' }}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
       </div>
     {%- endif -%}
 
@@ -106,12 +155,6 @@
       "info": "Background image for the hero section"
     },
     {
-      "type": "image_picker",
-      "id": "woman_image",
-      "label": "Woman Image",
-      "info": "Half-body photo of a woman facing slightly sideways"
-    },
-    {
       "type": "header",
       "content": "t:sections.all.padding.section_padding_heading"
     },
@@ -137,12 +180,35 @@
     },
     {
       "type": "header",
+      "content": "Character Images",
+      "info": "Add character images (onesies) to display in the center of the hero section"
+    },
+    {
+      "type": "header",
       "content": "Sliding Images",
       "info": "IMPORTANT: If you don't see blocks below, remove this section and add it again to load 7 empty image blocks. Then scroll down past this header to see the 'Add block' button or existing blocks."
     }
   ],
-  "max_blocks": 10,
+  "max_blocks": 15,
   "blocks": [
+    {
+      "type": "character_image",
+      "name": "Character Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Character Image",
+          "info": "Upload a character onesie image (e.g., bunny, shark, dinosaur, etc.)"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Alt Text",
+          "info": "Description of the character for accessibility"
+        }
+      ]
+    },
     {
       "type": "sliding_image",
       "name": "Sliding Image",
