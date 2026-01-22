@@ -18,6 +18,7 @@
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
   assign blocks_count = section.blocks.size
+  assign section_title = section.settings.section_title | default: ''
   assign show_age_filter = section.settings.show_age_filter
   assign age_filter_title = section.settings.age_filter_title | default: 'Choose Age'
   assign age_filter_values = section.settings.age_filter_values | default: '0.5-4,4-7'
@@ -35,6 +36,11 @@
   data-side-opacity="{{ side_opacity }}"
   style="background-color: {{ background_color }}; --card-r: {{ corner_radius }}px; --card-w: {{ face_width }}px; --card-h: {{ face_height }}px; --card-w-m: {{ face_width_mobile }}px; --card-h-m: {{ face_height_mobile }}px; --persp-d: {{ perspective }}px; --persp-m: {{ perspective_mobile }}px; --radius-d: {{ radius }}px; --radius-m: {{ radius_mobile }}px; --faces: {{ blocks_count }};"
 >
+  {%- if section_title != blank -%}
+    <h2 class="hex-prism-carousel__section-title hex-prism-carousel__section-title--{{ section_id }}">
+      {{ section_title }}
+    </h2>
+  {%- endif -%}
   {%- if show_age_filter -%}
     <div class="hex-prism-carousel__filters hex-prism-carousel__filters--{{ section_id }}" data-filters>
       <div class="hex-prism-carousel__filters-title hex-prism-carousel__filters-title--{{ section_id }}">
@@ -281,6 +287,11 @@
 
 
   @media (max-width: 768px) {
+    .hex-prism-carousel__section-title--{{ section_id }}{
+      font-size: 24px;
+      padding: 20px 18px 10px;
+    }
+
     .hex-prism-carousel--{{ section_id }} {
       display: block;
       min-height: auto;
@@ -402,9 +413,28 @@
     border-color: rgba(255,255,255,0.55);
   }
 
+  /* Section title */
+  .hex-prism-carousel__section-title--{{ section_id }}{
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 18px 12px;
+    font-size: 32px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.95);
+    text-align: center;
+    line-height: 1.2;
+  }
+
   /* Push scene down slightly when filters exist */
   .hex-prism-carousel__filters--{{ section_id }} + .hex-prism-carousel__scene--{{ section_id }}{
     min-height: 520px;
+    margin-top: 24px;
+  }
+
+  /* Add space when title exists but no filters */
+  .hex-prism-carousel__section-title--{{ section_id }} + .hex-prism-carousel__scene--{{ section_id }}{
+    margin-top: 12px;
   }
 
   /* ===== Inactive faces (filtered out) ===== */
@@ -878,6 +908,17 @@
       "unit": "px",
       "default": 420,
       "info": "Height of each card on mobile devices"
+    },
+    {
+      "type": "header",
+      "content": "Section Title"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "",
+      "info": "Optional title displayed at the top of the section"
     },
     {
       "type": "header",
