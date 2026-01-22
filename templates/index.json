@@ -273,11 +273,77 @@
         "card_height_mobile": 440,
         "image_max_width": 900
       }
+    },
+    "hers_labs_hero_AAQ9WT": {
+      "type": "hers-labs-hero",
+      "blocks": {
+        "sliding_image_Qf9MyM": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/White_Boo.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_U3JLHa": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_chTbfw": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_VJYKJM": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_tjtD3g": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_PabRa8": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_YhjTGf": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "sliding_image_Qf9MyM",
+        "sliding_image_U3JLHa",
+        "sliding_image_chTbfw",
+        "sliding_image_VJYKJM",
+        "sliding_image_tjtD3g",
+        "sliding_image_PabRa8",
+        "sliding_image_YhjTGf"
+      ],
+      "name": "Hers Labs Hero",
+      "settings": {
+        "background_image": "shopify://shop_images/Background.jpg",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "characters_image": "shopify://shop_images/Foreground_77f221b7-0ee3-46cf-912b-9efeb2f8d2fd.png",
+        "characters_alt_text": "Character onesies"
+      }
     }
   },
   "order": [
     "hex_prism_carousel_WDEgJy",
     "3d_card_carousel_x3rUgj",
-    "best_sellers_on_sale_ygnM6X"
+    "best_sellers_on_sale_ygnM6X",
+    "hers_labs_hero_AAQ9WT"
   ]
 }
