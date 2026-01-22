@@ -113,6 +113,7 @@
 
               comment
                 Age range comes directly from block settings (not from product tags)
+                Supports multiple age ranges separated by commas or spaces (e.g., "0.5-4,5-7")
               endcomment
               assign product_age_range = block.settings.age_range | default: 'all' | downcase | strip
             -%}
@@ -508,19 +509,26 @@
         }
       });
 
-      {%- comment -%} Filter cards by age range {%- endcomment -%}
+      {%- comment -%} Filter cards by age range (supports multiple age ranges per product) {%- endcomment -%}
       cards.forEach(function(card) {
-        const cardAgeRange = (card.getAttribute('data-age-range') || 'all').toLowerCase().trim();
+        const cardAgeRangeStr = (card.getAttribute('data-age-range') || 'all').toLowerCase().trim();
         let shouldShow = false;
 
         if (normalizedFilter === 'all') {
           shouldShow = true;
         } else {
-          {%- comment -%} Show if age range matches OR if card has age_range="all" (always visible) {%- endcomment -%}
-          if (normalizedFilter === cardAgeRange || cardAgeRange === 'all') {
+          {%- comment -%} Split by comma or space to support multiple age ranges {%- endcomment -%}
+          const cardAgeRanges = cardAgeRangeStr.split(/[,\s]+/).map(function(r) {
+            return r.trim();
+          }).filter(function(r) {
+            return r.length > 0;
+          });
+
+          {%- comment -%} Show if filter matches any age range OR if card has "all" (always visible) {%- endcomment -%}
+          if (cardAgeRanges.indexOf('all') !== -1) {
             shouldShow = true;
           } else {
-            shouldShow = false;
+            shouldShow = cardAgeRanges.indexOf(normalizedFilter) !== -1;
           }
         }
 
@@ -814,7 +822,7 @@
           "id": "age_range",
           "label": "Age Range",
           "default": "all",
-          "info": "Enter the age range value (e.g., '0.5-4', '5-7', 'all'). This must match the age range set on filter buttons."
+          "info": "Enter one or more age range values separated by commas or spaces (e.g., '0.5-4', '5-7', '0.5-4,5-7', or 'all'). This must match the age range set on filter buttons. Products can belong to multiple age ranges."
         }
       ]
     }
