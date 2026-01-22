@@ -97,6 +97,7 @@
         "face_height": 520,
         "face_width_mobile": 240,
         "face_height_mobile": 400,
+        "section_title": "Swipe to choose your character",
         "corner_radius": 14,
         "side_opacity": 3,
         "side2_opacity": 3,
