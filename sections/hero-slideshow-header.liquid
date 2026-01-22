@@ -209,6 +209,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    margin-left: auto;
     min-width: 0;
   }
 
@@ -231,14 +232,10 @@
   }
 
   .hero-slideshow-{{ section_id }}__header-pill {
-    flex: 1 1 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
     padding: 0.5rem 0.75rem;
     border-radius: 9999px;
-    min-width: 0;
 
     /* glass bar for menu only */
     background: rgba(0,0,0,0.35);
@@ -789,8 +786,9 @@
               {%- endfor -%}
             </ul>
           </nav>
+        </div>
 
-          <div class="hero-slideshow-{{ section_id }}__actions">
+        <div class="hero-slideshow-{{ section_id }}__actions">
           <a
             href="{{ routes.cart_url }}"
             class="hero-slideshow-{{ section_id }}__icon"
@@ -832,7 +830,6 @@
               </span>
             </a>
           {%- endif -%}
-          </div>
         </div>
       {%- endif -%}
     </div>
