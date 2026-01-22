@@ -617,6 +617,16 @@
             {%- endif -%}
 
             <a
+              href="{{ routes.search_url }}"
+              class="hero-header-{{ section_id }}__mobile-icon"
+              aria-label="Search"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-search.svg' | inline_asset_content -}}
+              </span>
+            </a>
+
+            <a
               href="{{ routes.cart_url }}"
               class="hero-header-{{ section_id }}__mobile-icon"
               aria-label="{{ 'templates.cart.cart' | t }}"
@@ -643,6 +653,35 @@
       {%- endif -%}
 
       <div class="hero-header-{{ section_id }}__actions">
+        <a
+          href="{{ routes.cart_url }}"
+          class="hero-header-{{ section_id }}__icon"
+          aria-label="{{ 'templates.cart.cart' | t }}"
+        >
+          <span class="svg-wrapper">
+            {%- if cart == empty -%}
+              {{- 'icon-cart-empty.svg' | inline_asset_content -}}
+            {%- else -%}
+              {{- 'icon-cart.svg' | inline_asset_content -}}
+            {%- endif -%}
+          </span>
+          {%- if cart != empty -%}
+            <span class="hero-header-{{ section_id }}__cart-badge" aria-hidden="true">
+              {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+            </span>
+          {%- endif -%}
+        </a>
+
+        <a
+          href="{{ routes.search_url }}"
+          class="hero-header-{{ section_id }}__icon"
+          aria-label="Search"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-search.svg' | inline_asset_content -}}
+          </span>
+        </a>
+
         {%- if shop.customer_accounts_enabled -%}
           <a
             href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
@@ -655,13 +694,6 @@
             </span>
           </a>
         {%- endif -%}
-
-        <a
-          href="{{ routes.cart_url }}"
-          class="hero-header-{{ section_id }}__icon"
-          id="cart-icon-bubble"
-          aria-label="{{ 'templates.cart.cart' | t }}"
-        >
           <span class="svg-wrapper">
             {%- if cart == empty -%}
               {{- 'icon-cart-empty.svg' | inline_asset_content -}}
