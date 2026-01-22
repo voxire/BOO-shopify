@@ -12,6 +12,26 @@
   if template.name == 'index'
     assign is_home_page = true
   endif
+
+  assign shared_title = section.settings.shared_title
+  assign shared_subtitle = section.settings.shared_subtitle
+  assign shared_button_text = section.settings.shared_button_text
+  assign shared_button_link = section.settings.shared_button_link
+
+  if slides.size > 0
+    if shared_title == blank
+      assign shared_title = slides.first.settings.title
+    endif
+    if shared_subtitle == blank
+      assign shared_subtitle = slides.first.settings.subtitle
+    endif
+    if shared_button_text == blank
+      assign shared_button_text = slides.first.settings.button_text
+    endif
+    if shared_button_link == blank
+      assign shared_button_link = slides.first.settings.button_link
+    endif
+  endif
 -%}
 
 {%- style -%}
@@ -66,7 +86,7 @@
     padding: 0 2rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 2rem;
     overflow: visible !important;
   }
@@ -101,7 +121,6 @@
     flex: 1;
     display: flex;
     justify-content: center;
-    order: 2;
   }
 
   .hero-slideshow-{{ section_id }}__menu {
@@ -166,8 +185,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
     color: {{ text_color }};
     text-decoration: none;
     transition: opacity 0.2s ease, color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -185,16 +202,54 @@
     justify-content: center;
   }
 
-  .hero-slideshow-{{ section_id }}__icon#cart-icon-bubble {
-    width: 72px;
-    height: 72px;
-    max-width: 72px;
-    overflow: hidden;
+  .hero-slideshow-{{ section_id }}__header-pill {
+    margin-left: 1.25rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
-  .hero-slideshow-{{ section_id }}__icon#cart-icon-bubble .svg-wrapper {
-    width: 40px;
-    height: 40px;
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__menu {
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__menu-link {
+    padding: 0.55rem 1.05rem;
+    border-radius: 9999px;
+    font-weight: 500;
+  }
+
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__menu-link.is-active {
+    background: rgba(255,255,255,0.16);
+  }
+
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__actions {
+    gap: 0.75rem;
+  }
+
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-slideshow-{{ section_id }}__header-pill .hero-slideshow-{{ section_id }}__icon .svg-wrapper {
+    width: 22px;
+    height: 22px;
   }
 
   .hero-slideshow-{{ section_id }}__icon svg {
@@ -209,8 +264,8 @@
     position: absolute;
     top: 6px;
     right: 6px;
-    background: {{ text_color }};
-    color: #000;
+    background: #ffffff;
+    color: #000000;
     border-radius: 50%;
     min-width: 18px;
     height: 18px;
@@ -711,57 +766,67 @@
           </span>
         </button>
 
-        <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
-          <ul class="hero-slideshow-{{ section_id }}__menu">
-            {%- for link in menu.links -%}
-              <li class="hero-slideshow-{{ section_id }}__menu-item">
-                <a href="{{ link.url }}" class="hero-slideshow-{{ section_id }}__menu-link">
-                  {{ link.title }}
-                </a>
-              </li>
-            {%- endfor -%}
-          </ul>
-        </nav>
-      {%- endif -%}
+        <div class="hero-slideshow-{{ section_id }}__header-pill">
+          <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
+            <ul class="hero-slideshow-{{ section_id }}__menu">
+              {%- for link in menu.links -%}
+                <li class="hero-slideshow-{{ section_id }}__menu-item">
+                  <a
+                    href="{{ link.url }}"
+                    class="hero-slideshow-{{ section_id }}__menu-link{% if link.active %} is-active{% endif %}"
+                  >
+                    {{ link.title }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
 
-      <div class="hero-slideshow-{{ section_id }}__actions">
-        {%- if shop.customer_accounts_enabled -%}
-          <a
-            href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-            class="hero-slideshow-{{ section_id }}__icon"
-            rel="nofollow"
-            aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
-          >
-            <span class="svg-wrapper">
-              {{- 'icon-account.svg' | inline_asset_content -}}
-            </span>
-          </a>
-        {%- endif -%}
+          <div class="hero-slideshow-{{ section_id }}__actions">
+            <a
+              href="{{ routes.search_url }}"
+              class="hero-slideshow-{{ section_id }}__icon"
+              aria-label="Search"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-search.svg' | inline_asset_content -}}
+              </span>
+            </a>
 
-        <a
-          href="{{ routes.cart_url }}"
-          class="hero-slideshow-{{ section_id }}__icon"
-          id="cart-icon-bubble"
-          aria-label="{{ 'templates.cart.cart' | t }}"
-        >
-          <span class="svg-wrapper">
-            {%- if cart == empty -%}
-              {{- 'icon-cart-empty.svg' | inline_asset_content -}}
-            {%- else -%}
-              {{- 'icon-cart.svg' | inline_asset_content -}}
+            {%- if shop.customer_accounts_enabled -%}
+              <a
+                href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+                class="hero-slideshow-{{ section_id }}__icon"
+                rel="nofollow"
+                aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
+              >
+                <span class="svg-wrapper">
+                  {{- 'icon-account.svg' | inline_asset_content -}}
+                </span>
+              </a>
             {%- endif -%}
-          </span>
-          {%- if cart != empty -%}
-            <span class="hero-slideshow-{{ section_id }}__cart-badge" aria-hidden="true">
-              {%- if cart.item_count < 100 -%}
-                {{ cart.item_count }}
-              {%- else -%}
-                99+
+
+            <a
+              href="{{ routes.cart_url }}"
+              class="hero-slideshow-{{ section_id }}__icon"
+              aria-label="{{ 'templates.cart.cart' | t }}"
+            >
+              <span class="svg-wrapper">
+                {%- if cart == empty -%}
+                  {{- 'icon-cart-empty.svg' | inline_asset_content -}}
+                {%- else -%}
+                  {{- 'icon-cart.svg' | inline_asset_content -}}
+                {%- endif -%}
+              </span>
+              {%- if cart != empty -%}
+                <span class="hero-slideshow-{{ section_id }}__cart-badge" aria-hidden="true">
+                  {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+                </span>
               {%- endif -%}
-            </span>
-          {%- endif -%}
-        </a>
-      </div>
+            </a>
+          </div>
+        </div>
+      {%- endif -%}
     </div>
 
     {%- if menu != blank -%}
@@ -829,15 +894,11 @@
       {%- for block in slides -%}
         {%- assign slide_image = block.settings.image -%}
         {%- assign slide_mobile_image = block.settings.mobile_image -%}
-        {%- assign slide_title = block.settings.title -%}
-        {%- assign slide_subtitle = block.settings.subtitle -%}
         {%- assign text_position = block.settings.text_position | default: 'center' -%}
         {%- assign text_horizontal = block.settings.text_horizontal | default: 50 -%}
         {%- assign text_vertical = block.settings.text_vertical | default: 50 -%}
         {%- assign title_color = block.settings.title_color | default: '#ffffff' -%}
         {%- assign subtitle_color = block.settings.subtitle_color | default: '#ffffff' -%}
-        {%- assign button_text = block.settings.button_text -%}
-        {%- assign button_link = block.settings.button_link -%}
         {%- assign button_position = block.settings.button_position | default: 'center' -%}
         {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
         {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
@@ -886,7 +947,7 @@
           {%- endif -%}
 
           <div class="hero-slideshow-{{ section_id }}__slide-content">
-            {%- if slide_title != blank or slide_subtitle != blank -%}
+            {%- if shared_title != blank or shared_subtitle != blank -%}
               <div
                 class="hero-slideshow-{{ section_id }}__slide-text"
                 style="
@@ -933,27 +994,27 @@
                   {%- endif -%}
                 "
               >
-                {%- if slide_title != blank -%}
+                {%- if shared_title != blank -%}
                   <h2
                     class="hero-slideshow-{{ section_id }}__slide-title"
                     style="color: {{ title_color }};"
                   >
-                    {{ slide_title }}
+                    {{ shared_title }}
                   </h2>
                 {%- endif -%}
-                {%- if slide_subtitle != blank -%}
+                {%- if shared_subtitle != blank -%}
                   <p
                     class="hero-slideshow-{{ section_id }}__slide-subtitle"
                     style="color: {{ subtitle_color }};"
                   >
-                    {{ slide_subtitle }}
+                    {{ shared_subtitle }}
                   </p>
                 {%- endif -%}
               </div>
             {%- endif -%}
-            {%- if button_text != blank and button_link != blank -%}
+            {%- if shared_button_text != blank and shared_button_link != blank -%}
               <a
-                href="{{ button_link }}"
+                href="{{ shared_button_link }}"
                 class="hero-slideshow-{{ section_id }}__button"
                 style="
                   {% if button_position == 'custom' %}
@@ -995,7 +1056,7 @@
                   {% endif %}
                 "
               >
-                {{ button_text }}
+                {{ shared_button_text }}
               </a>
             {%- endif -%}
           </div>
@@ -1020,164 +1081,132 @@
 {%- endunless -%}
 
 <script>
-  (function() {
-    const sectionId = '{{ section_id }}';
-    const sectionEl = document.querySelector('.hero-slideshow-' + sectionId);
-    if (!sectionEl) return;
-    
-    // Mobile menu initialization - ALWAYS runs regardless of slideshow
-    function initMobileMenu() {
-      const menuToggle = sectionEl.querySelector('.hero-slideshow-' + sectionId + '__menu-toggle');
-      const mobileNavId = menuToggle ? menuToggle.getAttribute('aria-controls') : null;
-      const mobileNav = mobileNavId ? document.getElementById(mobileNavId) : null;
-      
-      if (!menuToggle || !mobileNav) {
-        console.warn('Hero Slideshow Header: Mobile menu elements not found');
-        return;
-      }
+(function () {
+  const sectionId = {{ section_id | json }};
+  const root = document.querySelector('.hero-slideshow-' + sectionId);
+  if (!root) return;
 
-      // Ensure mobile nav starts hidden
+  window.__booHeroSlideshows = window.__booHeroSlideshows || {};
+  if (window.__booHeroSlideshows[sectionId]) {
+    window.__booHeroSlideshows[sectionId].destroy();
+  }
+
+  const ac = new AbortController();
+  const slides = Array.from(root.querySelectorAll('.hero-slideshow-' + sectionId + '__slide'));
+  const dots = Array.from(root.querySelectorAll('.hero-slideshow-' + sectionId + '__indicator'));
+  const autoplayEnabled = {{ autoplay_enabled | json }};
+  const delay = {{ autoplay_speed | json }};
+
+  let current = 0;
+  let timer = null;
+
+  function setActive(index) {
+    slides.forEach((s, i) => s.classList.toggle('active', i === index));
+    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    current = index;
+  }
+
+  function clearTimer() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+
+  function scheduleNext() {
+    clearTimer();
+    if (!autoplayEnabled || slides.length <= 1) return;
+
+    timer = setTimeout(() => {
+      const next = (current + 1) % slides.length;
+      setActive(next);
+      scheduleNext();
+    }, delay);
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= slides.length) return;
+    setActive(index);
+    scheduleNext(); // reset timing to a full delay after manual navigation
+  }
+
+  // Dot navigation
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => goTo(i), { signal: ac.signal });
+  });
+
+  // Pause on hover (desktop)
+  const slideshow = root.querySelector('.hero-slideshow-' + sectionId + '__slideshow');
+  if (slideshow) {
+    slideshow.addEventListener('mouseenter', clearTimer, { signal: ac.signal });
+    slideshow.addEventListener('mouseleave', scheduleNext, { signal: ac.signal });
+  }
+
+  // Mobile menu (also guarded against duplicates)
+  function initMobileMenu() {
+    const menuToggle = root.querySelector('.hero-slideshow-' + sectionId + '__menu-toggle');
+    const mobileNavId = menuToggle ? menuToggle.getAttribute('aria-controls') : null;
+    const mobileNav = mobileNavId ? document.getElementById(mobileNavId) : null;
+    if (!menuToggle || !mobileNav) return;
+
+    function closeMenu() {
+      menuToggle.setAttribute('aria-expanded', 'false');
       mobileNav.setAttribute('aria-hidden', 'true');
       mobileNav.classList.remove('mobile-nav-open');
-      menuToggle.setAttribute('aria-expanded', 'false');
-
-      function toggleMenu() {
-        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-        const newExpanded = !isExpanded;
-        
-        menuToggle.setAttribute('aria-expanded', newExpanded ? 'true' : 'false');
-        mobileNav.setAttribute('aria-hidden', newExpanded ? 'false' : 'true');
-
-        if (newExpanded) {
-          mobileNav.classList.add('mobile-nav-open');
-        } else {
-          mobileNav.classList.remove('mobile-nav-open');
-        }
-      }
-
-      function closeMenu() {
-        menuToggle.setAttribute('aria-expanded', 'false');
-        mobileNav.setAttribute('aria-hidden', 'true');
-        mobileNav.classList.remove('mobile-nav-open');
-      }
-
-      // Toggle button click
-      menuToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        toggleMenu();
-      });
-
-      // Close menu when clicking on a link or icon
-      const mobileLinks = mobileNav.querySelectorAll('.hero-slideshow-' + sectionId + '__mobile-menu-link, .hero-slideshow-' + sectionId + '__mobile-icon');
-      mobileLinks.forEach(function(link) {
-        link.addEventListener('click', function() {
-          closeMenu();
-        });
-      });
-
-      // Close menu when clicking outside
-      document.addEventListener('click', function(event) {
-        if (mobileNav.getAttribute('aria-hidden') === 'false' && 
-            !menuToggle.contains(event.target) && 
-            !mobileNav.contains(event.target)) {
-          closeMenu();
-        }
-      });
-
-      // Close menu on Escape key
-      document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && mobileNav.getAttribute('aria-hidden') === 'false') {
-          closeMenu();
-        }
-      });
     }
 
-    // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileMenu);
-    } else {
-      // Small delay to ensure all elements are rendered
-      setTimeout(initMobileMenu, 100);
+    function toggleMenu() {
+      const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+      const next = !expanded;
+      menuToggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+      mobileNav.setAttribute('aria-hidden', next ? 'false' : 'true');
+      mobileNav.classList.toggle('mobile-nav-open', next);
     }
 
-    // Slideshow functionality - only runs if slides.length > 1
-    const slides = sectionEl.querySelectorAll('.hero-slideshow-' + sectionId + '__slide');
-    const indicators = sectionEl.querySelectorAll('.hero-slideshow-' + sectionId + '__indicator');
+    // Ensure initial state
+    closeMenu();
 
-    if (slides.length > 1) {
-      let currentSlide = 0;
-      let autoplayInterval = null;
+    menuToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+    }, { signal: ac.signal });
 
-      function showSlide(index) {
-        slides.forEach((slide, i) => {
-          if (i === index) {
-            slide.classList.add('active');
-          } else {
-            slide.classList.remove('active');
-          }
-        });
+    mobileNav.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', closeMenu, { signal: ac.signal });
+    });
 
-        indicators.forEach((indicator, i) => {
-          if (i === index) {
-            indicator.classList.add('active');
-          } else {
-            indicator.classList.remove('active');
-          }
-        });
-
-        currentSlide = index;
+    document.addEventListener('click', (e) => {
+      if (mobileNav.getAttribute('aria-hidden') === 'false' &&
+          !menuToggle.contains(e.target) &&
+          !mobileNav.contains(e.target)) {
+        closeMenu();
       }
+    }, { signal: ac.signal });
 
-      function nextSlide() {
-        const next = (currentSlide + 1) % slides.length;
-        showSlide(next);
-      }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    }, { signal: ac.signal });
+  }
 
-      function goToSlide(index) {
-        if (index >= 0 && index < slides.length) {
-          showSlide(index);
-        }
-      }
+  initMobileMenu();
 
-      // Indicator clicks
-      indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-          goToSlide(index);
-          resetAutoplay();
-        });
-      });
+  // init slideshow
+  if (slides.length) setActive(0);
+  scheduleNext();
 
-      // Auto-rotate
-      function startAutoplay() {
-        {% if autoplay_enabled %}
-          autoplayInterval = setInterval(nextSlide, {{ autoplay_speed }});
-        {% endif %}
-      }
+  function destroy() {
+    clearTimer();
+    ac.abort(); // removes all listeners registered with this signal
+  }
 
-      function stopAutoplay() {
-        if (autoplayInterval) {
-          clearInterval(autoplayInterval);
-          autoplayInterval = null;
-        }
-      }
+  // Shopify theme editor safety (optional)
+  document.addEventListener('shopify:section:unload', (e) => {
+    if (e.detail && e.detail.sectionId === sectionId) destroy();
+  }, { signal: ac.signal });
 
-      function resetAutoplay() {
-        stopAutoplay();
-        startAutoplay();
-      }
-
-      // Pause on hover
-      const slideshow = sectionEl.querySelector('.hero-slideshow-' + sectionId + '__slideshow');
-      if (slideshow) {
-        slideshow.addEventListener('mouseenter', stopAutoplay);
-        slideshow.addEventListener('mouseleave', startAutoplay);
-      }
-
-      // Initialize slideshow
-      startAutoplay();
-    }
-  })();
+  window.__booHeroSlideshows[sectionId] = { destroy };
+})();
 </script>
 
 {% schema %}
@@ -1214,6 +1243,31 @@
       "id": "button_text_color",
       "label": "Button Text Color",
       "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Shared Content (All Slides)"
+    },
+    {
+      "type": "text",
+      "id": "shared_title",
+      "label": "Shared Title (all slides)"
+    },
+    {
+      "type": "text",
+      "id": "shared_subtitle",
+      "label": "Shared Subtitle (all slides)"
+    },
+    {
+      "type": "text",
+      "id": "shared_button_text",
+      "label": "Shared Button Text (all slides)",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "shared_button_link",
+      "label": "Shared Button Link (all slides)"
     },
     {
       "type": "header",
