@@ -74,8 +74,8 @@
     isolation: isolate;
   }
 
-  .hero-slideshow-{{ section_id }}__header:has(.hero-slideshow-{{ section_id }}__mobile-nav[aria-hidden="false"]) .hero-slideshow-{{ section_id }}__header-container,
-  .hero-slideshow-{{ section_id }}__header:has(.hero-slideshow-{{ section_id }}__menu-toggle[aria-expanded="true"]) .hero-slideshow-{{ section_id }}__header-container {
+  .hero-slideshow-{{ section_id }}__header:has(.hero-slideshow-{{ section_id }}__mobile-nav[aria-hidden="false"]) .hero-slideshow-{{ section_id }}__header-pill,
+  .hero-slideshow-{{ section_id }}__header:has(.hero-slideshow-{{ section_id }}__menu-toggle[aria-expanded="true"]) .hero-slideshow-{{ section_id }}__header-pill {
     background: #ffffff;
     border-color: rgba(0,0,0,0.08);
   }
@@ -89,14 +89,6 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.25rem;
-    border-radius: 9999px;
-
-    /* glass bar (this is what the mockup shows) */
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-
     overflow: visible !important;
   }
 
@@ -138,7 +130,6 @@
   }
 
   .hero-slideshow-{{ section_id }}__nav {
-    flex: 1 1 auto;
     display: flex;
     justify-content: flex-start;
     min-width: 0;
@@ -187,9 +178,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    order: 3;
-    margin-right: 0;
-    padding-right: 0;
+    margin-left: auto;
     min-width: 0;
   }
 
@@ -212,20 +201,16 @@
   }
 
   .hero-slideshow-{{ section_id }}__header-pill {
-    flex: 1 1 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
 
-    /* remove inner pill look */
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    border: 0;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    /* glass bar for menu only */
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .hero-slideshow-{{ section_id }}__icon {
@@ -788,50 +773,50 @@
               {%- endfor -%}
             </ul>
           </nav>
+        </div>
 
-          <div class="hero-slideshow-{{ section_id }}__actions">
-            <a
-              href="{{ routes.cart_url }}"
-              class="hero-slideshow-{{ section_id }}__icon"
-              aria-label="{{ 'templates.cart.cart' | t }}"
-            >
-              <span class="svg-wrapper">
-                {%- if cart == empty -%}
-                  {{- 'icon-cart-empty.svg' | inline_asset_content -}}
-                {%- else -%}
-                  {{- 'icon-cart.svg' | inline_asset_content -}}
-                {%- endif -%}
-              </span>
-              {%- if cart != empty -%}
-                <span class="hero-slideshow-{{ section_id }}__cart-badge" aria-hidden="true">
-                  {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
-                </span>
+        <div class="hero-slideshow-{{ section_id }}__actions">
+          <a
+            href="{{ routes.cart_url }}"
+            class="hero-slideshow-{{ section_id }}__icon"
+            aria-label="{{ 'templates.cart.cart' | t }}"
+          >
+            <span class="svg-wrapper">
+              {%- if cart == empty -%}
+                {{- 'icon-cart-empty.svg' | inline_asset_content -}}
+              {%- else -%}
+                {{- 'icon-cart.svg' | inline_asset_content -}}
               {%- endif -%}
-            </a>
+            </span>
+            {%- if cart != empty -%}
+              <span class="hero-slideshow-{{ section_id }}__cart-badge" aria-hidden="true">
+                {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- else -%}99+{%- endif -%}
+              </span>
+            {%- endif -%}
+          </a>
 
+          <a
+            href="{{ routes.search_url }}"
+            class="hero-slideshow-{{ section_id }}__icon"
+            aria-label="Search"
+          >
+            <span class="svg-wrapper">
+              {{- 'icon-search.svg' | inline_asset_content -}}
+            </span>
+          </a>
+
+          {%- if shop.customer_accounts_enabled -%}
             <a
-              href="{{ routes.search_url }}"
+              href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
               class="hero-slideshow-{{ section_id }}__icon"
-              aria-label="Search"
+              rel="nofollow"
+              aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
             >
               <span class="svg-wrapper">
-                {{- 'icon-search.svg' | inline_asset_content -}}
+                {{- 'icon-account.svg' | inline_asset_content -}}
               </span>
             </a>
-
-            {%- if shop.customer_accounts_enabled -%}
-              <a
-                href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-                class="hero-slideshow-{{ section_id }}__icon"
-                rel="nofollow"
-                aria-label="{%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}"
-              >
-                <span class="svg-wrapper">
-                  {{- 'icon-account.svg' | inline_asset_content -}}
-                </span>
-              </a>
-            {%- endif -%}
-          </div>
+          {%- endif -%}
         </div>
       {%- endif -%}
     </div>
