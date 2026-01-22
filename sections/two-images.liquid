@@ -1,0 +1,145 @@
+{%- liquid
+  assign section_id = section.id
+  assign top_image = section.settings.top_image
+  assign bottom_image = section.settings.bottom_image
+  assign top_image_alt = section.settings.top_image_alt | default: ''
+  assign bottom_image_alt = section.settings.bottom_image_alt | default: ''
+  assign spacing = section.settings.spacing | default: 40
+  assign full_width = section.settings.full_width
+-%}
+
+<section class="two-images two-images--{{ section_id }}" data-section-id="{{ section_id }}">
+  <div class="two-images__container{% if full_width %} two-images__container--full{% endif %}">
+    {%- if top_image != blank -%}
+      <div class="two-images__top">
+        <img
+          src="{{ top_image | image_url: width: 1920 }}"
+          srcset="{{ top_image | image_url: width: 1920 }} 1x, {{ top_image | image_url: width: 3840 }} 2x"
+          alt="{{ top_image_alt | escape }}"
+          class="two-images__img two-images__img--top"
+          loading="lazy"
+        >
+      </div>
+    {%- endif -%}
+
+    {%- if bottom_image != blank -%}
+      <div class="two-images__bottom">
+        <img
+          src="{{ bottom_image | image_url: width: 1920 }}"
+          srcset="{{ bottom_image | image_url: width: 1920 }} 1x, {{ bottom_image | image_url: width: 3840 }} 2x"
+          alt="{{ bottom_image_alt | escape }}"
+          class="two-images__img two-images__img--bottom"
+          loading="lazy"
+        >
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .two-images--{{ section_id }} {
+    width: 100%;
+    padding: {{ spacing }}px 0;
+  }
+
+  .two-images--{{ section_id }} .two-images__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: {{ spacing }}px;
+  }
+
+  .two-images--{{ section_id }} .two-images__container--full {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .two-images--{{ section_id }} .two-images__top,
+  .two-images--{{ section_id }} .two-images__bottom {
+    width: 100%;
+  }
+
+  .two-images--{{ section_id }} .two-images__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  @media screen and (max-width: 749px) {
+    .two-images--{{ section_id }} {
+      padding: {{ spacing | times: 0.5 | round: 0 }}px 0;
+    }
+
+    .two-images--{{ section_id }} .two-images__container {
+      gap: {{ spacing | times: 0.5 | round: 0 }}px;
+      padding: 0 16px;
+    }
+
+    .two-images--{{ section_id }} .two-images__container--full {
+      padding: 0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Two Images",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top Image"
+    },
+    {
+      "type": "text",
+      "id": "top_image_alt",
+      "label": "Top Image Alt Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_image",
+      "label": "Bottom Image"
+    },
+    {
+      "type": "text",
+      "id": "bottom_image_alt",
+      "label": "Bottom Image Alt Text"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "Spacing Between Images",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Two Images"
+    }
+  ]
+}
+{% endschema %}
+
