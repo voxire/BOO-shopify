@@ -334,7 +334,7 @@
       "settings": {
         "background_image": "shopify://shop_images/Background.jpg",
         "padding_top": 0,
-        "padding_bottom": 0,
+        "padding_bottom": 20,
         "characters_image": "shopify://shop_images/Foreground_77f221b7-0ee3-46cf-912b-9efeb2f8d2fd.png",
         "characters_alt_text": "Character onesies"
       }
