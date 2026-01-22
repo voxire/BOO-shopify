@@ -58,7 +58,7 @@
             "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/greenpng.png",
             "text_color": "#ffffff",
-            "age_range": "0.5-4"
+            "age_range": "0.5-4,4-7"
           }
         },
         "tile_GVynen": {
@@ -67,7 +67,7 @@
             "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/pinkbunny.png",
             "text_color": "#ffffff",
-            "age_range": "4-7"
+            "age_range": "'0.5-4', '4-7'"
           }
         },
         "tile_MBTBfD": {
@@ -76,7 +76,7 @@
             "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/blue.png",
             "text_color": "#ffffff",
-            "age_range": "0.5-4"
+            "age_range": "4-7"
           }
         },
         "tile_ViQ7GJ": {
@@ -94,7 +94,7 @@
             "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/grey.png",
             "text_color": "#ffffff",
-            "age_range": "0.5-4"
+            "age_range": "4-7"
           }
         }
       },
@@ -282,6 +282,8 @@
         "face_W9JEMc": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/FoxBoo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -291,6 +293,8 @@
         "face_iJTAd7": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/GriBoo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -300,6 +304,8 @@
         "face_E3wKmb": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/BunBoo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -309,6 +315,8 @@
         "face_r6ihhE": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/Shaboo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -318,6 +326,8 @@
         "face_FCNhBE": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/DinoBoo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -327,6 +337,8 @@
         "face_3HAW8z": {
           "type": "face",
           "settings": {
+            "name": "Bunny Set",
+            "ages": "2-4",
             "image": "shopify://shop_images/OIP.webp",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -353,13 +365,19 @@
         "face_height": 320,
         "face_width_mobile": 280,
         "face_height_mobile": 420,
+        "section_title": "Shop by Age",
+        "section_title_color": "#ffffff",
         "corner_radius": 14,
         "side_opacity": 2,
         "side2_opacity": 2,
         "image_max_width": 800,
         "background_color": "#ffffff",
         "padding_top": 0,
-        "padding_bottom": 0
+        "padding_bottom": 0,
+        "age_filter_title": "Choose Age",
+        "age_filter_title_color": "#ffffff",
+        "show_age_filter": true,
+        "age_filter_values": "0.5-4,4-7"
       }
     }
   },
