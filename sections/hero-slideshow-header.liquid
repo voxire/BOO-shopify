@@ -116,6 +116,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 1.25rem;
+    flex-wrap: nowrap;
     overflow: visible !important;
   }
 
@@ -156,6 +157,7 @@
     display: flex;
     justify-content: flex-start;
     min-width: 0;
+    flex: 1 1 auto;
   }
 
   .hero-slideshow-{{ section_id }}__menu {
@@ -201,7 +203,6 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-left: auto;
     min-width: 0;
   }
 
@@ -224,10 +225,14 @@
   }
 
   .hero-slideshow-{{ section_id }}__header-pill {
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     padding: 0.5rem 0.75rem;
     border-radius: 9999px;
+    min-width: 0;
 
     /* glass bar for menu only */
     background: rgba(0,0,0,0.35);
@@ -289,19 +294,26 @@
     line-height: 1;
   }
 
-  {%- if first_slide_image != blank -%}
-    .hero-slideshow-{{ section_id }}__slideshow::before {
-      content: '';
-      display: block;
-      padding-bottom: {{ 1 | divided_by: first_slide_image.aspect_ratio | times: 100 }}%;
-    }
-  {%- endif -%}
-
   .hero-slideshow-{{ section_id }}__slideshow {
     position: relative;
     width: 100%;
     overflow: hidden;
     min-height: 0;
+    {%- if slide_height == 'small' -%}
+      height: clamp(420px, 60vh, 560px);
+    {%- elsif slide_height == 'medium' -%}
+      height: clamp(520px, 75vh, 720px);
+    {%- elsif slide_height == 'large' -%}
+      height: clamp(600px, 85vh, 860px);
+    {%- elsif slide_height == 'xlarge' -%}
+      height: clamp(680px, 92vh, 980px);
+    {%- elsif slide_height == 'adapt_image' and first_slide_image != blank -%}
+      aspect-ratio: {{ first_slide_image.aspect_ratio }};
+      min-height: 420px;
+      max-height: 90vh;
+    {%- else -%}
+      height: clamp(600px, 85vh, 860px);
+    {%- endif -%}
   }
 
   .hero-slideshow-{{ section_id }}__slides {
@@ -328,45 +340,33 @@
 
   .hero-slideshow-{{ section_id }}__slide-image {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 120%;
-    height: 120%;
-    min-width: 120%;
-    min-height: 120%;
-    max-width: none;
-    max-height: none;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center;
     display: block;
-    transform: translate(-50%, -50%);
+    transform: none;
   }
 
-  /* Desktop image - hidden on mobile if mobile image exists */
-  .hero-slideshow-{{ section_id }}__slide-image--desktop {
-    display: block;
+  /* Desktop image - hidden on mobile */
+  @media screen and (min-width: 769px) {
+    .hero-slideshow-{{ section_id }}__slide-image--desktop {
+      display: block !important;
+      z-index: 1;
+    }
+    .hero-slideshow-{{ section_id }}__slide-image--mobile {
+      display: none !important;
+    }
   }
 
   /* Mobile image - hidden on desktop */
-  .hero-slideshow-{{ section_id }}__slide-image--mobile {
-    display: none;
-    z-index: 1;
-  }
-
-  /* Desktop image z-index */
-  .hero-slideshow-{{ section_id }}__slide-image--desktop {
-    z-index: 1;
-  }
-
   @media screen and (max-width: 768px) {
     .hero-slideshow-{{ section_id }}__slide-image--desktop {
       display: none !important;
-      visibility: hidden !important;
     }
-
     .hero-slideshow-{{ section_id }}__slide-image--mobile {
       display: block !important;
-      visibility: visible !important;
       z-index: 2;
     }
   }
@@ -796,9 +796,8 @@
               {%- endfor -%}
             </ul>
           </nav>
-        </div>
 
-        <div class="hero-slideshow-{{ section_id }}__actions">
+          <div class="hero-slideshow-{{ section_id }}__actions">
           <a
             href="{{ routes.cart_url }}"
             class="hero-slideshow-{{ section_id }}__icon"
@@ -840,6 +839,7 @@
               </span>
             </a>
           {%- endif -%}
+          </div>
         </div>
       {%- endif -%}
     </div>
