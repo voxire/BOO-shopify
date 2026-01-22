@@ -273,11 +273,164 @@
         "card_height_mobile": 440,
         "image_max_width": 900
       }
+    },
+    "hers_labs_hero_AAQ9WT": {
+      "type": "hers-labs-hero",
+      "blocks": {
+        "sliding_image_Qf9MyM": {
+          "type": "sliding_image",
+          "settings": {
+            "image": "shopify://shop_images/White_Boo.png",
+            "alt_text": ""
+          }
+        },
+        "sliding_image_U3JLHa": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_chTbfw": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_VJYKJM": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_tjtD3g": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_PabRa8": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        },
+        "sliding_image_YhjTGf": {
+          "type": "sliding_image",
+          "settings": {
+            "alt_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "sliding_image_Qf9MyM",
+        "sliding_image_U3JLHa",
+        "sliding_image_chTbfw",
+        "sliding_image_VJYKJM",
+        "sliding_image_tjtD3g",
+        "sliding_image_PabRa8",
+        "sliding_image_YhjTGf"
+      ],
+      "name": "Hers Labs Hero",
+      "settings": {
+        "background_image": "shopify://shop_images/Background.jpg",
+        "padding_top": 0,
+        "padding_bottom": 20,
+        "characters_image": "shopify://shop_images/Foreground_77f221b7-0ee3-46cf-912b-9efeb2f8d2fd.png",
+        "characters_alt_text": "Character onesies"
+      }
+    },
+    "shop_color_grid_ifdnEa": {
+      "type": "shop-color-grid",
+      "blocks": {
+        "tile_Rbgae7": {
+          "type": "tile",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/BunBoo.png",
+            "text_color": "#ffffff",
+            "age_range": "all"
+          }
+        },
+        "tile_hPQHAX": {
+          "type": "tile",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/DinoBoo.png",
+            "text_color": "#ffffff",
+            "age_range": "all"
+          }
+        },
+        "tile_6bAzm9": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/FoxBoo.png",
+            "text_color": "#ffffff",
+            "age_range": "all"
+          }
+        },
+        "tile_tNNNai": {
+          "type": "tile",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/GriBoo.png",
+            "text_color": "#ffffff",
+            "age_range": "all"
+          }
+        },
+        "tile_W3yWNi": {
+          "type": "tile",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "custom_image": "shopify://shop_images/Shaboo.png",
+            "text_color": "#ffffff",
+            "age_range": "all"
+          }
+        }
+      },
+      "block_order": [
+        "tile_Rbgae7",
+        "tile_hPQHAX",
+        "tile_6bAzm9",
+        "tile_tNNNai",
+        "tile_W3yWNi"
+      ],
+      "name": "Shop color grid",
+      "settings": {
+        "heading_text": "Choose Your Character",
+        "heading_color": "",
+        "filter_title": "Select your Age",
+        "filter_button_1_text": "0.5 - 4 Years",
+        "filter_button_1_range": "0.5-4",
+        "filter_button_2_text": "4 - 7 Years",
+        "filter_button_2_range": "4-7",
+        "filter_button_3_text": "",
+        "filter_button_3_range": "all",
+        "section_bg": "#ffffff",
+        "max_width": 1400,
+        "outer_padding": 40,
+        "gap": 40,
+        "columns": 5,
+        "height_vh": 100,
+        "tile_h": 540,
+        "tile_h_mobile": 420,
+        "tile_bg": "#ffffff",
+        "image_fit": "cover",
+        "image_scale": 100,
+        "image_pos_x": 50,
+        "image_pos_y": 50,
+        "hover_zoom": 112,
+        "radius": 26,
+        "overlay_opacity": 0,
+        "overlay_hover_opacity": 15
+      }
     }
   },
   "order": [
     "hex_prism_carousel_WDEgJy",
     "3d_card_carousel_x3rUgj",
-    "best_sellers_on_sale_ygnM6X"
+    "best_sellers_on_sale_ygnM6X",
+    "hers_labs_hero_AAQ9WT",
+    "shop_color_grid_ifdnEa"
   ]
 }
