@@ -208,7 +208,7 @@
           "settings": {
             "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/Shaboo.png",
-            "age_range": "0.5-4"
+            "age_range": "5-7"
           }
         },
         "product_card_qYRQw6": {
@@ -232,7 +232,7 @@
           "settings": {
             "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/BunBoo.png",
-            "age_range": "5-7"
+            "age_range": "0.5-4,5-7"
           }
         },
         "product_card_f4yNcW": {
@@ -240,7 +240,7 @@
           "settings": {
             "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
             "custom_image": "shopify://shop_images/FoxBoo.png",
-            "age_range": "0.5-4"
+            "age_range": "5-7"
           }
         }
       },
