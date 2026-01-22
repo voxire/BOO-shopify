@@ -3,15 +3,6 @@
   assign logo = section.settings.logo
   assign menu = section.settings.menu
   assign text_color = section.settings.text_color
-  assign is_home_page = false
-  if template.name == 'index'
-    assign is_home_page = true
-  endif
-  assign autoplay_enabled = section.settings.autoplay_enabled
-  assign autoplay_speed = section.settings.autoplay_speed | default: 5000
-  assign slide_height = section.settings.slide_height | default: 'large'
-  assign slides = section.blocks | where: 'type', 'slide'
-  assign first_slide_image = slides.first.settings.image
   
   # Get product header color if on product page
   assign product_header_color = blank
@@ -43,162 +34,63 @@
     max-width: 100%;
     overflow: visible;
     border-radius: 0;
-    {%- unless is_home_page -%}
-      background: {{ section.settings.background_color | default: 'transparent' }};
-    {%- else -%}
-      background: none;
-    {%- endunless -%}
+    background: {{ section.settings.background_color | default: 'transparent' }};
   }
 
-  {%- if is_home_page and first_slide_image != blank -%}
-    .hero-header-{{ section_id }}__slideshow::before {
-      content: '';
-      display: block;
-      padding-bottom: {{ 1 | divided_by: first_slide_image.aspect_ratio | times: 100 }}%;
-    }
-  {%- endif -%}
-
-  .hero-header-{{ section_id }}__slideshow {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  .hero-header-{{ section_id }}__slides {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .hero-header-{{ section_id }}__slide {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 1s ease-in-out;
-    z-index: 1;
-  }
-
-  .hero-header-{{ section_id }}__slide.active {
-    opacity: 1;
-    z-index: 2;
-  }
-
-  .hero-header-{{ section_id }}__slide-image {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 120%;
-    height: 120%;
-    min-width: 120%;
-    min-height: 120%;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    transform: translate(-50%, -50%);
-  }
-
-  .hero-header-{{ section_id }}__slide-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-  }
-
-  .hero-header-{{ section_id }}__button {
-    position: absolute;
-    padding: 1rem 2rem;
-    background: {{ section.settings.button_bg_color | default: '#ffffff' }};
-    color: {{ section.settings.button_text_color | default: '#000000' }};
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    border: none;
-    cursor: pointer;
-    z-index: 4;
-  }
-
-  .hero-header-{{ section_id }}__button:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
-  }
-
-  .hero-header-{{ section_id }}__indicators {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.5rem;
-    z-index: 5;
-  }
-
-  .hero-header-{{ section_id }}__indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    padding: 0;
-  }
-
-  .hero-header-{{ section_id }}__indicator.active {
-    background: {{ text_color }};
-  }
 
   .hero-header-{{ section_id }}__header {
-    position: {% if is_home_page %}absolute{% else %}relative{% endif %};
-    inset: {% if is_home_page %}0 auto auto 0{% else %}auto{% endif %};
+    position: relative;
+    inset: auto;
     width: 100%;
     z-index: 1001;
     padding: 1.5rem 0;
     background: transparent;
     border-radius: 0;
     max-width: 100%;
-    overflow: visible;
+    overflow: visible !important;
     transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    isolation: isolate;
   }
 
-  .hero-header-{{ section_id }}__header:has(.hero-header-{{ section_id }}__mobile-nav[aria-hidden="false"]),
-  .hero-header-{{ section_id }}__header:has(.hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"]) {
+  .hero-header-{{ section_id }}__header:has(.hero-header-{{ section_id }}__mobile-nav[aria-hidden="false"]) .hero-header-{{ section_id }}__header-pill,
+  .hero-header-{{ section_id }}__header:has(.hero-header-{{ section_id }}__menu-toggle[aria-expanded="true"]) .hero-header-{{ section_id }}__header-pill {
     background: #ffffff;
+    border-color: rgba(0,0,0,0.08);
+  }
+
+  .hero-header-{{ section_id }},
+  .hero-header-{{ section_id }} * {
+    box-sizing: border-box;
   }
 
   .hero-header-{{ section_id }}__header-container {
-    position: relative;
     width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 0 2rem;
+    max-width: 1680px;
+    margin: 0 auto;
+    padding: 0.6rem 2rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    overflow: visible;
-    z-index: 1001;
+    justify-content: flex-start;
+    gap: 1.25rem;
+    flex-wrap: nowrap;
+    overflow: visible !important;
+    box-sizing: border-box;
+  }
+
+  @media screen and (max-width: 768px) {
+    .hero-header-{{ section_id }}__header-container {
+      padding: 0.5rem 1rem;
+      box-sizing: border-box;
+    }
   }
 
   .hero-header-{{ section_id }}__logo {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    order: 1;
-    margin-left: 0;
-    padding-left: 0;
+    margin: 0;
+    padding: 0;
+    margin-right: 1.25rem;
   }
 
   .hero-header-{{ section_id }}__logo img {
@@ -219,10 +111,10 @@
   }
 
   .hero-header-{{ section_id }}__nav {
-    flex: 1;
     display: flex;
-    justify-content: center;
-    order: 2;
+    justify-content: flex-start;
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   .hero-header-{{ section_id }}__menu {
@@ -230,9 +122,9 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
   }
 
   .hero-header-{{ section_id }}__menu-item {
@@ -246,21 +138,29 @@
     font-weight: 500;
     letter-spacing: 0.02em;
     transition: opacity 0.2s ease;
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+
+    /* give all links small click padding */
+    padding: 0.45rem 0.9rem;
+    border-radius: 9999px;
   }
 
   .hero-header-{{ section_id }}__menu-link:hover {
     opacity: 0.7;
   }
 
+  .hero-header-{{ section_id }}__menu-link.is-active {
+    background: rgba(255,255,255,0.16);
+  }
+
   .hero-header-{{ section_id }}__actions {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    order: 3;
-    margin-right: 0;
-    padding-right: 0;
+    gap: 0.75rem;
+    margin-left: auto;
     min-width: 0;
   }
 
@@ -282,13 +182,29 @@
     stroke: #000000;
   }
 
+  .hero-header-{{ section_id }}__header-pill {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 9999px;
+
+    /* glass bar for menu only */
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .hero-header-{{ section_id }}__icon {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.10);
     color: {{ text_color }};
     text-decoration: none;
     transition: opacity 0.2s ease, color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -299,23 +215,21 @@
   }
 
   .hero-header-{{ section_id }}__icon .svg-wrapper {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .hero-header-{{ section_id }}__icon#cart-icon-bubble {
-    width: 72px;
-    height: 72px;
-    max-width: 72px;
-    overflow: hidden;
+  .hero-header-{{ section_id }}__icon[href*="cart"] {
+    width: 46px;
+    height: 46px;
   }
 
-  .hero-header-{{ section_id }}__icon#cart-icon-bubble .svg-wrapper {
-    width: 40px;
-    height: 40px;
+  .hero-header-{{ section_id }}__icon[href*="cart"] .svg-wrapper {
+    width: 38px;
+    height: 38px;
   }
 
   .hero-header-{{ section_id }}__icon svg {
@@ -330,8 +244,8 @@
     position: absolute;
     top: 6px;
     right: 6px;
-    background: {{ text_color }};
-    color: #000;
+    background: #ffffff;
+    color: #000000;
     border-radius: 50%;
     min-width: 18px;
     height: 18px;
@@ -357,7 +271,7 @@
     width: 44px;
     height: 44px;
     color: {{ text_color }};
-    order: 2;
+    margin-left: auto;
   }
 
   .hero-header-{{ section_id }}__menu-toggle-icon {
@@ -620,6 +534,10 @@
     .hero-header-{{ section_id }}__actions {
       display: none;
     }
+
+    .hero-header-{{ section_id }}__header-pill {
+      display: none !important;
+    }
   }
 {%- endstyle -%}
 
@@ -650,17 +568,22 @@
           </span>
         </button>
 
-        <nav class="hero-header-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
-          <ul class="hero-header-{{ section_id }}__menu">
-            {%- for link in linklists[menu].links -%}
-              <li class="hero-header-{{ section_id }}__menu-item">
-                <a href="{{ link.url }}" class="hero-header-{{ section_id }}__menu-link">
-                  {{ link.title }}
-                </a>
-              </li>
-            {%- endfor -%}
-          </ul>
-        </nav>
+        <div class="hero-header-{{ section_id }}__header-pill">
+          <nav class="hero-header-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
+            <ul class="hero-header-{{ section_id }}__menu">
+              {%- for link in linklists[menu].links -%}
+                <li class="hero-header-{{ section_id }}__menu-item">
+                  <a
+                    href="{{ link.url }}"
+                    class="hero-header-{{ section_id }}__menu-link{% if link.active %} is-active{% endif %}"
+                  >
+                    {{ link.title }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        </div>
 
         <nav
           class="hero-header-{{ section_id }}__mobile-nav"
@@ -792,105 +715,6 @@
     })();
   </script>
 
-  {%- if is_home_page and slides.size > 0 -%}
-    <!-- Slideshow (only on home page) -->
-    <div class="hero-header-{{ section_id }}__slideshow">
-      <div class="hero-header-{{ section_id }}__slides" id="slides-{{ section_id }}">
-        {%- for block in slides -%}
-          {%- assign slide_image = block.settings.image -%}
-          {%- assign button_text = block.settings.button_text -%}
-          {%- assign button_link = block.settings.button_link -%}
-          {%- assign button_position = block.settings.button_position | default: 'center' -%}
-          {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
-          {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
-
-          <div
-            class="hero-header-{{ section_id }}__slide{% if forloop.first %} active{% endif %}"
-            data-slide-index="{{ forloop.index0 }}"
-            {{ block.shopify_attributes }}
-          >
-            {%- if slide_image != blank -%}
-              <img
-                class="hero-header-{{ section_id }}__slide-image"
-                src="{{ slide_image | image_url: width: 2400 }}"
-                alt="{{ slide_image.alt | escape }}"
-                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                width="{{ slide_image.width }}"
-                height="{{ slide_image.height }}"
-              >
-            {%- endif -%}
-
-            <div class="hero-header-{{ section_id }}__slide-content">
-              {%- if button_text != blank and button_link != blank -%}
-                <a
-                  href="{{ button_link }}"
-                  class="hero-header-{{ section_id }}__button"
-                  style="
-                    {%- if button_position == 'custom' -%}
-                      left: {{ button_horizontal }}%;
-                      top: {{ button_vertical }}%;
-                      transform: translate(-50%, -50%);
-                    {%- elsif button_position == 'top-left' -%}
-                      top: 20%;
-                      left: 20%;
-                      transform: translate(-50%, -50%);
-                    {%- elsif button_position == 'top-center' -%}
-                      top: 20%;
-                      left: 50%;
-                      transform: translate(-50%, -50%);
-                    {%- elsif button_position == 'top-right' -%}
-                      top: 20%;
-                      right: 20%;
-                      transform: translate(50%, -50%);
-                    {%- elsif button_position == 'center-left' -%}
-                      top: 50%;
-                      left: 20%;
-                      transform: translate(-50%, -50%);
-                    {%- elsif button_position == 'center-right' -%}
-                      top: 50%;
-                      right: 20%;
-                      transform: translate(50%, -50%);
-                    {%- elsif button_position == 'bottom-left' -%}
-                      bottom: 20%;
-                      left: 20%;
-                      transform: translate(-50%, 50%);
-                    {%- elsif button_position == 'bottom-center' -%}
-                      bottom: 20%;
-                      left: 50%;
-                      transform: translate(-50%, 50%);
-                    {%- elsif button_position == 'bottom-right' -%}
-                      bottom: 20%;
-                      right: 20%;
-                      transform: translate(50%, 50%);
-                    {%- else -%}
-                      top: 50%;
-                      left: 50%;
-                      transform: translate(-50%, -50%);
-                    {%- endif -%}
-                  "
-                >
-                  {{ button_text }}
-                </a>
-              {%- endif -%}
-            </div>
-          </div>
-        {%- endfor -%}
-      </div>
-
-      {%- if slides.size > 1 -%}
-        <div class="hero-header-{{ section_id }}__indicators">
-          {%- for block in slides -%}
-            <button
-              type="button"
-              class="hero-header-{{ section_id }}__indicator{% if forloop.first %} active{% endif %}"
-              data-slide-index="{{ forloop.index0 }}"
-              aria-label="Go to slide {{ forloop.index }}"
-            ></button>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-    </div>
-  {%- endif -%}
 </div>
 
 <script>
@@ -982,83 +806,6 @@
       setTimeout(initMobileMenu, 100);
     }
 
-    {%- if is_home_page -%}
-    // Slideshow functionality (only on home page)
-    const slides = sectionEl.querySelectorAll('[class*="__slide"]');
-    const indicators = sectionEl.querySelectorAll('[class*="__indicator"]');
-
-    if (slides.length <= 1) return;
-
-    let currentSlide = 0;
-    let autoplayInterval = null;
-
-    function showSlide(index) {
-      slides.forEach((slide, i) => {
-        if (i === index) {
-          slide.classList.add('active');
-        } else {
-          slide.classList.remove('active');
-        }
-      });
-
-      indicators.forEach((indicator, i) => {
-        if (i === index) {
-          indicator.classList.add('active');
-        } else {
-          indicator.classList.remove('active');
-        }
-      });
-
-      currentSlide = index;
-    }
-
-    function nextSlide() {
-      const next = (currentSlide + 1) % slides.length;
-      showSlide(next);
-    }
-
-    function goToSlide(index) {
-      if (index >= 0 && index < slides.length) {
-        showSlide(index);
-      }
-    }
-
-    // Indicator clicks
-    indicators.forEach((indicator, index) => {
-      indicator.addEventListener('click', () => {
-        goToSlide(index);
-        resetAutoplay();
-      });
-    });
-
-    // Auto-rotate
-    function startAutoplay() {
-      {% if autoplay_enabled %}
-        autoplayInterval = setInterval(nextSlide, {{ autoplay_speed }});
-      {% endif %}
-    }
-
-    function stopAutoplay() {
-      if (autoplayInterval) {
-        clearInterval(autoplayInterval);
-        autoplayInterval = null;
-      }
-    }
-
-    function resetAutoplay() {
-      stopAutoplay();
-      startAutoplay();
-    }
-
-    // Pause on hover
-    const slideshow = sectionEl.querySelector('.hero-header-{{ section_id }}__slideshow');
-    if (slideshow) {
-      slideshow.addEventListener('mouseenter', stopAutoplay);
-      slideshow.addEventListener('mouseleave', startAutoplay);
-    }
-
-    startAutoplay();
-    {%- endif -%}
 
     // Update hero header background color based on product
     (function() {
@@ -1196,156 +943,10 @@
       "type": "color",
       "id": "background_color",
       "label": "Background color",
-      "default": "#000000",
-      "info": "Only used when slideshow is not active (non-home pages)"
-    },
-    {
-      "type": "header",
-      "content": "Slideshow Settings (Home Page Only)"
-    },
-    {
-      "type": "select",
-      "id": "slide_height",
-      "options": [
-        {
-          "value": "small",
-          "label": "Small"
-        },
-        {
-          "value": "medium",
-          "label": "Medium"
-        },
-        {
-          "value": "large",
-          "label": "Large"
-        }
-      ],
-      "default": "large",
-      "label": "Slide height"
-    },
-    {
-      "type": "checkbox",
-      "id": "autoplay_enabled",
-      "label": "Enable Auto-rotate",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "autoplay_speed",
-      "min": 3000,
-      "max": 9500,
-      "step": 500,
-      "unit": "ms",
-      "label": "Auto-rotate Speed",
-      "default": 5000
-    },
-    {
-      "type": "color",
-      "id": "button_bg_color",
-      "label": "Button background color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Button text color",
       "default": "#000000"
-    }
+    },
   ],
   "blocks": [
-    {
-      "type": "slide",
-      "name": "Slide",
-      "limit": 10,
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image"
-        },
-        {
-          "type": "text",
-          "id": "button_text",
-          "label": "Button Text",
-          "default": "Shop Now"
-        },
-        {
-          "type": "url",
-          "id": "button_link",
-          "label": "Button Link"
-        },
-        {
-          "type": "select",
-          "id": "button_position",
-          "label": "Button Position",
-          "options": [
-            {
-              "value": "center",
-              "label": "Center"
-            },
-            {
-              "value": "top-left",
-              "label": "Top Left"
-            },
-            {
-              "value": "top-center",
-              "label": "Top Center"
-            },
-            {
-              "value": "top-right",
-              "label": "Top Right"
-            },
-            {
-              "value": "center-left",
-              "label": "Center Left"
-            },
-            {
-              "value": "center-right",
-              "label": "Center Right"
-            },
-            {
-              "value": "bottom-left",
-              "label": "Bottom Left"
-            },
-            {
-              "value": "bottom-center",
-              "label": "Bottom Center"
-            },
-            {
-              "value": "bottom-right",
-              "label": "Bottom Right"
-            },
-            {
-              "value": "custom",
-              "label": "Custom Position"
-            }
-          ],
-          "default": "center"
-        },
-        {
-          "type": "range",
-          "id": "button_horizontal",
-          "min": 0,
-          "max": 100,
-          "step": 1,
-          "unit": "%",
-          "label": "Button Horizontal Position",
-          "default": 50,
-          "info": "Only applies when position is set to Custom"
-        },
-        {
-          "type": "range",
-          "id": "button_vertical",
-          "min": 0,
-          "max": 100,
-          "step": 1,
-          "unit": "%",
-          "label": "Button Vertical Position",
-          "default": 50,
-          "info": "Only applies when position is set to Custom"
-        }
-      ]
-    },
     {
       "type": "product_color",
       "name": "Product Header Color",
