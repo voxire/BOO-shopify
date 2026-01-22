@@ -17,6 +17,14 @@
   assign shared_subtitle = section.settings.shared_subtitle
   assign shared_button_text = section.settings.shared_button_text
   assign shared_button_link = section.settings.shared_button_link
+  assign shared_text_position = section.settings.shared_text_position
+  assign shared_text_horizontal = section.settings.shared_text_horizontal | default: 50
+  assign shared_text_vertical = section.settings.shared_text_vertical | default: 50
+  assign shared_button_position = section.settings.shared_button_position
+  assign shared_button_horizontal = section.settings.shared_button_horizontal | default: 50
+  assign shared_button_vertical = section.settings.shared_button_vertical | default: 50
+  assign shared_title_color = section.settings.shared_title_color | default: '#ffffff'
+  assign shared_subtitle_color = section.settings.shared_subtitle_color | default: '#ffffff'
 
   if slides.size > 0
     if shared_title == blank
@@ -30,6 +38,25 @@
     endif
     if shared_button_link == blank
       assign shared_button_link = slides.first.settings.button_link
+    endif
+    if shared_text_position == blank
+      assign shared_text_position = slides.first.settings.text_position | default: 'center'
+    endif
+    if shared_button_position == blank
+      assign shared_button_position = slides.first.settings.button_position | default: 'center'
+    endif
+    if shared_title_color == blank or shared_title_color == '#ffffff'
+      assign shared_title_color = slides.first.settings.title_color | default: '#ffffff'
+    endif
+    if shared_subtitle_color == blank or shared_subtitle_color == '#ffffff'
+      assign shared_subtitle_color = slides.first.settings.subtitle_color | default: '#ffffff'
+    endif
+  else
+    if shared_text_position == blank
+      assign shared_text_position = 'center'
+    endif
+    if shared_button_position == blank
+      assign shared_button_position = 'center'
     endif
   endif
 -%}
@@ -892,14 +919,6 @@
       {%- for block in slides -%}
         {%- assign slide_image = block.settings.image -%}
         {%- assign slide_mobile_image = block.settings.mobile_image -%}
-        {%- assign text_position = block.settings.text_position | default: 'center' -%}
-        {%- assign text_horizontal = block.settings.text_horizontal | default: 50 -%}
-        {%- assign text_vertical = block.settings.text_vertical | default: 50 -%}
-        {%- assign title_color = block.settings.title_color | default: '#ffffff' -%}
-        {%- assign subtitle_color = block.settings.subtitle_color | default: '#ffffff' -%}
-        {%- assign button_position = block.settings.button_position | default: 'center' -%}
-        {%- assign button_horizontal = block.settings.button_horizontal | default: 50 -%}
-        {%- assign button_vertical = block.settings.button_vertical | default: 50 -%}
 
         <div
           class="hero-slideshow-{{ section_id }}__slide{% if forloop.first %} active{% endif %}"
@@ -949,39 +968,39 @@
               <div
                 class="hero-slideshow-{{ section_id }}__slide-text"
                 style="
-                  {%- if text_position == 'custom' -%}
-                    left: {{ text_horizontal }}%;
-                    top: {{ text_vertical }}%;
+                  {%- if shared_text_position == 'custom' -%}
+                    left: {{ shared_text_horizontal }}%;
+                    top: {{ shared_text_vertical }}%;
                     transform: translate(-50%, -50%);
-                  {%- elsif text_position == 'top-left' -%}
+                  {%- elsif shared_text_position == 'top-left' -%}
                     top: 20%;
                     left: 20%;
                     transform: translate(-50%, -50%);
-                  {%- elsif text_position == 'top-center' -%}
+                  {%- elsif shared_text_position == 'top-center' -%}
                     top: 20%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                  {%- elsif text_position == 'top-right' -%}
+                  {%- elsif shared_text_position == 'top-right' -%}
                     top: 20%;
                     right: 20%;
                     transform: translate(50%, -50%);
-                  {%- elsif text_position == 'center-left' -%}
+                  {%- elsif shared_text_position == 'center-left' -%}
                     top: 50%;
                     left: 20%;
                     transform: translate(-50%, -50%);
-                  {%- elsif text_position == 'center-right' -%}
+                  {%- elsif shared_text_position == 'center-right' -%}
                     top: 50%;
                     right: 20%;
                     transform: translate(50%, -50%);
-                  {%- elsif text_position == 'bottom-left' -%}
+                  {%- elsif shared_text_position == 'bottom-left' -%}
                     bottom: 20%;
                     left: 20%;
                     transform: translate(-50%, 50%);
-                  {%- elsif text_position == 'bottom-center' -%}
+                  {%- elsif shared_text_position == 'bottom-center' -%}
                     bottom: 20%;
                     left: 50%;
                     transform: translate(-50%, 50%);
-                  {%- elsif text_position == 'bottom-right' -%}
+                  {%- elsif shared_text_position == 'bottom-right' -%}
                     bottom: 20%;
                     right: 20%;
                     transform: translate(50%, 50%);
@@ -995,7 +1014,7 @@
                 {%- if shared_title != blank -%}
                   <h2
                     class="hero-slideshow-{{ section_id }}__slide-title"
-                    style="color: {{ title_color }};"
+                    style="color: {{ shared_title_color }};"
                   >
                     {{ shared_title }}
                   </h2>
@@ -1003,7 +1022,7 @@
                 {%- if shared_subtitle != blank -%}
                   <p
                     class="hero-slideshow-{{ section_id }}__slide-subtitle"
-                    style="color: {{ subtitle_color }};"
+                    style="color: {{ shared_subtitle_color }};"
                   >
                     {{ shared_subtitle }}
                   </p>
@@ -1015,36 +1034,36 @@
                 href="{{ shared_button_link }}"
                 class="hero-slideshow-{{ section_id }}__button"
                 style="
-                  {% if button_position == 'custom' %}
-                    left: {{ button_horizontal }}%;
-                    top: {{ button_vertical }}%;
+                  {% if shared_button_position == 'custom' %}
+                    left: {{ shared_button_horizontal }}%;
+                    top: {{ shared_button_vertical }}%;
                     transform: translate(-50%, -50%);
-                  {% elsif button_position == 'top-left' %}
+                  {% elsif shared_button_position == 'top-left' %}
                     top: 20%;
                     left: 10%;
-                  {% elsif button_position == 'top-center' %}
+                  {% elsif shared_button_position == 'top-center' %}
                     top: 20%;
                     left: 50%;
                     transform: translateX(-50%);
-                  {% elsif button_position == 'top-right' %}
+                  {% elsif shared_button_position == 'top-right' %}
                     top: 20%;
                     right: 10%;
-                  {% elsif button_position == 'center-left' %}
+                  {% elsif shared_button_position == 'center-left' %}
                     top: 50%;
                     left: 10%;
                     transform: translateY(-50%);
-                  {% elsif button_position == 'center-right' %}
+                  {% elsif shared_button_position == 'center-right' %}
                     top: 50%;
                     right: 10%;
                     transform: translateY(-50%);
-                  {% elsif button_position == 'bottom-left' %}
+                  {% elsif shared_button_position == 'bottom-left' %}
                     bottom: 20%;
                     left: 10%;
-                  {% elsif button_position == 'bottom-center' %}
+                  {% elsif shared_button_position == 'bottom-center' %}
                     bottom: 20%;
                     left: 50%;
                     transform: translateX(-50%);
-                  {% elsif button_position == 'bottom-right' %}
+                  {% elsif shared_button_position == 'bottom-right' %}
                     bottom: 20%;
                     right: 10%;
                   {% else %}
@@ -1266,6 +1285,158 @@
       "type": "url",
       "id": "shared_button_link",
       "label": "Shared Button Link (all slides)"
+    },
+    {
+      "type": "color",
+      "id": "shared_title_color",
+      "label": "Shared Title Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "shared_subtitle_color",
+      "label": "Shared Subtitle Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "shared_text_position",
+      "label": "Title & Subtitle Position",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "top-left",
+          "label": "Top Left"
+        },
+        {
+          "value": "top-center",
+          "label": "Top Center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top Right"
+        },
+        {
+          "value": "center-left",
+          "label": "Center Left"
+        },
+        {
+          "value": "center-right",
+          "label": "Center Right"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom Left"
+        },
+        {
+          "value": "bottom-center",
+          "label": "Bottom Center"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom Right"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Position"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "shared_text_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Text Horizontal Position",
+      "default": 50,
+      "info": "Only applies when position is set to Custom"
+    },
+    {
+      "type": "range",
+      "id": "shared_text_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Text Vertical Position",
+      "default": 50,
+      "info": "Only applies when position is set to Custom"
+    },
+    {
+      "type": "select",
+      "id": "shared_button_position",
+      "label": "Button Position",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "top-left",
+          "label": "Top Left"
+        },
+        {
+          "value": "top-center",
+          "label": "Top Center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top Right"
+        },
+        {
+          "value": "center-left",
+          "label": "Center Left"
+        },
+        {
+          "value": "center-right",
+          "label": "Center Right"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom Left"
+        },
+        {
+          "value": "bottom-center",
+          "label": "Bottom Center"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom Right"
+        },
+        {
+          "value": "custom",
+          "label": "Custom Position"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "shared_button_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Button Horizontal Position",
+      "default": 50,
+      "info": "Only applies when position is set to Custom"
+    },
+    {
+      "type": "range",
+      "id": "shared_button_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Button Vertical Position",
+      "default": 50,
+      "info": "Only applies when position is set to Custom"
     },
     {
       "type": "header",
