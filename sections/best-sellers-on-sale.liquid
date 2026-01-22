@@ -167,15 +167,19 @@
                       {%- endif -%}
                     </div>
 
-                    <button
-                      type="button"
-                      class="best-sellers-on-sale__atc"
-                      data-variant-id="{{ first_variant.id }}"
-                      {% unless first_variant.available %}disabled{% endunless %}
-                      aria-label="{% if first_variant.available %}Add {{ product.title | escape }} to cart{% else %}Sold out{% endif %}"
-                    >
-                      {% if first_variant.available %}Add to cart{% else %}Sold out{% endif %}
-                    </button>
+                    {%- if first_variant.available -%}
+                      <a
+                        href="{{ product.url }}"
+                        class="best-sellers-on-sale__atc"
+                        aria-label="Buy {{ product.title | escape }} now"
+                      >
+                        Buy now
+                      </a>
+                    {%- else -%}
+                      <div class="best-sellers-on-sale__atc best-sellers-on-sale__atc--sold-out">
+                        Sold out
+                      </div>
+                    {%- endif -%}
                   </div>
                 </div>
               </div>
@@ -391,6 +395,9 @@
     letter-spacing: 0.6px;
     text-transform: uppercase;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    display: block;
+    text-align: center;
+    text-decoration: none;
   }
 
   .best-sellers-on-sale__atc:hover {
@@ -398,10 +405,11 @@
     transform: translateY(-1px);
   }
 
-  .best-sellers-on-sale__atc:disabled {
+  .best-sellers-on-sale__atc--sold-out {
     opacity: 0.55;
     cursor: not-allowed;
     transform: none;
+    pointer-events: none;
   }
 
   .best-sellers-on-sale__card:hover .best-sellers-on-sale__overlay {
@@ -579,69 +587,6 @@
 
     {%- comment -%} Initialize: show all products {%- endcomment -%}
     filterByAge('all');
-
-    // ===== AJAX ADD TO CART =====
-    async function addToCart(variantId, qty) {
-      const res = await fetch('/cart/add.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ id: Number(variantId), quantity: qty || 1 })
-      });
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        throw new Error('Add to cart failed: ' + txt);
-      }
-      return res.json();
-    }
-
-    async function fetchCart() {
-      const res = await fetch('/cart.js', { headers: { 'Accept': 'application/json' }});
-      if (!res.ok) throw new Error('Cart fetch failed');
-      return res.json();
-    }
-
-    function updateHeaderCartCount(count) {
-      // Try common selectors (your hero header uses .hero-slideshow__cart-badge / mobile-cart-badge)
-      const sectionIdStr = sectionId;
-      const badges = document.querySelectorAll(
-        '.hero-slideshow-' + sectionIdStr + '__cart-badge, .hero-slideshow-' + sectionIdStr + '__mobile-cart-badge, .cart-count-bubble span, [data-cart-count]'
-      );
-      badges.forEach((b) => {
-        if (b) b.textContent = String(count);
-      });
-    }
-
-    const atcButtons = section.querySelectorAll('.best-sellers-on-sale__atc[data-variant-id]');
-    atcButtons.forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const variantId = btn.getAttribute('data-variant-id');
-        if (!variantId || btn.disabled) return;
-
-        const original = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Adding...';
-
-        try {
-          await addToCart(variantId, 1);
-          const cart = await fetchCart();
-          updateHeaderCartCount(cart.item_count);
-
-          btn.textContent = 'Added';
-          setTimeout(() => {
-            btn.textContent = original;
-            btn.disabled = false;
-          }, 900);
-        } catch (err) {
-          console.error(err);
-          btn.textContent = 'Error';
-          setTimeout(() => {
-            btn.textContent = original;
-            btn.disabled = false;
-          }, 1200);
-        }
-      });
-    });
   })();
 </script>
 
