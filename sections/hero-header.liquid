@@ -541,6 +541,8 @@
   }
 {%- endstyle -%}
 
+{%- comment -%} Hide hero header on home page, show on all other pages {%- endcomment -%}
+{%- unless template.name == 'index' -%}
 <div class="hero-header-{{ section_id }}">
   <!-- Header -->
   <div class="hero-header-{{ section_id }}__header">
@@ -731,6 +733,7 @@
   </script>
 
 </div>
+{%- endunless -%}
 
 <script>
   (function() {
