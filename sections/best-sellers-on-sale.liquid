@@ -283,11 +283,15 @@
     overflow: hidden;         /* crop image to card */
     display: block;           /* no flex centering */
     width: 100%;
+    transition: opacity 0.4s ease, filter 0.4s ease;
   }
 
-  {%- comment -%} Filtered out cards are hidden via JS {%- endcomment -%}
+  {%- comment -%} Filtered out cards are blurred and faded via JS {%- endcomment -%}
   .best-sellers-on-sale__card.best-sellers-on-sale__card--filtered-out {
-    display: none !important;
+    opacity: 0.25;
+    filter: blur(4px);
+    pointer-events: none;
+    transition: opacity 0.4s ease, filter 0.4s ease;
   }
 
   .best-sellers-on-sale__badge {
@@ -522,11 +526,9 @@
 
         if (shouldShow) {
           card.classList.remove('best-sellers-on-sale__card--filtered-out');
-          card.style.display = 'block';
           visibleCount++;
         } else {
           card.classList.add('best-sellers-on-sale__card--filtered-out');
-          card.style.display = 'none';
         }
       });
 
