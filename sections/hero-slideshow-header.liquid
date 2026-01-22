@@ -131,6 +131,9 @@
     align-items: center;
     gap: 1.25rem;
     flex-shrink: 0;
+    flex-grow: 0;
+    min-width: 0;
+    margin-right: auto;
   }
 
   @media screen and (max-width: 768px) {
@@ -212,6 +215,7 @@
 
   .hero-slideshow-{{ section_id }}__actions {
     flex-shrink: 0;
+    flex-grow: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -241,6 +245,7 @@
     align-items: center;
     padding: 0.5rem 0.75rem;
     border-radius: 9999px;
+    flex-shrink: 0;
 
     /* glass bar for menu only */
     background: rgba(0,0,0,0.35);
