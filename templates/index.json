@@ -15,10 +15,10 @@
         "face_kY9Niz": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "FoxBoo",
             "ages": "4-7",
             "image": "shopify://shop_images/FoxBoo.png",
-            "link": "",
+            "link": "shopify://products/dark-pink-fox-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
           }
@@ -26,7 +26,7 @@
         "face_JxVWWQ": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "DinoBoo",
             "ages": "0.5-4,4-7",
             "image": "shopify://shop_images/DinoBoo.png",
             "link": "shopify://products/green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
@@ -37,7 +37,7 @@
         "face_jLktq7": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "ShaBoo",
             "ages": "4-7",
             "image": "shopify://shop_images/Shaboo.png",
             "link": "shopify://products/dark-blue-shark-costume-for-babies-toddlers-lebanon",
@@ -48,7 +48,7 @@
         "face_q8Wjqd": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "FoxBoo\\",
             "ages": "4-7",
             "image": "shopify://shop_images/FoxBoo.png",
             "link": "shopify://products/dark-pink-fox-costume-for-babies-toddlers-lebanon",
@@ -59,7 +59,7 @@
         "face_M7Hj6q": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "GriBoo",
             "ages": "4-7",
             "image": "shopify://shop_images/GriBoo.png",
             "link": "shopify://products/grey-dragon-costume-for-babies-toddlers-lebanon",
@@ -70,7 +70,7 @@
         "face_QYqcdH": {
           "type": "face",
           "settings": {
-            "name": "Bunny Set",
+            "name": "BunBoo",
             "ages": "0.5-4,4-7",
             "image": "shopify://shop_images/BunBoo.png",
             "link": "shopify://products/light-pink-rabbit-costume-for-babies-toddlers-lebanon",
