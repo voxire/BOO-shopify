@@ -107,23 +107,29 @@
     border-color: rgba(0,0,0,0.08);
   }
 
+  .hero-slideshow-{{ section_id }},
+  .hero-slideshow-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
   .hero-slideshow-{{ section_id }}__header-container {
-    width: calc(100% - 4rem);
+    width: 100%;
     max-width: 1680px;
     margin: 0 auto;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 2rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 1.25rem;
     flex-wrap: nowrap;
     overflow: visible !important;
+    box-sizing: border-box;
   }
 
   @media screen and (max-width: 768px) {
     .hero-slideshow-{{ section_id }}__header-container {
-      width: calc(100% - 2rem);
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 1rem;
+      box-sizing: border-box;
     }
   }
 
@@ -338,37 +344,24 @@
     z-index: 2;
   }
 
-  .hero-slideshow-{{ section_id }}__slide-image {
+  /* Ensure slide media always covers the full slideshow area */
+  .hero-slideshow-{{ section_id }}__media,
+  .hero-slideshow-{{ section_id }}__placeholder {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    display: block;
+  }
+
+  .hero-slideshow-{{ section_id }}__media-img,
+  .hero-slideshow-{{ section_id }}__media img,
+  .hero-slideshow-{{ section_id }}__placeholder svg {
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: cover;
     object-position: center;
-    display: block;
-    transform: none;
-  }
-
-  /* Desktop image - hidden on mobile */
-  @media screen and (min-width: 769px) {
-    .hero-slideshow-{{ section_id }}__slide-image--desktop {
-      display: block !important;
-      z-index: 1;
-    }
-    .hero-slideshow-{{ section_id }}__slide-image--mobile {
-      display: none !important;
-    }
-  }
-
-  /* Mobile image - hidden on desktop */
-  @media screen and (max-width: 768px) {
-    .hero-slideshow-{{ section_id }}__slide-image--desktop {
-      display: none !important;
-    }
-    .hero-slideshow-{{ section_id }}__slide-image--mobile {
-      display: block !important;
-      z-index: 2;
-    }
   }
 
   .hero-slideshow-{{ section_id }}__slide-content {
@@ -925,42 +918,46 @@
           data-slide-index="{{ forloop.index0 }}"
           {{ block.shopify_attributes }}
         >
-          {%- comment -%} Desktop Image - only add --desktop class if mobile image exists {%- endcomment -%}
-          {%- if slide_image != blank -%}
-            {%- if slide_mobile_image != blank -%}
-              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' -%}
-            {%- else -%}
-              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image' -%}
-            {%- endif -%}
-            {{
-              slide_image
-              | image_url: width: 2560
-              | image_tag:
-                loading: 'eager',
-                fetchpriority: 'high',
-                alt: slide_image.alt | default: '',
-                class: desktop_class
-            }}
-          {%- else -%}
-            {%- if slide_mobile_image != blank -%}
-              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--desktop' -%}
-            {%- else -%}
-              {%- assign desktop_class = 'hero-slideshow-' | append: section_id | append: '__slide-image' -%}
-            {%- endif -%}
-            {{ 'lifestyle-1' | placeholder_svg_tag: desktop_class }}
-          {%- endif -%}
+          {%- liquid
+            assign desktop_asset = slide_image
+            assign mobile_asset = slide_mobile_image
+            assign fallback_asset = desktop_asset
+            if fallback_asset == blank
+              assign fallback_asset = mobile_asset
+            endif
+          -%}
 
-          {%- comment -%} Mobile Image (only if provided, otherwise desktop image will show) {%- endcomment -%}
-          {%- if slide_mobile_image != blank -%}
-            {{
-              slide_mobile_image
-              | image_url: width: 1200
-              | image_tag:
-                loading: 'eager',
-                fetchpriority: 'high',
-                alt: slide_mobile_image.alt | default: slide_image.alt | default: '',
-                class: 'hero-slideshow-' | append: section_id | append: '__slide-image hero-slideshow-' | append: section_id | append: '__slide-image--mobile'
-            }}
+          {%- if fallback_asset != blank -%}
+            <picture class="hero-slideshow-{{ section_id }}__media">
+              {%- if mobile_asset != blank -%}
+                <source
+                  media="(max-width: 768px)"
+                  srcset="
+                    {{ mobile_asset | image_url: width: 750 }} 750w,
+                    {{ mobile_asset | image_url: width: 1100 }} 1100w,
+                    {{ mobile_asset | image_url: width: 1500 }} 1500w
+                  "
+                  sizes="100vw"
+                >
+              {%- endif -%}
+
+              <img
+                class="hero-slideshow-{{ section_id }}__media-img"
+                src="{{ fallback_asset | image_url: width: 2560 }}"
+                srcset="
+                  {{ fallback_asset | image_url: width: 1200 }} 1200w,
+                  {{ fallback_asset | image_url: width: 1800 }} 1800w,
+                  {{ fallback_asset | image_url: width: 2560 }} 2560w
+                "
+                sizes="100vw"
+                alt="{{ fallback_asset.alt | default: '' | escape }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
+                decoding="async"
+              >
+            </picture>
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-slideshow-' | append: section_id | append: '__placeholder' }}
           {%- endif -%}
 
           <div class="hero-slideshow-{{ section_id }}__slide-content">
