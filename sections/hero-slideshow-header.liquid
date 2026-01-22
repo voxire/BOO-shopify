@@ -119,21 +119,11 @@
     padding: 0.6rem 2rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 1.25rem;
     flex-wrap: nowrap;
     overflow: visible !important;
     box-sizing: border-box;
-  }
-
-  .hero-slideshow-{{ section_id }}__header-left {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex-shrink: 0;
-    flex-grow: 0;
-    min-width: 0;
-    margin-right: auto;
   }
 
   @media screen and (max-width: 768px) {
@@ -149,6 +139,7 @@
     align-items: center;
     margin: 0;
     padding: 0;
+    margin-right: 1.25rem;
   }
 
   .hero-slideshow-{{ section_id }}__logo a {
@@ -215,10 +206,10 @@
 
   .hero-slideshow-{{ section_id }}__actions {
     flex-shrink: 0;
-    flex-grow: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    margin-left: auto;
     min-width: 0;
   }
 
@@ -245,7 +236,6 @@
     align-items: center;
     padding: 0.5rem 0.75rem;
     border-radius: 9999px;
-    flex-shrink: 0;
 
     /* glass bar for menu only */
     background: rgba(0,0,0,0.35);
@@ -758,50 +748,46 @@
   <!-- Header -->
   <div class="hero-slideshow-{{ section_id }}__header">
     <div class="hero-slideshow-{{ section_id }}__header-container">
-      <div class="hero-slideshow-{{ section_id }}__header-left">
-        {%- if logo != blank -%}
-          <div class="hero-slideshow-{{ section_id }}__logo">
-            <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
-              {{ logo | image_url: width: 200 | image_tag: alt: shop.name, loading: 'eager' }}
-            </a>
-          </div>
-        {%- endif -%}
-
-        {%- if menu != blank -%}
-          <button
-            class="hero-slideshow-{{ section_id }}__menu-toggle"
-            aria-label="Toggle menu"
-            aria-expanded="false"
-            aria-controls="mobile-nav-{{ section_id }}"
-            type="button"
-          >
-            <span class="hero-slideshow-{{ section_id }}__menu-toggle-icon">
-              <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
-              <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
-              <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
-            </span>
-          </button>
-
-          <div class="hero-slideshow-{{ section_id }}__header-pill">
-            <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
-              <ul class="hero-slideshow-{{ section_id }}__menu">
-                {%- for link in menu.links -%}
-                  <li class="hero-slideshow-{{ section_id }}__menu-item">
-                    <a
-                      href="{{ link.url }}"
-                      class="hero-slideshow-{{ section_id }}__menu-link{% if link.active %} is-active{% endif %}"
-                    >
-                      {{ link.title }}
-                    </a>
-                  </li>
-                {%- endfor -%}
-              </ul>
-            </nav>
-          </div>
-        {%- endif -%}
-      </div>
+      {%- if logo != blank -%}
+        <div class="hero-slideshow-{{ section_id }}__logo">
+          <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+            {{ logo | image_url: width: 200 | image_tag: alt: shop.name, loading: 'eager' }}
+          </a>
+        </div>
+      {%- endif -%}
 
       {%- if menu != blank -%}
+        <button
+          class="hero-slideshow-{{ section_id }}__menu-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav-{{ section_id }}"
+          type="button"
+        >
+          <span class="hero-slideshow-{{ section_id }}__menu-toggle-icon">
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+            <span class="hero-slideshow-{{ section_id }}__menu-toggle-line"></span>
+          </span>
+        </button>
+
+        <div class="hero-slideshow-{{ section_id }}__header-pill">
+          <nav class="hero-slideshow-{{ section_id }}__nav" role="navigation" aria-label="Main navigation">
+            <ul class="hero-slideshow-{{ section_id }}__menu">
+              {%- for link in menu.links -%}
+                <li class="hero-slideshow-{{ section_id }}__menu-item">
+                  <a
+                    href="{{ link.url }}"
+                    class="hero-slideshow-{{ section_id }}__menu-link{% if link.active %} is-active{% endif %}"
+                  >
+                    {{ link.title }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        </div>
+
         <div class="hero-slideshow-{{ section_id }}__actions">
           <a
             href="{{ routes.cart_url }}"
