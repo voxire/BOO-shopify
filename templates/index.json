@@ -16,7 +16,7 @@
           "type": "face",
           "settings": {
             "name": "Bunny Set",
-            "ages": "2-4",
+            "ages": "4-7",
             "image": "shopify://shop_images/FoxBoo.png",
             "link": "",
             "gradient_start": "#4a90e2",
@@ -27,7 +27,7 @@
           "type": "face",
           "settings": {
             "name": "Bunny Set",
-            "ages": "0.5-4",
+            "ages": "0.5-4,4-7",
             "image": "shopify://shop_images/DinoBoo.png",
             "link": "shopify://products/green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
@@ -38,7 +38,7 @@
           "type": "face",
           "settings": {
             "name": "Bunny Set",
-            "ages": "2-4",
+            "ages": "4-7",
             "image": "shopify://shop_images/Shaboo.png",
             "link": "shopify://products/dark-blue-shark-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
@@ -49,7 +49,7 @@
           "type": "face",
           "settings": {
             "name": "Bunny Set",
-            "ages": "2-4",
+            "ages": "4-7",
             "image": "shopify://shop_images/FoxBoo.png",
             "link": "shopify://products/dark-pink-fox-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
@@ -60,7 +60,7 @@
           "type": "face",
           "settings": {
             "name": "Bunny Set",
-            "ages": "2-4",
+            "ages": "4-7",
             "image": "shopify://shop_images/GriBoo.png",
             "link": "shopify://products/grey-dragon-costume-for-babies-toddlers-lebanon",
             "gradient_start": "#4a90e2",
