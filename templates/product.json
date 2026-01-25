@@ -419,7 +419,7 @@
         "card_radius": 18,
         "media_height_desktop": 520,
         "media_height_mobile": 340,
-        "show_arrows": false,
+        "show_arrows": true,
         "show_dots": false,
         "autoplay": false,
         "autoplay_seconds": 5,
