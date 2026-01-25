@@ -1,0 +1,205 @@
+{%- liquid
+  comment
+    Determine which product to use:
+    - If on a product page, use the global product object
+    - Otherwise, use the product selected in section settings
+  endcomment
+  if product and product.id
+    assign display_product = product
+  elsif section.settings.fallback_product
+    assign display_product = section.settings.fallback_product
+  else
+    assign display_product = null
+  endif
+
+  comment
+    Prepare product data for the carousel
+  endcomment
+  if display_product
+    assign product_id = display_product.id
+    assign product_tags = display_product.tags
+  else
+    assign product_id = null
+    assign product_tags = null
+  endif
+
+  comment
+    Convert tags array to JSON string for data attribute
+  endcomment
+  if product_tags and product_tags.size > 0
+    assign tags_json = product_tags | json
+  else
+    assign tags_json = '[]'
+  endif
+-%}
+
+{%- style -%}
+  .tolstoy-carousel-wrapper-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .tolstoy-carousel-wrapper-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .tolstoy-carousel-container-{{ section.id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .tolstoy-carousel-heading-{{ section.id }} {
+    margin-bottom: {{ section.settings.heading_spacing }}px;
+  }
+{%- endstyle -%}
+
+<div class="tolstoy-carousel-wrapper-{{ section.id }}">
+  <div class="tolstoy-carousel-container-{{ section.id }}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="tolstoy-carousel-heading-{{ section.id }}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+
+    {%- if display_product and section.settings.publish_id != blank -%}
+      <tolstoy-carousel
+        data-publish-id="{{ section.settings.publish_id }}"
+        {%- if section.settings.app_key != blank -%}
+          data-app-key="{{ section.settings.app_key }}"
+        {%- endif -%}
+        data-product-id="{{ product_id }}"
+        data-tags='{{ tags_json }}'
+      ></tolstoy-carousel>
+    {%- else -%}
+      <div style="padding: 2rem; text-align: center; background: #f5f5f5; border-radius: 4px;">
+        <p style="margin: 0; color: #666;">
+          {%- if section.settings.publish_id == blank -%}
+            Please configure the Publish ID in section settings.
+          {%- elsif display_product == null -%}
+            Please select a product in section settings or place this section on a product page.
+          {%- endif -%}
+        </p>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if section.settings.load_script and section.settings.script_url != blank -%}
+  <script>
+    (function() {
+      if (window.__tolstoyScriptLoaded) {
+        return;
+      }
+      window.__tolstoyScriptLoaded = true;
+      
+      var script = document.createElement('script');
+      script.src = {{ section.settings.script_url | json }};
+      script.async = true;
+      document.head.appendChild(script);
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Tolstoy Carousel",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Customer Reviews"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Heading spacing",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Tolstoy Settings"
+    },
+    {
+      "type": "text",
+      "id": "publish_id",
+      "label": "Publish ID",
+      "info": "Your Tolstoy Publish ID"
+    },
+    {
+      "type": "text",
+      "id": "app_key",
+      "label": "Tolstoy App Key",
+      "info": "Optional: Your Tolstoy App Key if required"
+    },
+    {
+      "type": "header",
+      "content": "Script Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "load_script",
+      "label": "Load Tolstoy script",
+      "info": "Enable this if the Tolstoy app embed is OFF. The script will only load once per page.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "script_url",
+      "label": "Script URL",
+      "default": "https://widget.gotolstoy.com/widget/widget.js",
+      "info": "URL to the Tolstoy widget script"
+    },
+    {
+      "type": "header",
+      "content": "Product Settings"
+    },
+    {
+      "type": "product",
+      "id": "fallback_product",
+      "label": "Fallback Product",
+      "info": "Select a product to use when this section is not on a product page"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tolstoy Carousel"
+    }
+  ]
+}
+{% endschema %}
+
