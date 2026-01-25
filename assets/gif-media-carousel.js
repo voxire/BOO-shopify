@@ -75,151 +75,163 @@
     }
 
     /**
-     * Setup touch/drag support for better mobile swiping
+     * Setup touch/drag support for swipe gestures
      */
     setupTouchSupport() {
-      let isDragging = false;
-      let startX = 0;
-      let scrollLeft = 0;
-      let startTime = 0;
-      let velocity = 0;
-      let lastX = 0;
-      let lastTime = 0;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      let touchStartScroll = 0;
+      let isSwipe = false;
+      const SWIPE_THRESHOLD = 50; // Minimum distance for swipe
+      const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity (px/ms)
+      const MAX_VERTICAL_SWIPE = 30; // Max vertical movement to consider horizontal swipe
 
-      const snapToNearestSlide = () => {
-        const slideWidth = this.getSlideWidth();
-        const currentScroll = this.track.scrollLeft;
-        const nearestIndex = Math.round(currentScroll / slideWidth);
-        
-        // Clamp to valid range
-        const targetIndex = Math.max(0, Math.min(nearestIndex, this.slides.length - 1));
-        
-        // Use smooth scroll to snap to nearest slide
-        this.track.style.scrollBehavior = 'smooth';
-        this.track.scrollTo({
-          left: targetIndex * slideWidth,
-          behavior: 'smooth'
-        });
-        
-        // Update after a short delay to allow scroll to complete
-        setTimeout(() => {
-          this.updateActiveSlide();
-          this.updateActiveState();
-        }, 100);
+      const handleSwipe = (endX, endY, endTime) => {
+        const deltaX = endX - touchStartX;
+        const deltaY = Math.abs(endY - touchStartY);
+        const deltaTime = endTime - touchStartTime;
+        const distance = Math.abs(deltaX);
+        const velocity = distance / Math.max(deltaTime, 1);
+
+        // Check if it's a horizontal swipe (not vertical scroll)
+        if (deltaY > MAX_VERTICAL_SWIPE) {
+          // Vertical movement too large, treat as scroll - let browser handle it
+          return;
+        }
+
+        // Check if it's a valid swipe gesture
+        if (distance > SWIPE_THRESHOLD && velocity > SWIPE_VELOCITY_THRESHOLD) {
+          isSwipe = true;
+          
+          // Temporarily disable scroll-snap for programmatic scroll
+          this.track.style.scrollSnapType = 'none';
+          
+          if (deltaX > 0) {
+            // Swipe right - go to previous slide
+            this.scrollToPrev();
+          } else {
+            // Swipe left - go to next slide
+            this.scrollToNext();
+          }
+          
+          // Re-enable scroll-snap after a delay
+          setTimeout(() => {
+            this.track.style.scrollSnapType = 'x proximity';
+          }, 500);
+        }
+        // If not a clear swipe, let browser's scroll-snap handle it naturally
       };
 
-      // Touch events
+      // Touch events for mobile swipe
       this.track.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        this.isDragging = true;
-        startX = e.touches[0].pageX - this.track.offsetLeft;
-        scrollLeft = this.track.scrollLeft;
-        startTime = Date.now();
-        lastX = startX;
-        lastTime = startTime;
-        velocity = 0;
-        
-        // Disable scroll-snap during drag
-        this.track.style.scrollSnapType = 'none';
-        this.track.style.scrollBehavior = 'auto';
+        touchStartX = e.touches[0].pageX;
+        touchStartY = e.touches[0].pageY;
+        touchStartTime = Date.now();
+        touchStartScroll = this.track.scrollLeft;
+        isSwipe = false;
+        this.isDragging = false;
       }, { passive: true });
 
       this.track.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.touches[0].pageX - this.track.offsetLeft;
-        const currentTime = Date.now();
-        const deltaX = x - lastX;
-        const deltaTime = currentTime - lastTime;
-        
-        if (deltaTime > 0) {
-          velocity = deltaX / deltaTime;
-        }
-        
-        const walk = (x - startX) * 1.2; // Reduced multiplier for smoother control
-        this.track.scrollLeft = scrollLeft - walk;
-        
-        lastX = x;
-        lastTime = currentTime;
-      }, { passive: false });
-
-      this.track.addEventListener('touchend', () => {
-        if (!isDragging) return;
-        isDragging = false;
-        this.isDragging = false;
-        
-        // Re-enable scroll-snap
-        this.track.style.scrollSnapType = 'x mandatory';
-        
-        // Snap to nearest slide
-        snapToNearestSlide();
+        // Let browser handle scrolling naturally
+        // We'll detect swipe on touchend
       }, { passive: true });
 
-      // Mouse drag support for desktop
-      this.track.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        this.isDragging = true;
-        startX = e.pageX - this.track.offsetLeft;
-        scrollLeft = this.track.scrollLeft;
-        startTime = Date.now();
-        lastX = startX;
-        lastTime = startTime;
-        velocity = 0;
+      this.track.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].pageX;
+        const endY = e.changedTouches[0].pageY;
+        const endTime = Date.now();
         
-        // Disable scroll-snap during drag
-        this.track.style.scrollSnapType = 'none';
-        this.track.style.scrollBehavior = 'auto';
+        handleSwipe(endX, endY, endTime);
+      }, { passive: true });
+
+      // Mouse support for desktop (click and drag to swipe)
+      let mouseDown = false;
+      let mouseStartX = 0;
+      let mouseStartTime = 0;
+      let mouseStartScroll = 0;
+
+      this.track.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        mouseStartX = e.pageX;
+        mouseStartTime = Date.now();
+        mouseStartScroll = this.track.scrollLeft;
+        this.isDragging = true;
         this.track.style.cursor = 'grabbing';
+        this.track.style.scrollBehavior = 'auto';
       });
 
       this.track.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - this.track.offsetLeft;
-        const currentTime = Date.now();
-        const deltaX = x - lastX;
-        const deltaTime = currentTime - lastTime;
-        
-        if (deltaTime > 0) {
-          velocity = deltaX / deltaTime;
-        }
-        
-        const walk = (x - startX) * 1.2;
-        this.track.scrollLeft = scrollLeft - walk;
-        
-        lastX = x;
-        lastTime = currentTime;
+        if (!mouseDown) return;
+        // Allow natural scrolling during mouse drag
       });
 
-      this.track.addEventListener('mouseup', () => {
-        if (!isDragging) return;
-        isDragging = false;
+      this.track.addEventListener('mouseup', (e) => {
+        if (!mouseDown) return;
+        mouseDown = false;
         this.isDragging = false;
-        
-        // Re-enable scroll-snap
-        this.track.style.scrollSnapType = 'x mandatory';
         this.track.style.cursor = 'grab';
+        this.track.style.scrollBehavior = 'smooth';
         
-        // Snap to nearest slide
-        snapToNearestSlide();
+        const endX = e.pageX;
+        const endTime = Date.now();
+        const deltaX = endX - mouseStartX;
+        const deltaTime = endTime - mouseStartTime;
+        const distance = Math.abs(deltaX);
+        const velocity = distance / Math.max(deltaTime, 1);
+
+        if (distance > SWIPE_THRESHOLD && velocity > SWIPE_VELOCITY_THRESHOLD) {
+          // Temporarily disable scroll-snap for programmatic scroll
+          this.track.style.scrollSnapType = 'none';
+          
+          if (deltaX > 0) {
+            this.scrollToPrev();
+          } else {
+            this.scrollToNext();
+          }
+          
+          // Re-enable scroll-snap after a delay
+          setTimeout(() => {
+            this.track.style.scrollSnapType = 'x proximity';
+          }, 500);
+        }
+        // If not a clear swipe, let browser's scroll-snap handle it naturally
       });
 
       this.track.addEventListener('mouseleave', () => {
-        if (isDragging) {
-          isDragging = false;
+        if (mouseDown) {
+          mouseDown = false;
           this.isDragging = false;
-          
-          // Re-enable scroll-snap
-          this.track.style.scrollSnapType = 'x mandatory';
           this.track.style.cursor = 'grab';
-          
-          // Snap to nearest slide
-          snapToNearestSlide();
+          this.track.style.scrollBehavior = 'smooth';
+          this.snapToNearestSlide();
         }
       });
 
       // Set initial cursor
       this.track.style.cursor = 'grab';
+    }
+
+    /**
+     * Snap to the nearest slide based on current scroll position
+     */
+    snapToNearestSlide() {
+      const slideWidth = this.getSlideWidth();
+      if (slideWidth === 0) return;
+      
+      const currentScroll = this.track.scrollLeft;
+      let nearestIndex = Math.round(currentScroll / slideWidth);
+      
+      // Handle loop
+      if (this.loopEnabled) {
+        if (nearestIndex < 0) nearestIndex = this.slides.length - 1;
+        if (nearestIndex >= this.slides.length) nearestIndex = 0;
+      } else {
+        nearestIndex = Math.max(0, Math.min(nearestIndex, this.slides.length - 1));
+      }
+      
+      this.scrollToIndex(nearestIndex, true);
     }
 
     getSlideWidth() {
@@ -308,21 +320,34 @@
       }
       
       const slideWidth = this.getSlideWidth();
+      if (slideWidth === 0) return;
+      
       const scrollPosition = slideWidth * index;
       
       if (smooth) {
+        this.track.style.scrollBehavior = 'smooth';
         this.track.scrollTo({
           left: scrollPosition,
           behavior: 'smooth'
         });
       } else {
+        this.track.style.scrollBehavior = 'auto';
         this.track.scrollLeft = scrollPosition;
       }
       
       // Update immediately for better UX
       this.currentIndex = index;
-      this.updateActiveSlide();
-      this.updateActiveState();
+      
+      // Update after scroll completes
+      if (smooth) {
+        setTimeout(() => {
+          this.updateActiveSlide();
+          this.updateActiveState();
+        }, 300);
+      } else {
+        this.updateActiveSlide();
+        this.updateActiveState();
+      }
       
       // Reset autoplay timer
       if (this.autoplayEnabled && !this.isPaused) {

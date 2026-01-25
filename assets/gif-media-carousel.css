@@ -69,7 +69,7 @@
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scroll-snap-stop: normal;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
@@ -79,7 +79,7 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   /* Improve touch/drag experience */
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
