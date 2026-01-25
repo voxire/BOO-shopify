@@ -45,24 +45,39 @@
 
       if (this.realSlideCount === 0) return;
 
-      // Calculate slide width and gap
-      this.calculateDimensions();
-
-      // Clone slides for infinite loop (if enabled)
-      if (this.loopEnabled) {
-        this.cloneSlides();
-      }
-
-      // Get all slides (real + clones)
-      this.allSlides = Array.from(this.track.querySelectorAll('.gmc-slide'));
-
-      // Setup track for transform-based movement
+      // Setup track for transform-based movement first
       this.setupTrack();
 
-      // Initialize position to first real slide
-      this.currentIndex = 0;
-      this.updateTransform(0, false); // No animation on init
+      // Wait for layout to calculate dimensions properly
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        // Calculate slide width and gap after layout
+        this.calculateDimensions();
 
+        // Clone slides for infinite loop (if enabled)
+        if (this.loopEnabled) {
+          this.cloneSlides();
+        }
+
+        // Get all slides (real + clones)
+        this.allSlides = Array.from(this.track.querySelectorAll('.gmc-slide'));
+
+        // Recalculate after cloning (in case layout changed)
+        this.calculateDimensions();
+
+        // Initialize position to first real slide
+        this.currentIndex = 0;
+        this.updateTransform(0, false); // No animation on init
+
+        // Setup rest of functionality
+        this.setupRemainingFeatures();
+      });
+    }
+
+    /**
+     * Setup remaining features after initial positioning
+     */
+    setupRemainingFeatures() {
       // Setup navigation buttons
       if (this.prevBtn) {
         this.prevBtn.addEventListener('click', () => this.goToPrev());
@@ -110,7 +125,18 @@
       const firstSlide = this.realSlides[0];
       const trackStyles = getComputedStyle(this.track);
       this.gap = parseInt(trackStyles.gap) || 18;
-      this.slideWidth = firstSlide.offsetWidth + this.gap;
+
+      // Ensure slide has width - use getBoundingClientRect for accurate measurement
+      const slideRect = firstSlide.getBoundingClientRect();
+      this.slideWidth = slideRect.width + this.gap;
+
+      // Fallback if width is 0 (slides not rendered yet)
+      if (this.slideWidth <= this.gap) {
+        // Use computed width from CSS
+        const slideStyles = getComputedStyle(firstSlide);
+        const slideWidth = parseFloat(slideStyles.width) || parseFloat(slideStyles.minWidth) || 300;
+        this.slideWidth = slideWidth + this.gap;
+      }
     }
 
     /**
@@ -143,10 +169,11 @@
      * Disable native scrolling, enable transform
      */
     setupTrack() {
-      // Disable native scrolling
-      this.track.style.overflow = 'hidden';
+      // Ensure track is flex and can contain slides
       this.track.style.display = 'flex';
+      this.track.style.overflow = 'visible'; // Allow slides to be visible
       this.track.style.willChange = 'transform';
+      this.track.style.position = 'relative';
 
       // Add transition for smooth animations
       this.track.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';

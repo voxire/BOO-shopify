@@ -56,6 +56,7 @@
 .gmc-section .gmc-carousel-wrapper {
   position: relative;
   padding: 0 4rem;
+  overflow: hidden; /* Hide slides that extend beyond viewport */
 }
 
 @media screen and (max-width: 749px) {
@@ -67,11 +68,12 @@
 /* ===== TRACK (Transform Container) ===== */
 .gmc-section .gmc-track {
   display: flex;
-  overflow: hidden; /* Changed from overflow-x: auto - no scrolling needed with transform */
+  overflow: visible; /* Allow slides to extend - wrapper handles clipping */
   gap: var(--gmc-gap, 18px);
   padding: 2rem 0;
   /* Transform-based movement - no scrollbar needed */
   will-change: transform;
+  position: relative;
   /* Improve touch/drag experience */
   touch-action: pan-x pan-y;
   user-select: none;
