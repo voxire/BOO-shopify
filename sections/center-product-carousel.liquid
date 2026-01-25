@@ -58,7 +58,7 @@
               {%- assign product = block.settings.product -%}
               {%- if product != blank -%}
                 <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
-                <a href="{{ product.url }}" class="cpc-card">
+                <a href="{{ product.url }}" class="cpc-card" draggable="false">
                   <div class="cpc-card-media">
                     {%- liquid
                       assign media_source = block.settings.media_source | default: 'product_featured'
@@ -488,6 +488,21 @@
     -webkit-user-drag: none;
     user-drag: none;
   }
+
+  .cpc-section--{{ section_id }} .cpc-card,
+  .cpc-section--{{ section_id }} .cpc-card * {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track {
+    cursor: grab;
+    touch-action: pan-y;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track:active {
+    cursor: grabbing;
+  }
 </style>
 
 <script>
@@ -514,6 +529,7 @@
     let originalCount = 0;
     let clonesCount = 0;
     let currentIndex = 0;
+    let currentRealIndex = 0;
     let autoplayTimer = null;
     let isPaused = false;
     let scrollRaf = null;
@@ -575,12 +591,12 @@
       if (isCorrecting || slides.length === 0) return;
       
       const realIndex = getClosestIndexToCenter();
-      const originalIdx = getOriginalIndex(realIndex);
+      let correctedRealIndex = realIndex;
       
       if (realIndex < clonesCount) {
         isCorrecting = true;
-        const targetRealIndex = realIndex + originalCount;
-        const target = slides[targetRealIndex];
+        correctedRealIndex = realIndex + originalCount;
+        const target = slides[correctedRealIndex];
         if (target) {
           track.scrollTo({
             left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -590,8 +606,8 @@
         setTimeout(() => { isCorrecting = false; }, 50);
       } else if (realIndex >= clonesCount + originalCount) {
         isCorrecting = true;
-        const targetRealIndex = realIndex - originalCount;
-        const target = slides[targetRealIndex];
+        correctedRealIndex = realIndex - originalCount;
+        const target = slides[correctedRealIndex];
         if (target) {
           track.scrollTo({
             left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -601,8 +617,9 @@
         setTimeout(() => { isCorrecting = false; }, 50);
       }
       
-      currentIndex = originalIdx;
-      setActiveByRealIndex(getRealIndex(currentIndex));
+      currentRealIndex = correctedRealIndex;
+      currentIndex = getOriginalIndex(correctedRealIndex);
+      setActiveByRealIndex(correctedRealIndex);
       updateDots();
     }
 
@@ -615,17 +632,18 @@
       });
     }
 
-    function scrollToOriginalIndex(originalIndex, smooth = true) {
-      if (originalCount === 0) return;
+    function scrollToRealIndex(realIndex, smooth = true) {
+      if (slides.length === 0) return;
       
-      originalIndex = ((originalIndex % originalCount) + originalCount) % originalCount;
-      const realIndex = getRealIndex(originalIndex);
+      // Clamp to valid range
+      realIndex = Math.max(0, Math.min(slides.length - 1, realIndex));
       const target = slides[realIndex];
       
       if (!target) return;
 
       isScrolling = true;
-      currentIndex = originalIndex;
+      currentRealIndex = realIndex;
+      currentIndex = getOriginalIndex(realIndex);
       
       track.scrollTo({
         left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -637,20 +655,37 @@
 
       setTimeout(() => {
         isScrolling = false;
-        if (!smooth) correctPosition();
+        if (smooth) {
+          // After smooth scroll settles, check if we need to correct position
+          setTimeout(() => {
+            correctPosition();
+          }, 100);
+        } else {
+          correctPosition();
+        }
       }, smooth ? 500 : 100);
 
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
 
+    function scrollToOriginalIndex(originalIndex, smooth = true) {
+      if (originalCount === 0) return;
+      
+      originalIndex = ((originalIndex % originalCount) + originalCount) % originalCount;
+      const realIndex = getRealIndex(originalIndex);
+      scrollToRealIndex(realIndex, smooth);
+    }
+
     function scrollToPrev() {
-      if (originalCount <= 1) return;
-      scrollToOriginalIndex(currentIndex - 1, true);
+      if (slides.length <= 1) return;
+      const newRealIndex = Math.max(0, currentRealIndex - 1);
+      scrollToRealIndex(newRealIndex, true);
     }
 
     function scrollToNext() {
-      if (originalCount <= 1) return;
-      scrollToOriginalIndex(currentIndex + 1, true);
+      if (slides.length <= 1) return;
+      const newRealIndex = Math.min(slides.length - 1, currentRealIndex + 1);
+      scrollToRealIndex(newRealIndex, true);
     }
 
     function startAutoplay() {
@@ -679,6 +714,9 @@
     }
 
     // Swipe detection
+    const DRAG_START_PX = 8;
+    const CHANGE_SLIDE_THRESHOLD_PERCENT = 0.15;
+    
     let isDragging = false;
     let startX = 0;
     let dragOffset = 0;
@@ -687,6 +725,7 @@
 
     function handlePointerDown(e) {
       if (originalCount <= 1) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
       
       isDragging = true;
       didDrag = false;
@@ -695,6 +734,15 @@
       dragOffset = 0;
       track.style.cursor = 'grabbing';
       track.style.userSelect = 'none';
+      
+      // Try to capture pointer for better tracking
+      try {
+        if (e.pointerId !== undefined) {
+          track.setPointerCapture(e.pointerId);
+        }
+      } catch (err) {
+        // Ignore if pointer capture fails
+      }
     }
 
     function handlePointerMove(e) {
@@ -703,8 +751,9 @@
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = x - startX;
       
-      if (Math.abs(dragOffset) > 5) {
+      if (Math.abs(dragOffset) > DRAG_START_PX) {
         didDrag = true;
+        shouldPreventClick = true;
         e.preventDefault();
       }
     }
@@ -715,8 +764,17 @@
         return;
       }
       
+      // Release pointer capture
+      try {
+        if (e.pointerId !== undefined) {
+          track.releasePointerCapture(e.pointerId);
+        }
+      } catch (err) {
+        // Ignore if release fails
+      }
+      
       const slideWidth = slides[0] ? slides[0].offsetWidth : 0;
-      const threshold = slideWidth ? slideWidth * 0.15 : 50;
+      const threshold = slideWidth ? slideWidth * CHANGE_SLIDE_THRESHOLD_PERCENT : 50;
       const wasDrag = Math.abs(dragOffset) > threshold;
       
       isDragging = false;
@@ -724,7 +782,6 @@
       track.style.userSelect = '';
       
       if (wasDrag && didDrag) {
-        shouldPreventClick = true;
         e.preventDefault();
         e.stopPropagation();
         if (dragOffset > 0) {
@@ -732,11 +789,18 @@
         } else {
           scrollToNext();
         }
-        // Reset flag after a short delay to allow click event to be prevented
-        setTimeout(() => {
-          shouldPreventClick = false;
-        }, 100);
+      } else if (didDrag) {
+        // Small drag that didn't change slide - snap to nearest and prevent click
+        e.preventDefault();
+        e.stopPropagation();
+        const closestRealIndex = getClosestIndexToCenter();
+        scrollToRealIndex(closestRealIndex, true);
       }
+      
+      // Reset flag after delay to allow click event to be prevented
+      setTimeout(() => {
+        shouldPreventClick = false;
+      }, 150);
       
       dragOffset = 0;
       didDrag = false;
@@ -787,6 +851,7 @@
         });
       }
       
+      currentRealIndex = firstRealIndex;
       currentIndex = 0;
       setActiveByRealIndex(firstRealIndex);
       updateDots();
@@ -814,8 +879,30 @@
       dots.forEach((dot) => {
         dot.addEventListener('click', (e) => {
           e.preventDefault();
-          const idx = parseInt(dot.dataset.dotIndex, 10);
-          if (!Number.isNaN(idx)) scrollToOriginalIndex(idx, true);
+          const dotIndex = parseInt(dot.dataset.dotIndex, 10);
+          if (Number.isNaN(dotIndex)) return;
+          
+          // Find closest occurrence of this original slide
+          const base = clonesCount + dotIndex;
+          const candidates = [
+            base,
+            base + originalCount,
+            base - originalCount
+          ].filter(c => c >= 0 && c < slides.length);
+          
+          // Pick the candidate closest to currentRealIndex
+          let closestCandidate = base;
+          let minDistance = Math.abs(base - currentRealIndex);
+          
+          candidates.forEach(candidate => {
+            const distance = Math.abs(candidate - currentRealIndex);
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestCandidate = candidate;
+            }
+          });
+          
+          scrollToRealIndex(closestCandidate, true);
         });
       });
 
