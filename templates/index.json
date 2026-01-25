@@ -523,6 +523,8 @@
         "card_radius": 18,
         "show_vendor": false,
         "show_color_swatches": true,
+        "card_content_bg_color": "",
+        "card_content_text_color": "#000000",
         "show_arrows": true,
         "show_dots": true,
         "autoplay": false,
