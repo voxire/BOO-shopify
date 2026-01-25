@@ -1,8 +1,8 @@
 /**
  * GIF Media Carousel
- * Transform-based infinite looping carousel with smooth animations
- * Uses transform: translateX() instead of scrollLeft for true infinite loop
+ * Handles carousel navigation, autoplay, active slide detection, and quick add to cart
  * Supports multiple instances on the same page
+ * Active slide is determined by which slide's center is closest to the track's center
  */
 
 (function () {
@@ -15,272 +15,225 @@
       this.prevBtn = section.querySelector('.gmc-arrow--prev');
       this.nextBtn = section.querySelector('.gmc-arrow--next');
       this.dots = section.querySelectorAll('[data-dot-index]');
+      this.slides = section.querySelectorAll('.gmc-slide');
       this.autoplayEnabled = section.dataset.autoplay === 'true';
       this.autoplayDelay = parseInt(section.dataset.autoplayDelay) || 5000;
       this.autoplayTimer = null;
       this.isPaused = false;
+      this.currentIndex = 0;
+      this.scrollRaf = null;
       this.loopEnabled = section.dataset.loop === 'true';
-      this.isDragging = false;
-      this.isTransitioning = false;
+      this.isScrolling = false;
+      this.touchStartX = 0;
+      this.touchStartY = 0;
 
-      // Transform-based properties
-      this.currentTranslateX = 0;
-      this.slideWidth = 0;
-      this.gap = 0;
-      this.realSlides = [];
-      this.allSlides = [];
-      this.realSlideCount = 0;
-      this.cloneCount = 0; // Number of clones at each end
-      this.currentIndex = 0; // Index of REAL slides only (0 to realSlideCount - 1)
-
-      if (!this.track || !this.track.children.length) return;
+      if (!this.track || this.slides.length === 0) return;
 
       this.init();
     }
 
     init() {
-      // Store original slides before cloning
-      this.realSlides = Array.from(this.track.querySelectorAll('.gmc-slide'));
-      this.realSlideCount = this.realSlides.length;
-
-      if (this.realSlideCount === 0) return;
-
-      // Setup track for transform-based movement first
-      this.setupTrack();
-
-      // Wait for layout to calculate dimensions properly
-      // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
-        // Calculate slide width and gap after layout
-        this.calculateDimensions();
-
-        // Clone slides for infinite loop (if enabled)
-        if (this.loopEnabled) {
-          this.cloneSlides();
-        }
-
-        // Get all slides (real + clones)
-        this.allSlides = Array.from(this.track.querySelectorAll('.gmc-slide'));
-
-        // Recalculate after cloning (in case layout changed)
-        this.calculateDimensions();
-
-        // Initialize position to first real slide
-        this.currentIndex = 0;
-        this.updateTransform(0, false); // No animation on init
-
-        // Setup rest of functionality
-        this.setupRemainingFeatures();
-      });
-    }
-
-    /**
-     * Setup remaining features after initial positioning
-     */
-    setupRemainingFeatures() {
       // Setup navigation buttons
       if (this.prevBtn) {
-        this.prevBtn.addEventListener('click', () => this.goToPrev());
+        this.prevBtn.addEventListener('click', () => this.scrollToPrev());
       }
       if (this.nextBtn) {
-        this.nextBtn.addEventListener('click', () => this.goToNext());
+        this.nextBtn.addEventListener('click', () => this.scrollToNext());
       }
 
-      // Setup dots (only for real slides)
+      // Setup dots
       this.dots.forEach((dot, index) => {
-        if (index < this.realSlideCount) {
-          dot.addEventListener('click', () => this.goToSlide(index));
-        }
+        dot.addEventListener('click', () => this.scrollToIndex(index));
       });
 
-      // Setup touch/drag support
+      // Setup scroll listener for updating active slide and dots/arrows
+      this.track.addEventListener('scroll', () => this.handleScroll(), { passive: true });
+
+      // Setup touch/drag support for better swiping
       this.setupTouchSupport();
 
       // Setup autoplay
       if (this.autoplayEnabled) {
         this.startAutoplay();
+
+        // Pause on hover/focus
         this.section.addEventListener('mouseenter', () => this.pauseAutoplay());
         this.section.addEventListener('mouseleave', () => this.resumeAutoplay());
         this.section.addEventListener('focusin', () => this.pauseAutoplay());
         this.section.addEventListener('focusout', () => this.resumeAutoplay());
       }
 
-      // Setup quick add buttons
+      // Setup quick add buttons (both product bar and overlay)
       this.setupQuickAdd();
 
       // Setup overlay buttons
       this.setupOverlayButtons();
 
       // Initial state update
+      this.updateActiveSlide();
       this.updateActiveState();
     }
 
     /**
-     * Calculate slide width and gap from first slide
-     * This is used to determine how much to translate
+     * Setup touch/drag support for better mobile swiping
      */
-    calculateDimensions() {
-      if (this.realSlides.length === 0) return;
+    setupTouchSupport() {
+      let isDragging = false;
+      let startX = 0;
+      let scrollLeft = 0;
 
-      const firstSlide = this.realSlides[0];
-      const trackStyles = getComputedStyle(this.track);
-      this.gap = parseInt(trackStyles.gap) || 18;
+      this.track.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].pageX - this.track.offsetLeft;
+        scrollLeft = this.track.scrollLeft;
+        this.track.style.scrollBehavior = 'auto';
+      }, { passive: true });
 
-      // Ensure slide has width - use getBoundingClientRect for accurate measurement
-      const slideRect = firstSlide.getBoundingClientRect();
-      this.slideWidth = slideRect.width + this.gap;
+      this.track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - this.track.offsetLeft;
+        const walk = (x - startX) * 1.5; // Scroll speed multiplier
+        this.track.scrollLeft = scrollLeft - walk;
+      }, { passive: false });
 
-      // Fallback if width is 0 (slides not rendered yet)
-      if (this.slideWidth <= this.gap) {
-        // Use computed width from CSS
-        const slideStyles = getComputedStyle(firstSlide);
-        const slideWidth = parseFloat(slideStyles.width) || parseFloat(slideStyles.minWidth) || 300;
-        this.slideWidth = slideWidth + this.gap;
-      }
+      this.track.addEventListener('touchend', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.updateActiveSlide();
+      }, { passive: true });
+
+      // Mouse drag support for desktop
+      this.track.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - this.track.offsetLeft;
+        scrollLeft = this.track.scrollLeft;
+        this.track.style.scrollBehavior = 'auto';
+        this.track.style.cursor = 'grabbing';
+      });
+
+      this.track.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - this.track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        this.track.scrollLeft = scrollLeft - walk;
+      });
+
+      this.track.addEventListener('mouseup', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.track.style.cursor = 'grab';
+        this.updateActiveSlide();
+      });
+
+      this.track.addEventListener('mouseleave', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.track.style.cursor = 'grab';
+      });
+
+      // Set initial cursor
+      this.track.style.cursor = 'grab';
+    }
+
+    getSlideWidth() {
+      if (this.slides.length === 0) return 0;
+      const firstSlide = this.slides[0];
+      const gap = parseInt(getComputedStyle(this.track).gap) || 18;
+      return firstSlide.offsetWidth + gap;
     }
 
     /**
-     * Clone slides for infinite loop
-     * Clones first N slides to end, and last N slides to beginning
-     * N = number of visible slides (to ensure seamless transition)
+     * Find the slide whose center is closest to the track's center
+     * This determines which slide should be marked as active
      */
-    cloneSlides() {
-      // Determine how many clones we need (enough to cover viewport)
-      const visibleSlides = Math.ceil(this.track.offsetWidth / this.slideWidth) + 2;
-      this.cloneCount = Math.min(visibleSlides, this.realSlideCount);
+    findActiveSlideIndex() {
+      if (this.slides.length === 0) return 0;
 
-      // Clone last N slides and prepend to beginning
-      for (let i = this.realSlideCount - this.cloneCount; i < this.realSlideCount; i++) {
-        const clone = this.realSlides[i].cloneNode(true);
-        clone.classList.add('gmc-clone');
-        this.track.insertBefore(clone, this.track.firstChild);
-      }
+      const trackRect = this.track.getBoundingClientRect();
+      const trackCenter = trackRect.left + trackRect.width / 2;
 
-      // Clone first N slides and append to end
-      for (let i = 0; i < this.cloneCount; i++) {
-        const clone = this.realSlides[i].cloneNode(true);
-        clone.classList.add('gmc-clone');
-        this.track.appendChild(clone);
-      }
-    }
+      let closestIndex = 0;
+      let closestDistance = Infinity;
 
-    /**
-     * Setup track for transform-based movement
-     * Disable native scrolling, enable transform
-     */
-    setupTrack() {
-      // Ensure track is flex and can contain slides
-      this.track.style.display = 'flex';
-      this.track.style.overflow = 'visible'; // Allow slides to be visible
-      this.track.style.willChange = 'transform';
-      this.track.style.position = 'relative';
+      this.slides.forEach((slide, index) => {
+        const slideRect = slide.getBoundingClientRect();
+        const slideCenter = slideRect.left + slideRect.width / 2;
+        const distance = Math.abs(trackCenter - slideCenter);
 
-      // Add transition for smooth animations
-      this.track.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    }
-
-    /**
-     * Update transform position
-     * @param {number} index - Real slide index (0 to realSlideCount - 1)
-     * @param {boolean} animate - Whether to animate the transition
-     */
-    updateTransform(index, animate = true) {
-      // Clamp or wrap index to valid range
-      let targetIndex = index;
-      if (!this.loopEnabled) {
-        targetIndex = Math.max(0, Math.min(index, this.realSlideCount - 1));
-      } else {
-        // Wrap around for loop
-        if (index < 0) {
-          targetIndex = this.realSlideCount - 1;
-        } else if (index >= this.realSlideCount) {
-          targetIndex = 0;
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
         }
+      });
+
+      return closestIndex;
+    }
+
+    /**
+     * Update which slide has the .is-active class based on center position
+     */
+    updateActiveSlide() {
+      const activeIndex = this.findActiveSlideIndex();
+
+      this.slides.forEach((slide, index) => {
+        if (index === activeIndex) {
+          slide.classList.add('is-active');
+        } else {
+          slide.classList.remove('is-active');
+        }
+      });
+
+      this.currentIndex = activeIndex;
+    }
+
+    /**
+     * Throttled scroll handler using requestAnimationFrame
+     */
+    handleScroll() {
+      if (this.scrollRaf) {
+        cancelAnimationFrame(this.scrollRaf);
       }
 
-      // Calculate translateX position
-      // If looped, account for prepended clones
-      let translateX = 0;
+      this.scrollRaf = requestAnimationFrame(() => {
+        this.updateActiveSlide();
+        this.updateActiveState();
+      });
+    }
+
+    scrollToIndex(index, smooth = true) {
+      if (this.slides.length === 0) return;
+
+      // Handle infinite loop
       if (this.loopEnabled) {
-        // Start position accounts for prepended clones
-        const startOffset = this.cloneCount * this.slideWidth;
-        translateX = startOffset + (targetIndex * this.slideWidth);
-
-        // If going from last to first (next), go to clone at end
-        if (this.currentIndex === this.realSlideCount - 1 && targetIndex === 0) {
-          translateX = startOffset + (this.realSlideCount * this.slideWidth);
-        }
-        // If going from first to last (prev), go to clone at start
-        else if (this.currentIndex === 0 && targetIndex === this.realSlideCount - 1) {
-          translateX = 0; // Start of clones
+        // Allow wrapping around
+        if (index < 0) {
+          index = this.slides.length - 1;
+        } else if (index >= this.slides.length) {
+          index = 0;
         }
       } else {
-        translateX = targetIndex * this.slideWidth;
+        // No loop - clamp to bounds
+        if (index < 0 || index >= this.slides.length) return;
       }
 
-      // Apply transform
-      if (animate) {
-        this.isTransitioning = true;
-        this.track.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      const slideWidth = this.getSlideWidth();
+      const scrollPosition = slideWidth * index;
+
+      if (smooth) {
+        this.track.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
       } else {
-        this.track.style.transition = 'none';
+        this.track.scrollLeft = scrollPosition;
       }
 
-      this.track.style.transform = `translateX(-${translateX}px)`;
-      this.currentTranslateX = translateX;
-      this.currentIndex = targetIndex;
-
-      // Handle loop jump after transition
-      if (animate && this.loopEnabled) {
-        this.track.addEventListener('transitionend', this.handleTransitionEnd.bind(this), { once: true });
-      } else if (!animate) {
-        this.isTransitioning = false;
-      }
-
-      // Update active state
+      // Update immediately for better UX
+      this.currentIndex = index;
+      this.updateActiveSlide();
       this.updateActiveState();
-    }
-
-    /**
-     * Handle transition end - check if we need to jump to real slide
-     * This creates the seamless infinite loop effect
-     * 
-     * When we reach a clone slide, we instantly jump (without animation) to the
-     * corresponding real slide, creating the illusion of infinite scrolling
-     */
-    handleTransitionEnd() {
-      this.isTransitioning = false;
-
-      if (!this.loopEnabled) return;
-
-      // Calculate boundaries
-      const startOffset = this.cloneCount * this.slideWidth;
-      const endOffset = startOffset + (this.realSlideCount * this.slideWidth);
-
-      // If we've scrolled to or past the end clones (after last real slide), jump to first real slide
-      if (this.currentTranslateX >= endOffset) {
-        this.track.style.transition = 'none';
-        this.currentTranslateX = startOffset; // Jump to first real slide
-        this.track.style.transform = `translateX(-${this.currentTranslateX}px)`;
-        this.currentIndex = 0;
-        this.updateActiveState();
-      }
-      // If we've scrolled before the start clones, jump to last real slide
-      else if (this.currentTranslateX < startOffset) {
-        this.track.style.transition = 'none';
-        this.currentTranslateX = startOffset + ((this.realSlideCount - 1) * this.slideWidth);
-        this.track.style.transform = `translateX(-${this.currentTranslateX}px)`;
-        this.currentIndex = this.realSlideCount - 1;
-        this.updateActiveState();
-      }
-    }
-
-    /**
-     * Go to specific slide index (real slides only)
-     */
-    goToSlide(index) {
-      if (this.isTransitioning) return;
-      this.updateTransform(index, true);
 
       // Reset autoplay timer
       if (this.autoplayEnabled && !this.isPaused) {
@@ -288,41 +241,37 @@
       }
     }
 
-    /**
-     * Go to previous slide
-     */
-    goToPrev() {
-      if (this.isTransitioning) return;
-      const newIndex = this.currentIndex - 1;
-      this.goToSlide(newIndex);
+    scrollToPrev() {
+      if (this.loopEnabled) {
+        const newIndex = this.currentIndex - 1 < 0 ? this.slides.length - 1 : this.currentIndex - 1;
+        this.scrollToIndex(newIndex);
+      } else {
+        const newIndex = Math.max(0, this.currentIndex - 1);
+        this.scrollToIndex(newIndex);
+      }
     }
 
-    /**
-     * Go to next slide
-     */
-    goToNext() {
-      if (this.isTransitioning) return;
-      const newIndex = this.currentIndex + 1;
-      this.goToSlide(newIndex);
+    scrollToNext() {
+      if (this.loopEnabled) {
+        const newIndex = (this.currentIndex + 1) % this.slides.length;
+        this.scrollToIndex(newIndex);
+      } else {
+        const newIndex = Math.min(this.slides.length - 1, this.currentIndex + 1);
+        this.scrollToIndex(newIndex);
+      }
     }
 
-    /**
-     * Update active state (dots, arrows, slide classes)
-     * Only applies to real slides, ignores clones
-     */
     updateActiveState() {
-      // Update dots (only for real slides)
+      // Update dots
       this.dots.forEach((dot, index) => {
-        if (index < this.realSlideCount) {
-          if (index === this.currentIndex) {
-            dot.classList.add('gmc-dot--active');
-          } else {
-            dot.classList.remove('gmc-dot--active');
-          }
+        if (index === this.currentIndex) {
+          dot.classList.add('gmc-dot--active');
+        } else {
+          dot.classList.remove('gmc-dot--active');
         }
       });
 
-      // Update arrow states
+      // Update arrow states (disabled only if loop is off and at boundaries)
       if (this.prevBtn) {
         if (this.loopEnabled) {
           this.prevBtn.disabled = false;
@@ -334,157 +283,17 @@
         if (this.loopEnabled) {
           this.nextBtn.disabled = false;
         } else {
-          this.nextBtn.disabled = this.currentIndex >= this.realSlideCount - 1;
+          this.nextBtn.disabled = this.currentIndex >= this.slides.length - 1;
         }
       }
-
-      // Update active class on real slides only
-      this.realSlides.forEach((slide, index) => {
-        if (index === this.currentIndex) {
-          slide.classList.add('is-active');
-        } else {
-          slide.classList.remove('is-active');
-        }
-      });
-    }
-
-    /**
-     * Setup touch/drag support for swipe gestures
-     * Uses transform instead of scroll
-     */
-    setupTouchSupport() {
-      let touchStartX = 0;
-      let touchStartY = 0;
-      let touchStartTime = 0;
-      let touchStartTranslateX = 0;
-      let isDragging = false;
-      const SWIPE_THRESHOLD = 50;
-      const SWIPE_VELOCITY_THRESHOLD = 0.3;
-      const MAX_VERTICAL_SWIPE = 30;
-
-      // Touch events
-      this.track.addEventListener('touchstart', (e) => {
-        if (this.isTransitioning) return;
-        touchStartX = e.touches[0].pageX;
-        touchStartY = e.touches[0].pageY;
-        touchStartTime = Date.now();
-        touchStartTranslateX = this.currentTranslateX;
-        isDragging = true;
-        this.isDragging = true;
-
-        // Disable transition during drag
-        this.track.style.transition = 'none';
-      }, { passive: true });
-
-      this.track.addEventListener('touchmove', (e) => {
-        if (!isDragging || this.isTransitioning) return;
-
-        const deltaX = e.touches[0].pageX - touchStartX;
-        const newTranslateX = touchStartTranslateX - deltaX;
-
-        // Apply transform during drag
-        this.track.style.transform = `translateX(-${newTranslateX}px)`;
-        this.currentTranslateX = newTranslateX;
-      }, { passive: true });
-
-      this.track.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        this.isDragging = false;
-
-        const endX = e.changedTouches[0].pageX;
-        const endY = e.changedTouches[0].pageY;
-        const endTime = Date.now();
-        const deltaX = endX - touchStartX;
-        const deltaY = Math.abs(endY - touchStartY);
-        const deltaTime = endTime - touchStartTime;
-        const distance = Math.abs(deltaX);
-        const velocity = distance / Math.max(deltaTime, 1);
-
-        // Check if it's a valid swipe
-        if (deltaY < MAX_VERTICAL_SWIPE && (distance > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD)) {
-          if (deltaX > 0) {
-            this.goToPrev();
-          } else {
-            this.goToNext();
-          }
-        } else {
-          // Snap back to current slide
-          this.updateTransform(this.currentIndex, true);
-        }
-      }, { passive: true });
-
-      // Mouse drag support
-      let mouseDown = false;
-      let mouseStartX = 0;
-      let mouseStartTime = 0;
-      let mouseStartTranslateX = 0;
-
-      this.track.addEventListener('mousedown', (e) => {
-        if (this.isTransitioning) return;
-        mouseDown = true;
-        mouseStartX = e.pageX;
-        mouseStartTime = Date.now();
-        mouseStartTranslateX = this.currentTranslateX;
-        this.isDragging = true;
-        this.track.style.cursor = 'grabbing';
-        this.track.style.transition = 'none';
-        e.preventDefault();
-      });
-
-      this.track.addEventListener('mousemove', (e) => {
-        if (!mouseDown || this.isTransitioning) return;
-
-        const deltaX = e.pageX - mouseStartX;
-        const newTranslateX = mouseStartTranslateX - deltaX;
-
-        this.track.style.transform = `translateX(-${newTranslateX}px)`;
-        this.currentTranslateX = newTranslateX;
-      });
-
-      this.track.addEventListener('mouseup', (e) => {
-        if (!mouseDown) return;
-        mouseDown = false;
-        this.isDragging = false;
-        this.track.style.cursor = 'grab';
-
-        const endX = e.pageX;
-        const endTime = Date.now();
-        const deltaX = endX - mouseStartX;
-        const deltaTime = endTime - mouseStartTime;
-        const distance = Math.abs(deltaX);
-        const velocity = distance / Math.max(deltaTime, 1);
-
-        if (distance > SWIPE_THRESHOLD && velocity > SWIPE_VELOCITY_THRESHOLD) {
-          if (deltaX > 0) {
-            this.goToPrev();
-          } else {
-            this.goToNext();
-          }
-        } else {
-          this.updateTransform(this.currentIndex, true);
-        }
-      });
-
-      this.track.addEventListener('mouseleave', () => {
-        if (mouseDown) {
-          mouseDown = false;
-          this.isDragging = false;
-          this.track.style.cursor = 'grab';
-          this.updateTransform(this.currentIndex, true);
-        }
-      });
-
-      this.track.style.cursor = 'grab';
     }
 
     startAutoplay() {
       if (this.isPaused) return;
 
       this.autoplayTimer = setInterval(() => {
-        if (!this.isTransitioning) {
-          this.goToNext();
-        }
+        // Always use scrollToNext which handles loop automatically
+        this.scrollToNext();
       }, this.autoplayDelay);
     }
 
@@ -507,19 +316,27 @@
     }
 
     setupOverlayButtons() {
+      // Handle overlay "next" buttons
       const overlayNextButtons = this.section.querySelectorAll('.gmc-overlay-button--next');
       overlayNextButtons.forEach(button => {
         button.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.goToNext();
+          this.scrollToNext();
         });
       });
+
+      // Overlay quick add buttons are handled in setupQuickAdd
+      // Overlay link buttons are just regular links, no JS needed
     }
 
     setupQuickAdd() {
+      // Product bar quick add buttons
       const quickAddButtons = this.section.querySelectorAll('.gmc-quick-add-btn');
+
+      // Overlay quick add buttons
       const overlayQuickAddButtons = this.section.querySelectorAll('.gmc-overlay-button--quick-add');
+
       const allQuickAddButtons = [...quickAddButtons, ...overlayQuickAddButtons];
 
       allQuickAddButtons.forEach(button => {
@@ -540,6 +357,7 @@
         return;
       }
 
+      // Disable button and show loading state
       button.disabled = true;
       button.classList.add('loading');
 
@@ -558,10 +376,13 @@
         const data = await response.json();
 
         if (response.ok && !data.status) {
+          // Success - update cart and show success state
           button.classList.remove('loading');
           button.classList.add('success');
 
+          // Dispatch cart update event (Dawn theme compatible)
           if (typeof publish !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+            // Fetch updated cart data
             const cartResponse = await fetch('/cart.js');
             const cartData = await cartResponse.json();
 
@@ -571,25 +392,31 @@
               cartData: cartData
             });
           } else {
+            // Fallback: dispatch custom event
             document.dispatchEvent(new CustomEvent('cart:refresh'));
           }
 
+          // Reset button after 2 seconds
           setTimeout(() => {
             button.classList.remove('success');
             button.disabled = false;
           }, 2000);
 
+          // Try to open cart drawer if available
           const cartDrawer = document.querySelector('cart-drawer');
           if (cartDrawer && typeof cartDrawer.open === 'function') {
             cartDrawer.open();
           }
         } else {
+          // Error handling
           throw new Error(data.description || 'Failed to add to cart');
         }
       } catch (error) {
         console.error('Error adding to cart:', error);
         button.classList.remove('loading');
         button.disabled = false;
+
+        // Show error message (you can customize this)
         alert(error.message || 'Unable to add product to cart. Please try again.');
       }
     }
@@ -598,10 +425,13 @@
       if (this.autoplayTimer) {
         clearInterval(this.autoplayTimer);
       }
+      if (this.scrollRaf) {
+        cancelAnimationFrame(this.scrollRaf);
+      }
     }
   }
 
-  // Initialize all carousel instances
+  // Initialize all carousel instances on the page
   function initCarousels() {
     const sections = document.querySelectorAll('[id^="GifMediaCarousel-"]');
     const carousels = [];
@@ -636,7 +466,14 @@
     });
 
     document.addEventListener('shopify:section:unload', (event) => {
-      // Cleanup handled by destroy method
+      // Cleanup if needed - section will be removed from DOM
+      const sectionElement = event.detail || event.target;
+      const section = sectionElement.querySelector ?
+        sectionElement.querySelector('[id^="GifMediaCarousel-"]') :
+        (sectionElement.id && sectionElement.id.startsWith('GifMediaCarousel-') ? sectionElement : null);
+      if (section) {
+        // Carousel will be cleaned up when section is removed
+      }
     });
   }
 })();

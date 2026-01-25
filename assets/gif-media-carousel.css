@@ -56,7 +56,6 @@
 .gmc-section .gmc-carousel-wrapper {
   position: relative;
   padding: 0 4rem;
-  overflow: hidden; /* Hide slides that extend beyond viewport */
 }
 
 @media screen and (max-width: 749px) {
@@ -65,36 +64,40 @@
   }
 }
 
-/* ===== TRACK (Transform Container) ===== */
+/* ===== TRACK (Scroll Container) ===== */
 .gmc-section .gmc-track {
   display: flex;
-  overflow: visible; /* Allow slides to extend - wrapper handles clipping */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   gap: var(--gmc-gap, 18px);
   padding: 2rem 0;
-  /* Transform-based movement - no scrollbar needed */
-  will-change: transform;
-  position: relative;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
   /* Improve touch/drag experience */
-  touch-action: pan-x pan-y;
+  touch-action: pan-x;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
+}
+
+.gmc-section .gmc-track::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .gmc-section .gmc-track:active {
   cursor: grabbing;
 }
 
-/* Clone slides - hidden from screen readers */
-.gmc-section .gmc-slide.gmc-clone {
-  /* Clones are visually identical but marked for JS identification */
-}
-
 /* ===== SLIDE ===== */
 /* Mobile: Support partial peek (1.3 slides) */
 .gmc-section .gmc-slide {
   min-width: 0;
-  flex-shrink: 0; /* Prevent slides from shrinking */
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   padding: 0.5rem;
   transition: transform 0.3s ease, opacity 0.3s ease;
   transform-origin: center;
