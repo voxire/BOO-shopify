@@ -52,11 +52,12 @@
           </button>
         {%- endif -%}
 
-        <div class="cpc-track" data-track>
-          {%- for block in item_blocks -%}
-            {%- assign product = block.settings.product -%}
-            {%- if product != blank -%}
-              <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+        <div class="cpc-viewport" data-viewport>
+          <div class="cpc-track" data-track>
+            {%- for block in item_blocks -%}
+              {%- assign product = block.settings.product -%}
+              {%- if product != blank -%}
+                <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
                 <a href="{{ product.url }}" class="cpc-card">
                   <div class="cpc-card-media">
                     {%- liquid
@@ -154,9 +155,10 @@
                     </div>
                   </div>
                 </a>
-              </div>
-            {%- endif -%}
-          {%- endfor -%}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
         </div>
 
         {%- if show_dots and item_blocks.size > 1 -%}
@@ -225,6 +227,10 @@
     }
   }
 
+  .cpc-section--{{ section_id }} .cpc-viewport {
+    overflow: hidden;
+  }
+
   .cpc-section--{{ section_id }} .cpc-track {
     display: flex;
     overflow-x: auto;
@@ -232,7 +238,7 @@
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     gap: var(--cpc-gap);
-    padding: 2rem 0;
+    padding: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-snap-type: x mandatory;
@@ -244,7 +250,7 @@
 
   .cpc-section--{{ section_id }} .cpc-slide {
     min-width: 0;
-    flex: 0 0 calc(100% - var(--cpc-gap) * 2);
+    flex: 0 0 100%;
     scroll-snap-align: center;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
     transform-origin: center;
@@ -254,13 +260,13 @@
 
   @media screen and (min-width: 750px) {
     .cpc-section--{{ section_id }} .cpc-slide {
-      flex: 0 0 calc(50% - var(--cpc-gap));
+      flex: 0 0 calc((100% - var(--cpc-gap)) / 2);
     }
   }
 
   @media screen and (min-width: 990px) {
     .cpc-section--{{ section_id }} .cpc-slide {
-      flex: 0 0 calc(33.333% - var(--cpc-gap) * 1.5);
+      flex: 0 0 calc((100% - (var(--cpc-gap) * 2)) / 3);
     }
   }
 
@@ -492,25 +498,32 @@
     const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
     if (!section) return;
 
+    const viewport = section.querySelector('[data-viewport]');
     const track = section.querySelector('[data-track]');
     const prevBtn = section.querySelector('.cpc-arrow--prev');
     const nextBtn = section.querySelector('.cpc-arrow--next');
     const dots = Array.from(section.querySelectorAll('[data-dot-index]'));
-    let slides = Array.from(section.querySelectorAll('.cpc-slide'));
 
     const autoplayEnabled = section.dataset.autoplay === 'true';
     const autoplayDelay = (parseInt(section.dataset.autoplayDelay, 10) || 5) * 1000;
 
-    if (!track || slides.length === 0) return;
+    if (!track || !viewport) return;
 
+    let originalSlides = [];
+    let slides = [];
+    let originalCount = 0;
+    let clonesCount = 0;
+    let currentIndex = 0;
     let autoplayTimer = null;
     let isPaused = false;
-    let currentIndex = 0;
     let scrollRaf = null;
     let isScrolling = false;
+    let isCorrecting = false;
 
-    function mod(n, m) {
-      return ((n % m) + m) % m;
+    function getSlidesPerView() {
+      if (window.matchMedia('(min-width: 990px)').matches) return 3;
+      if (window.matchMedia('(min-width: 750px)').matches) return 2;
+      return 1;
     }
 
     function getClosestIndexToCenter() {
@@ -533,9 +546,22 @@
       return closestIndex;
     }
 
-    function setActiveByIndex(index) {
+    function getOriginalIndex(realIndex) {
+      if (realIndex < clonesCount) {
+        return realIndex + originalCount - clonesCount;
+      } else if (realIndex >= clonesCount + originalCount) {
+        return realIndex - clonesCount - originalCount;
+      }
+      return realIndex - clonesCount;
+    }
+
+    function getRealIndex(originalIndex) {
+      return clonesCount + originalIndex;
+    }
+
+    function setActiveByRealIndex(realIndex) {
       slides.forEach((slide, i) => {
-        slide.classList.toggle('is-active', i === index);
+        slide.classList.toggle('is-active', i === realIndex);
       });
     }
 
@@ -545,56 +571,90 @@
       });
     }
 
+    function correctPosition() {
+      if (isCorrecting || slides.length === 0) return;
+      
+      const realIndex = getClosestIndexToCenter();
+      const originalIdx = getOriginalIndex(realIndex);
+      
+      if (realIndex < clonesCount) {
+        isCorrecting = true;
+        const targetRealIndex = realIndex + originalCount;
+        const target = slides[targetRealIndex];
+        if (target) {
+          track.scrollTo({
+            left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+            behavior: 'auto'
+          });
+        }
+        setTimeout(() => { isCorrecting = false; }, 50);
+      } else if (realIndex >= clonesCount + originalCount) {
+        isCorrecting = true;
+        const targetRealIndex = realIndex - originalCount;
+        const target = slides[targetRealIndex];
+        if (target) {
+          track.scrollTo({
+            left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+            behavior: 'auto'
+          });
+        }
+        setTimeout(() => { isCorrecting = false; }, 50);
+      }
+      
+      currentIndex = originalIdx;
+      setActiveByRealIndex(getRealIndex(currentIndex));
+      updateDots();
+    }
+
     function handleScrollRaf() {
       if (scrollRaf) cancelAnimationFrame(scrollRaf);
       scrollRaf = requestAnimationFrame(() => {
-        if (!isScrolling) {
-          const idx = getClosestIndexToCenter();
-          setActiveByIndex(idx);
-          currentIndex = idx;
-          updateDots();
+        if (!isScrolling && !isCorrecting) {
+          correctPosition();
         }
       });
     }
 
-    function scrollToIndex(index, smooth = true) {
-      if (slides.length === 0) return;
-
-      const numSlides = slides.length;
-      index = mod(index, numSlides);
-
-      const target = slides[index];
+    function scrollToOriginalIndex(originalIndex, smooth = true) {
+      if (originalCount === 0) return;
+      
+      originalIndex = ((originalIndex % originalCount) + originalCount) % originalCount;
+      const realIndex = getRealIndex(originalIndex);
+      const target = slides[realIndex];
+      
       if (!target) return;
 
       isScrolling = true;
+      currentIndex = originalIndex;
+      
       track.scrollTo({
         left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
         behavior: smooth ? 'smooth' : 'auto'
       });
 
-      currentIndex = index;
-      setActiveByIndex(index);
+      setActiveByRealIndex(realIndex);
       updateDots();
 
       setTimeout(() => {
         isScrolling = false;
+        if (!smooth) correctPosition();
       }, smooth ? 500 : 100);
 
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
 
     function scrollToPrev() {
-      if (slides.length <= 1) return;
-      scrollToIndex(currentIndex - 1, true);
+      if (originalCount <= 1) return;
+      scrollToOriginalIndex(currentIndex - 1, true);
     }
 
     function scrollToNext() {
-      if (slides.length <= 1) return;
-      scrollToIndex(currentIndex + 1, true);
+      if (originalCount <= 1) return;
+      scrollToOriginalIndex(currentIndex + 1, true);
     }
 
     function startAutoplay() {
-      if (!autoplayEnabled || isPaused || slides.length <= 1) return;
+      if (!autoplayEnabled || isPaused || originalCount <= 1) return;
       autoplayTimer = window.setInterval(() => {
         scrollToNext();
       }, autoplayDelay);
@@ -621,19 +681,20 @@
     // Swipe detection
     let isDragging = false;
     let startX = 0;
-    let currentX = 0;
     let dragOffset = 0;
+    let didDrag = false;
+    let shouldPreventClick = false;
 
     function handlePointerDown(e) {
-      if (slides.length <= 1) return;
+      if (originalCount <= 1) return;
       
       isDragging = true;
+      didDrag = false;
+      shouldPreventClick = false;
       startX = e.touches ? e.touches[0].clientX : e.clientX;
-      currentX = startX;
       dragOffset = 0;
       track.style.cursor = 'grabbing';
       track.style.userSelect = 'none';
-      e.preventDefault();
     }
 
     function handlePointerMove(e) {
@@ -641,9 +702,9 @@
       
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = x - startX;
-      currentX = x;
       
       if (Math.abs(dragOffset) > 5) {
+        didDrag = true;
         e.preventDefault();
       }
     }
@@ -662,7 +723,8 @@
       track.style.cursor = 'grab';
       track.style.userSelect = '';
       
-      if (wasDrag) {
+      if (wasDrag && didDrag) {
+        shouldPreventClick = true;
         e.preventDefault();
         e.stopPropagation();
         if (dragOffset > 0) {
@@ -670,16 +732,82 @@
         } else {
           scrollToNext();
         }
-        dragOffset = 0;
-        return;
+        // Reset flag after a short delay to allow click event to be prevented
+        setTimeout(() => {
+          shouldPreventClick = false;
+        }, 100);
       }
       
       dragOffset = 0;
+      didDrag = false;
+    }
+
+    function buildInfiniteLoop() {
+      const slidesPerView = getSlidesPerView();
+      clonesCount = Math.min(slidesPerView, originalCount);
+      
+      if (originalCount <= clonesCount) {
+        slides = Array.from(originalSlides);
+        return;
+      }
+
+      // Remove existing clones
+      slides.forEach(slide => {
+        if (slide.dataset.clone === '1') {
+          slide.remove();
+        }
+      });
+
+      // Clone last N slides and prepend
+      for (let i = originalCount - clonesCount; i < originalCount; i++) {
+        const clone = originalSlides[i].cloneNode(true);
+        clone.dataset.clone = '1';
+        clone.dataset.originalIndex = i;
+        track.insertBefore(clone, originalSlides[0]);
+      }
+
+      // Clone first N slides and append
+      for (let i = 0; i < clonesCount; i++) {
+        const clone = originalSlides[i].cloneNode(true);
+        clone.dataset.clone = '1';
+        clone.dataset.originalIndex = i;
+        track.appendChild(clone);
+      }
+
+      // Rebuild slides array
+      slides = Array.from(track.querySelectorAll('.cpc-slide'));
+      
+      // Scroll to first real slide
+      const firstRealIndex = clonesCount;
+      const firstRealSlide = slides[firstRealIndex];
+      if (firstRealSlide) {
+        track.scrollTo({
+          left: firstRealSlide.offsetLeft - (track.offsetWidth / 2) + (firstRealSlide.offsetWidth / 2),
+          behavior: 'auto'
+        });
+      }
+      
+      currentIndex = 0;
+      setActiveByRealIndex(firstRealIndex);
+      updateDots();
     }
 
     function init() {
-      slides = Array.from(section.querySelectorAll('.cpc-slide'));
+      // Get original slides
+      originalSlides = Array.from(track.querySelectorAll('.cpc-slide')).filter(slide => !slide.dataset.clone);
+      originalCount = originalSlides.length;
+      
+      if (originalCount === 0) return;
 
+      // Mark original slides with data-original-index
+      originalSlides.forEach((slide, index) => {
+        slide.dataset.originalIndex = index;
+      });
+
+      // Build infinite loop
+      buildInfiniteLoop();
+
+      // Event listeners
       if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPrev(); });
       if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToNext(); });
 
@@ -687,7 +815,7 @@
         dot.addEventListener('click', (e) => {
           e.preventDefault();
           const idx = parseInt(dot.dataset.dotIndex, 10);
-          if (!Number.isNaN(idx)) scrollToIndex(idx, true);
+          if (!Number.isNaN(idx)) scrollToOriginalIndex(idx, true);
         });
       });
 
@@ -700,6 +828,14 @@
       track.addEventListener('pointerup', handlePointerUp);
       track.addEventListener('pointercancel', handlePointerUp);
 
+      // Prevent link clicks only if drag happened
+      track.addEventListener('click', (e) => {
+        if (shouldPreventClick && e.target.closest('a')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
       if (autoplayEnabled) {
         startAutoplay();
         section.addEventListener('mouseenter', pauseAutoplay);
@@ -708,10 +844,14 @@
         section.addEventListener('focusout', resumeAutoplay);
       }
 
-      const initial = getClosestIndexToCenter();
-      currentIndex = initial;
-      setActiveByIndex(initial);
-      updateDots();
+      // Handle window resize
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          buildInfiniteLoop();
+        }, 250);
+      });
     }
 
     if (document.readyState === 'loading') {
