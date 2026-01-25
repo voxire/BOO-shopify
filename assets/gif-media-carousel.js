@@ -23,7 +23,7 @@
       this.currentIndex = 0;
       this.scrollRaf = null;
       this.loopEnabled = section.dataset.loop === 'true';
-      this.isScrolling = false;
+      this.isDragging = false;
       this.touchStartX = 0;
       this.touchStartY = 0;
 
@@ -81,11 +81,46 @@
       let isDragging = false;
       let startX = 0;
       let scrollLeft = 0;
+      let startTime = 0;
+      let velocity = 0;
+      let lastX = 0;
+      let lastTime = 0;
 
+      const snapToNearestSlide = () => {
+        const slideWidth = this.getSlideWidth();
+        const currentScroll = this.track.scrollLeft;
+        const nearestIndex = Math.round(currentScroll / slideWidth);
+        
+        // Clamp to valid range
+        const targetIndex = Math.max(0, Math.min(nearestIndex, this.slides.length - 1));
+        
+        // Use smooth scroll to snap to nearest slide
+        this.track.style.scrollBehavior = 'smooth';
+        this.track.scrollTo({
+          left: targetIndex * slideWidth,
+          behavior: 'smooth'
+        });
+        
+        // Update after a short delay to allow scroll to complete
+        setTimeout(() => {
+          this.updateActiveSlide();
+          this.updateActiveState();
+        }, 100);
+      };
+
+      // Touch events
       this.track.addEventListener('touchstart', (e) => {
         isDragging = true;
+        this.isDragging = true;
         startX = e.touches[0].pageX - this.track.offsetLeft;
         scrollLeft = this.track.scrollLeft;
+        startTime = Date.now();
+        lastX = startX;
+        lastTime = startTime;
+        velocity = 0;
+        
+        // Disable scroll-snap during drag
+        this.track.style.scrollSnapType = 'none';
         this.track.style.scrollBehavior = 'auto';
       }, { passive: true });
 
@@ -93,21 +128,46 @@
         if (!isDragging) return;
         e.preventDefault();
         const x = e.touches[0].pageX - this.track.offsetLeft;
-        const walk = (x - startX) * 1.5; // Scroll speed multiplier
+        const currentTime = Date.now();
+        const deltaX = x - lastX;
+        const deltaTime = currentTime - lastTime;
+        
+        if (deltaTime > 0) {
+          velocity = deltaX / deltaTime;
+        }
+        
+        const walk = (x - startX) * 1.2; // Reduced multiplier for smoother control
         this.track.scrollLeft = scrollLeft - walk;
+        
+        lastX = x;
+        lastTime = currentTime;
       }, { passive: false });
 
       this.track.addEventListener('touchend', () => {
+        if (!isDragging) return;
         isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
-        this.updateActiveSlide();
+        this.isDragging = false;
+        
+        // Re-enable scroll-snap
+        this.track.style.scrollSnapType = 'x mandatory';
+        
+        // Snap to nearest slide
+        snapToNearestSlide();
       }, { passive: true });
 
       // Mouse drag support for desktop
       this.track.addEventListener('mousedown', (e) => {
         isDragging = true;
+        this.isDragging = true;
         startX = e.pageX - this.track.offsetLeft;
         scrollLeft = this.track.scrollLeft;
+        startTime = Date.now();
+        lastX = startX;
+        lastTime = startTime;
+        velocity = 0;
+        
+        // Disable scroll-snap during drag
+        this.track.style.scrollSnapType = 'none';
         this.track.style.scrollBehavior = 'auto';
         this.track.style.cursor = 'grabbing';
       });
@@ -116,21 +176,46 @@
         if (!isDragging) return;
         e.preventDefault();
         const x = e.pageX - this.track.offsetLeft;
-        const walk = (x - startX) * 1.5;
+        const currentTime = Date.now();
+        const deltaX = x - lastX;
+        const deltaTime = currentTime - lastTime;
+        
+        if (deltaTime > 0) {
+          velocity = deltaX / deltaTime;
+        }
+        
+        const walk = (x - startX) * 1.2;
         this.track.scrollLeft = scrollLeft - walk;
+        
+        lastX = x;
+        lastTime = currentTime;
       });
 
       this.track.addEventListener('mouseup', () => {
+        if (!isDragging) return;
         isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
+        this.isDragging = false;
+        
+        // Re-enable scroll-snap
+        this.track.style.scrollSnapType = 'x mandatory';
         this.track.style.cursor = 'grab';
-        this.updateActiveSlide();
+        
+        // Snap to nearest slide
+        snapToNearestSlide();
       });
 
       this.track.addEventListener('mouseleave', () => {
-        isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
-        this.track.style.cursor = 'grab';
+        if (isDragging) {
+          isDragging = false;
+          this.isDragging = false;
+          
+          // Re-enable scroll-snap
+          this.track.style.scrollSnapType = 'x mandatory';
+          this.track.style.cursor = 'grab';
+          
+          // Snap to nearest slide
+          snapToNearestSlide();
+        }
       });
 
       // Set initial cursor
@@ -190,8 +275,12 @@
 
     /**
      * Throttled scroll handler using requestAnimationFrame
+     * Only updates if not currently dragging
      */
     handleScroll() {
+      // Don't update during drag - let snapToNearestSlide handle it
+      if (this.isDragging) return;
+      
       if (this.scrollRaf) {
         cancelAnimationFrame(this.scrollRaf);
       }

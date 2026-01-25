@@ -70,6 +70,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  scroll-snap-stop: normal;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   gap: var(--gmc-gap, 18px);
@@ -97,7 +98,7 @@
 .gmc-section .gmc-slide {
   min-width: 0;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
   padding: 0.5rem;
   transition: transform 0.3s ease, opacity 0.3s ease;
   transform-origin: center;
