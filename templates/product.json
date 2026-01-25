@@ -219,6 +219,7 @@
     },
     "you_may_also_like_L4cyEY": {
       "type": "you-may-also-like",
+      "disabled": true,
       "name": "You might also like",
       "settings": {
         "title": "You might also like",
@@ -236,6 +237,98 @@
         "show_badge": false,
         "badge_text": "More"
       }
+    },
+    "gif_media_carousel_a8WJRm": {
+      "type": "gif-media-carousel",
+      "blocks": {
+        "item_Q7nQgA": {
+          "type": "item",
+          "settings": {
+            "product": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
+            "media_source": "custom_image_or_gif",
+            "custom_media": "shopify://shop_images/Shaboo.png",
+            "external_gif_url": "",
+            "alt_text": "",
+            "badge_text": "",
+            "focal_position": "center"
+          }
+        },
+        "item_VNqhNC": {
+          "type": "item",
+          "settings": {
+            "product": "grey-dragon-costume-for-babies-toddlers-lebanon",
+            "media_source": "custom_image_or_gif",
+            "custom_media": "shopify://shop_images/GriBoo.png",
+            "external_gif_url": "",
+            "alt_text": "",
+            "badge_text": "",
+            "focal_position": "center"
+          }
+        },
+        "item_pfrCH7": {
+          "type": "item",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "media_source": "custom_image_or_gif",
+            "custom_media": "shopify://shop_images/BunBoo.png",
+            "external_gif_url": "",
+            "alt_text": "",
+            "badge_text": "",
+            "focal_position": "center"
+          }
+        },
+        "item_a4tNBn": {
+          "type": "item",
+          "settings": {
+            "product": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
+            "media_source": "custom_image_or_gif",
+            "custom_media": "shopify://shop_images/DinoBoo.png",
+            "external_gif_url": "",
+            "alt_text": "",
+            "badge_text": "",
+            "focal_position": "center"
+          }
+        },
+        "item_wRy7ty": {
+          "type": "item",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "media_source": "custom_image_or_gif",
+            "custom_media": "shopify://shop_images/FoxBoo.png",
+            "external_gif_url": "",
+            "alt_text": "",
+            "badge_text": "",
+            "focal_position": "center"
+          }
+        }
+      },
+      "block_order": [
+        "item_Q7nQgA",
+        "item_VNqhNC",
+        "item_pfrCH7",
+        "item_a4tNBn",
+        "item_wRy7ty"
+      ],
+      "name": "GIF Media Carousel",
+      "settings": {
+        "heading": "Featured Products",
+        "subheading": "",
+        "alignment": "center",
+        "layout": "page-width",
+        "slides_per_view_desktop": 3,
+        "slides_per_view_tablet": 2,
+        "slides_per_view_mobile": 1,
+        "gap": 20,
+        "card_radius": 16,
+        "media_height_desktop": 500,
+        "media_height_mobile": 400,
+        "show_arrows": true,
+        "show_dots": false,
+        "autoplay": false,
+        "autoplay_seconds": 5,
+        "product_bar_enabled": true,
+        "product_bar_action": "link"
+      }
     }
   },
   "order": [
@@ -245,6 +338,7 @@
     "main",
     "related-products",
     "17661676631c74cce8",
-    "you_may_also_like_L4cyEY"
+    "you_may_also_like_L4cyEY",
+    "gif_media_carousel_a8WJRm"
   ]
 }
