@@ -287,31 +287,20 @@
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     gap: var(--gmc-gap);
     padding: 2rem 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    touch-action: pan-x;
-    user-select: none;
-    -webkit-user-select: none;
-    cursor: grab;
   }
 
   .gmc-section--{{ section_id }} .gmc-track::-webkit-scrollbar {
     display: none;
   }
 
-  .gmc-section--{{ section_id }} .gmc-track:active {
-    cursor: grabbing;
-  }
-
   .gmc-section--{{ section_id }} .gmc-slide {
     min-width: 0;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
     padding: 0.5rem;
     transition: transform 0.3s ease, opacity 0.3s ease;
     transform-origin: center;
@@ -602,10 +591,6 @@
     user-drag: none;
   }
 
-  .gmc-section--{{ section_id }} .gmc-track.is-dragging {
-    scroll-snap-type: none;
-    cursor: grabbing;
-  }
 </style>
 
 <script>
@@ -632,13 +617,6 @@
 
     let currentIndex = 0;
     let scrollRaf = null;
-    let scrollEndTimer = null;
-
-    // Mouse drag state (desktop)
-    let isDragging = false;
-    let dragMoved = false;
-    let startX = 0;
-    let startScrollLeft = 0;
 
     function mod(n, m) {
       return ((n % m) + m) % m;
@@ -707,11 +685,6 @@
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
 
-    function snapToNearest(smooth = true) {
-      const idx = getClosestIndexToCenter();
-      scrollToIndex(idx, smooth);
-    }
-
     function scrollToPrev() {
       if (slides.length <= 1) return;
       scrollToIndex(currentIndex - 1, true);
@@ -747,53 +720,6 @@
       resumeAutoplay();
     }
 
-    // Desktop mouse drag (do NOT interfere with touch swipe)
-    function onPointerDown(e) {
-      // Only mouse drag (desktop)
-      if (e.pointerType !== 'mouse') return;
-      if (slides.length <= 1) return;
-
-      isDragging = true;
-      dragMoved = false;
-      startX = e.clientX;
-      startScrollLeft = track.scrollLeft;
-
-      track.classList.add('is-dragging');
-      track.style.cursor = 'grabbing';
-
-      // Avoid selecting text/images while dragging
-      e.preventDefault();
-      track.setPointerCapture(e.pointerId);
-    }
-
-    function onPointerMove(e) {
-      if (!isDragging) return;
-
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 2) dragMoved = true;
-
-      // Dragging right should scroll left (natural feel)
-      track.scrollLeft = startScrollLeft - dx;
-      e.preventDefault();
-    }
-
-    function onPointerUp(e) {
-      if (!isDragging) return;
-
-      isDragging = false;
-      track.classList.remove('is-dragging');
-      track.style.cursor = 'grab';
-
-      try {
-        track.releasePointerCapture(e.pointerId);
-      } catch (_) {}
-
-      // Snap after drag
-      if (dragMoved) {
-        snapToNearest(true);
-      }
-    }
-
     function init() {
       // Refresh slides NodeList (in case of section reload)
       slides = Array.from(section.querySelectorAll('.gmc-slide'));
@@ -811,31 +737,10 @@
         });
       });
 
-      // Scroll: keep active state updated + snap when user stops scrolling
+      // Scroll: keep active state updated
       track.addEventListener('scroll', () => {
         handleScrollRaf();
-
-        if (scrollEndTimer) clearTimeout(scrollEndTimer);
-        scrollEndTimer = setTimeout(() => {
-          // Snap to nearest when scrolling ends (touch/mouse wheel)
-          snapToNearest(true);
-        }, 140);
       }, { passive: true });
-
-      // Pointer drag (mouse only)
-      track.addEventListener('pointerdown', onPointerDown, { passive: false });
-      track.addEventListener('pointermove', onPointerMove, { passive: false });
-      track.addEventListener('pointerup', onPointerUp, { passive: true });
-      track.addEventListener('pointercancel', onPointerUp, { passive: true });
-
-      // Prevent accidental click when dragging
-      track.addEventListener('click', (e) => {
-        if (dragMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          dragMoved = false;
-        }
-      }, true);
 
       // Quick add buttons remain as-is
       const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
