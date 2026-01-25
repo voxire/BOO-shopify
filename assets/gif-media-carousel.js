@@ -22,7 +22,8 @@
       this.isPaused = false;
       this.currentIndex = 0;
       this.scrollRaf = null;
-      this.loopEnabled = section.dataset.loop === 'true';
+      // Force enable loop for swipe functionality (same as hex prism carousel)
+      this.loopEnabled = true;
       this.isScrolling = false;
       this.touchStartX = 0;
       this.touchStartY = 0;
@@ -77,10 +78,12 @@
     /**
      * Setup touch/drag support for better mobile swiping
      * Uses the same pointer event logic as hex prism carousel
+     * Allows native scrolling while detecting swipes for navigation
      */
     setupTouchSupport() {
       let isDragging = false;
       let startX = 0;
+      let startScrollLeft = 0;
       let currentX = 0;
       let dragOffset = 0;
 
@@ -88,24 +91,23 @@
         if (this.slides.length <= 1) return;
 
         isDragging = true;
-        startX = e.clientX;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        startScrollLeft = this.track.scrollLeft;
         currentX = startX;
         dragOffset = 0;
         this.track.style.cursor = 'grabbing';
-        this.track.style.userSelect = 'none';
-        e.preventDefault();
+        // Don't prevent default - allow native scrolling
       };
 
       const handlePointerMove = (e) => {
         if (!isDragging) return;
 
-        const x = e.clientX;
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
         dragOffset = x - startX;
         currentX = x;
 
-        if (Math.abs(dragOffset) > 5) {
-          e.preventDefault();
-        }
+        // Don't prevent default - allow native scrolling
+        // Only track the drag offset for swipe detection
       };
 
       const handlePointerUp = (e) => {
@@ -114,15 +116,15 @@
           return;
         }
 
-        // Calculate threshold: 10% of slide width or 40px default
+        // Calculate threshold: 10% of slide width or 40px default (same as hex prism)
         const slideWidth = this.getSlideWidth();
         const threshold = slideWidth ? slideWidth * 0.1 : 40;
         const wasDrag = Math.abs(dragOffset) > threshold;
 
         isDragging = false;
         this.track.style.cursor = 'grab';
-        this.track.style.userSelect = '';
 
+        // If it was a significant drag/swipe, navigate to next/prev (same as hex prism)
         if (wasDrag) {
           e.preventDefault();
           e.stopPropagation();
@@ -137,18 +139,25 @@
           return;
         }
 
+        // Otherwise, let native scroll handle it and update active slide
         dragOffset = 0;
-        // Update active slide if it was just a small movement
         setTimeout(() => {
           this.updateActiveSlide();
         }, 100);
       };
 
       // Use pointer events (same as hex prism carousel)
-      this.track.addEventListener('pointerdown', handlePointerDown);
-      this.track.addEventListener('pointermove', handlePointerMove);
-      this.track.addEventListener('pointerup', handlePointerUp);
-      this.track.addEventListener('pointercancel', handlePointerUp);
+      // Use passive listeners to allow native scrolling
+      this.track.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      this.track.addEventListener('pointermove', handlePointerMove, { passive: true });
+      this.track.addEventListener('pointerup', handlePointerUp, { passive: false });
+      this.track.addEventListener('pointercancel', handlePointerUp, { passive: true });
+
+      // Also handle touch events for better mobile support
+      this.track.addEventListener('touchstart', handlePointerDown, { passive: true });
+      this.track.addEventListener('touchmove', handlePointerMove, { passive: true });
+      this.track.addEventListener('touchend', handlePointerUp, { passive: false });
+      this.track.addEventListener('touchcancel', handlePointerUp, { passive: true });
 
       // Set initial cursor
       this.track.style.cursor = 'grab';
