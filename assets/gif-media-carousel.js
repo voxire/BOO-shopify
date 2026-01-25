@@ -80,27 +80,48 @@
     setupTouchSupport() {
       let isDragging = false;
       let startX = 0;
+      let startY = 0;
       let scrollLeft = 0;
+      let isHorizontalSwipe = false;
 
       this.track.addEventListener('touchstart', (e) => {
         isDragging = true;
-        startX = e.touches[0].pageX - this.track.offsetLeft;
+        startX = e.touches[0].pageX;
+        startY = e.touches[0].pageY;
         scrollLeft = this.track.scrollLeft;
         this.track.style.scrollBehavior = 'auto';
+        isHorizontalSwipe = false;
       }, { passive: true });
 
       this.track.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
-        e.preventDefault();
-        const x = e.touches[0].pageX - this.track.offsetLeft;
-        const walk = (x - startX) * 1.5; // Scroll speed multiplier
-        this.track.scrollLeft = scrollLeft - walk;
+
+        const currentX = e.touches[0].pageX;
+        const currentY = e.touches[0].pageY;
+        const deltaX = Math.abs(currentX - startX);
+        const deltaY = Math.abs(currentY - startY);
+
+        // Determine if this is a horizontal swipe (only after a threshold)
+        if (!isHorizontalSwipe && deltaX > 10) {
+          isHorizontalSwipe = deltaX > deltaY;
+        }
+
+        // Only prevent default and handle swipe if it's a horizontal gesture
+        if (isHorizontalSwipe) {
+          e.preventDefault();
+          const x = currentX - this.track.getBoundingClientRect().left;
+          const walk = (x - startX) * 1.5; // Scroll speed multiplier
+          this.track.scrollLeft = scrollLeft - walk;
+        }
       }, { passive: false });
 
       this.track.addEventListener('touchend', () => {
         isDragging = false;
         this.track.style.scrollBehavior = 'smooth';
-        this.updateActiveSlide();
+        if (isHorizontalSwipe) {
+          this.updateActiveSlide();
+        }
+        isHorizontalSwipe = false;
       }, { passive: true });
 
       // Mouse drag support for desktop
