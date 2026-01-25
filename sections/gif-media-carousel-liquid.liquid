@@ -84,6 +84,7 @@
 
                     {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
                       <img
+                        draggable="false"
                         src="{{ block.settings.external_gif_url }}"
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
                         class="gmc-media-image"
@@ -92,6 +93,7 @@
                       >
                     {%- elsif media_source == 'custom_image_or_gif' and block.settings.custom_media != blank -%}
                       <img
+                        draggable="false"
                         src="{{ block.settings.custom_media | image_url: width: 1200 }}"
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
                         class="gmc-media-image"
@@ -100,6 +102,7 @@
                       >
                     {%- elsif product.featured_media != blank -%}
                       <img
+                        draggable="false"
                         src="{{ product.featured_media.preview_image | image_url: width: 1200 }}"
                         alt="{{ block.settings.alt_text | default: product.featured_media.alt | default: product.title | escape }}"
                         class="gmc-media-image"
@@ -153,6 +156,7 @@
                       {%- if product.featured_image != blank -%}
                         <div class="gmc-productbar-thumb">
                           <img
+                            draggable="false"
                             src="{{ product.featured_image | image_url: width: 100 }}"
                             alt="{{ product.title | escape }}"
                             loading="lazy"
@@ -592,167 +596,139 @@
     padding: 4rem 2rem;
     color: rgba(var(--color-foreground), 0.6);
   }
+
+  .gmc-section--{{ section_id }} .gmc-media-image {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-track.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+  }
 </style>
 
 <script>
-  (function() {
+  (function () {
     'use strict';
-    
+
     const sectionId = '{{ section_id }}';
     const section = document.querySelector(`#GifMediaCarousel-${sectionId}`);
     if (!section) return;
-    
+
     const track = section.querySelector('[data-track]');
     const prevBtn = section.querySelector('.gmc-arrow--prev');
     const nextBtn = section.querySelector('.gmc-arrow--next');
-    const dots = section.querySelectorAll('[data-dot-index]');
-    const slides = section.querySelectorAll('.gmc-slide');
+    const dots = Array.from(section.querySelectorAll('[data-dot-index]'));
+    let slides = Array.from(section.querySelectorAll('.gmc-slide'));
+
     const autoplayEnabled = section.dataset.autoplay === 'true';
-    const autoplayDelay = parseInt(section.dataset.autoplayDelay) || 5000;
-    
+    const autoplayDelay = (parseInt(section.dataset.autoplayDelay, 10) || 5) * 1000;
+
     if (!track || slides.length === 0) return;
-    
+
     let autoplayTimer = null;
     let isPaused = false;
+
     let currentIndex = 0;
     let scrollRaf = null;
+    let scrollEndTimer = null;
+
+    // Mouse drag state (desktop)
     let isDragging = false;
+    let dragMoved = false;
     let startX = 0;
     let startScrollLeft = 0;
-    let currentX = 0;
-    let dragOffset = 0;
-    const numSlides = slides.length;
-    
-    // Mod function (same as hex prism)
+
     function mod(n, m) {
       return ((n % m) + m) % m;
     }
-    
-    function getSlideWidth() {
-      if (slides.length === 0) return 0;
-      const firstSlide = slides[0];
-      const gap = parseInt(getComputedStyle(track).gap) || 18;
-      return firstSlide.offsetWidth + gap;
-    }
-    
-    // Store slide width in dataset for threshold calculation (like hex prism)
-    function updateSlideWidth() {
-      const slideWidth = getSlideWidth();
-      if (slideWidth) {
-        track.dataset.slideWidth = slideWidth;
-      }
-    }
-    
-    function findActiveSlideIndex() {
-      if (slides.length === 0) return 0;
-      
+
+    function getClosestIndexToCenter() {
       const trackRect = track.getBoundingClientRect();
       const trackCenter = trackRect.left + trackRect.width / 2;
-      
+
       let closestIndex = 0;
       let closestDistance = Infinity;
-      
+
       slides.forEach((slide, index) => {
-        const slideRect = slide.getBoundingClientRect();
-        const slideCenter = slideRect.left + slideRect.width / 2;
-        const distance = Math.abs(trackCenter - slideCenter);
-        
-        if (distance < closestDistance) {
-          closestDistance = distance;
+        const r = slide.getBoundingClientRect();
+        const c = r.left + r.width / 2;
+        const d = Math.abs(trackCenter - c);
+        if (d < closestDistance) {
+          closestDistance = d;
           closestIndex = index;
         }
       });
-      
+
       return closestIndex;
     }
-    
-    function updateActiveSlide() {
-      const activeIndex = findActiveSlideIndex();
-      
-      slides.forEach((slide, index) => {
-        if (index === activeIndex) {
-          slide.classList.add('is-active');
-        } else {
-          slide.classList.remove('is-active');
-        }
+
+    function setActiveByIndex(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === index);
       });
-      
-      currentIndex = activeIndex;
     }
-    
-    function updateActiveState() {
-      dots.forEach((dot, index) => {
-        if (index === currentIndex) {
-          dot.classList.add('gmc-dot--active');
-        } else {
-          dot.classList.remove('gmc-dot--active');
-        }
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('gmc-dot--active', i === currentIndex);
       });
-      
-      if (prevBtn) prevBtn.disabled = false;
-      if (nextBtn) nextBtn.disabled = false;
     }
-    
-    function handleScroll() {
-      if (scrollRaf) {
-        cancelAnimationFrame(scrollRaf);
-      }
-      
+
+    function handleScrollRaf() {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
       scrollRaf = requestAnimationFrame(() => {
-        updateActiveSlide();
-        updateActiveState();
+        const idx = getClosestIndexToCenter();
+        setActiveByIndex(idx);
+        currentIndex = idx;
+        updateDots();
       });
     }
-    
+
     function scrollToIndex(index, smooth = true) {
       if (slides.length === 0) return;
-      
-      // Loop enabled using mod (same as hex prism)
+
+      const numSlides = slides.length;
       index = mod(index, numSlides);
-      
-      const slideWidth = getSlideWidth();
-      const scrollPosition = slideWidth * index;
-      
-      if (smooth) {
-        track.scrollTo({
-          left: scrollPosition,
-          behavior: 'smooth'
-        });
-      } else {
-        track.scrollLeft = scrollPosition;
-      }
-      
+
+      const target = slides[index];
+      if (!target) return;
+
+      track.scrollTo({
+        left: target.offsetLeft,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+
       currentIndex = index;
-      updateActiveSlide();
-      updateActiveState();
-      
-      if (autoplayEnabled && !isPaused) {
-        resetAutoplay();
-      }
+      setActiveByIndex(index);
+      updateDots();
+
+      if (autoplayEnabled && !isPaused) resetAutoplay();
     }
-    
+
+    function snapToNearest(smooth = true) {
+      const idx = getClosestIndexToCenter();
+      scrollToIndex(idx, smooth);
+    }
+
     function scrollToPrev() {
-      if (numSlides <= 1) return;
-      // Always loop (same as hex prism)
-      const newIndex = mod(currentIndex - 1, numSlides);
-      scrollToIndex(newIndex);
+      if (slides.length <= 1) return;
+      scrollToIndex(currentIndex - 1, true);
     }
-    
+
     function scrollToNext() {
-      if (numSlides <= 1) return;
-      // Always loop (same as hex prism)
-      const newIndex = mod(currentIndex + 1, numSlides);
-      scrollToIndex(newIndex);
+      if (slides.length <= 1) return;
+      scrollToIndex(currentIndex + 1, true);
     }
-    
+
     function startAutoplay() {
-      if (isPaused) return;
-      
-      autoplayTimer = setInterval(() => {
+      if (!autoplayEnabled || isPaused || slides.length <= 1) return;
+      autoplayTimer = window.setInterval(() => {
         scrollToNext();
       }, autoplayDelay);
     }
-    
+
     function pauseAutoplay() {
       isPaused = true;
       if (autoplayTimer) {
@@ -760,104 +736,164 @@
         autoplayTimer = null;
       }
     }
-    
+
     function resumeAutoplay() {
       isPaused = false;
       startAutoplay();
     }
-    
+
     function resetAutoplay() {
       pauseAutoplay();
       resumeAutoplay();
     }
-    
-    // Swipe logic - adapted for scroll-based carousel
-    // Allows native scrolling while detecting swipes for navigation
-    function handlePointerDown(e) {
+
+    // Desktop mouse drag (do NOT interfere with touch swipe)
+    function onPointerDown(e) {
+      // Only mouse drag (desktop)
+      if (e.pointerType !== 'mouse') return;
       if (slides.length <= 1) return;
-      
+
       isDragging = true;
-      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      dragMoved = false;
+      startX = e.clientX;
       startScrollLeft = track.scrollLeft;
-      currentX = startX;
-      dragOffset = 0;
+
+      track.classList.add('is-dragging');
       track.style.cursor = 'grabbing';
-      // Don't prevent default - allow native scrolling
+
+      // Avoid selecting text/images while dragging
+      e.preventDefault();
+      track.setPointerCapture(e.pointerId);
     }
-    
-    function handlePointerMove(e) {
+
+    function onPointerMove(e) {
       if (!isDragging) return;
-      
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      dragOffset = x - startX;
-      currentX = x;
-      // Don't prevent default - allow native scrolling
+
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 2) dragMoved = true;
+
+      // Dragging right should scroll left (natural feel)
+      track.scrollLeft = startScrollLeft - dx;
+      e.preventDefault();
     }
-    
-    function handlePointerUp(e) {
-      if (!isDragging) {
-        dragOffset = 0;
-        return;
-      }
-      
-      // Check if scroll position changed (native scroll happened)
-      const scrollDiff = Math.abs(track.scrollLeft - startScrollLeft);
-      const threshold = track.dataset.slideWidth ? parseFloat(track.dataset.slideWidth) * 0.1 : 40;
-      const wasDrag = Math.abs(dragOffset) > threshold;
-      const wasScroll = scrollDiff > threshold;
-      
+
+    function onPointerUp(e) {
+      if (!isDragging) return;
+
       isDragging = false;
+      track.classList.remove('is-dragging');
       track.style.cursor = 'grab';
-      
-      // Only navigate if it was a swipe gesture, not native scrolling
-      if (wasDrag && !wasScroll) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (dragOffset > 0) {
-          scrollToPrev();
-        } else {
-          scrollToNext();
-        }
-        dragOffset = 0;
-        return;
+
+      try {
+        track.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+
+      // Snap after drag
+      if (dragMoved) {
+        snapToNearest(true);
       }
-      
-      // Native scroll happened - just update active slide
-      dragOffset = 0;
-      setTimeout(() => {
-        updateActiveSlide();
-      }, 100);
     }
-    
+
+    function init() {
+      // Refresh slides NodeList (in case of section reload)
+      slides = Array.from(section.querySelectorAll('.gmc-slide'));
+
+      // Buttons
+      if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPrev(); });
+      if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToNext(); });
+
+      // Dots
+      dots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const idx = parseInt(dot.dataset.dotIndex, 10);
+          if (!Number.isNaN(idx)) scrollToIndex(idx, true);
+        });
+      });
+
+      // Scroll: keep active state updated + snap when user stops scrolling
+      track.addEventListener('scroll', () => {
+        handleScrollRaf();
+
+        if (scrollEndTimer) clearTimeout(scrollEndTimer);
+        scrollEndTimer = setTimeout(() => {
+          // Snap to nearest when scrolling ends (touch/mouse wheel)
+          snapToNearest(true);
+        }, 140);
+      }, { passive: true });
+
+      // Pointer drag (mouse only)
+      track.addEventListener('pointerdown', onPointerDown, { passive: false });
+      track.addEventListener('pointermove', onPointerMove, { passive: false });
+      track.addEventListener('pointerup', onPointerUp, { passive: true });
+      track.addEventListener('pointercancel', onPointerUp, { passive: true });
+
+      // Prevent accidental click when dragging
+      track.addEventListener('click', (e) => {
+        if (dragMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+          dragMoved = false;
+        }
+      }, true);
+
+      // Quick add buttons remain as-is
+      const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
+      quickAddButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleQuickAdd(button);
+        });
+      });
+
+      // Overlay "next" buttons
+      const overlayNextButtons = section.querySelectorAll('.gmc-overlay-button--next');
+      overlayNextButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          scrollToNext();
+        });
+      });
+
+      // Autoplay
+      if (autoplayEnabled) {
+        startAutoplay();
+        section.addEventListener('mouseenter', pauseAutoplay);
+        section.addEventListener('mouseleave', resumeAutoplay);
+        section.addEventListener('focusin', pauseAutoplay);
+        section.addEventListener('focusout', resumeAutoplay);
+      }
+
+      // Initial active state
+      const initial = getClosestIndexToCenter();
+      currentIndex = initial;
+      setActiveByIndex(initial);
+      updateDots();
+    }
+
+    // Existing handleQuickAdd from your code (unchanged)
     async function handleQuickAdd(button) {
       const variantId = button.dataset.variantId;
-      
-      if (!variantId) {
-        console.error('Variant ID not found');
-        return;
-      }
-      
+      if (!variantId) return;
+
       button.disabled = true;
       button.classList.add('loading');
-      
+
       try {
         const response = await fetch('/cart/add.js', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: variantId,
-            quantity: 1
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: variantId, quantity: 1 })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok && !data.status) {
           button.classList.remove('loading');
           button.classList.add('success');
-          
+
           if (typeof publish !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
             const cartResponse = await fetch('/cart.js');
             const cartData = await cartResponse.json();
@@ -869,16 +905,14 @@
           } else {
             document.dispatchEvent(new CustomEvent('cart:refresh'));
           }
-          
+
           setTimeout(() => {
             button.classList.remove('success');
             button.disabled = false;
-          }, 2000);
-          
+          }, 1600);
+
           const cartDrawer = document.querySelector('cart-drawer');
-          if (cartDrawer && typeof cartDrawer.open === 'function') {
-            cartDrawer.open();
-          }
+          if (cartDrawer && typeof cartDrawer.open === 'function') cartDrawer.open();
         } else {
           throw new Error(data.description || 'Failed to add to cart');
         }
@@ -889,87 +923,22 @@
         alert(error.message || 'Unable to add product to cart. Please try again.');
       }
     }
-    
-    function init() {
-      // Navigation buttons
-      if (prevBtn) {
-        prevBtn.addEventListener('click', () => scrollToPrev());
-      }
-      if (nextBtn) {
-        nextBtn.addEventListener('click', () => scrollToNext());
-      }
-      
-      // Dots
-      dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => scrollToIndex(index));
-      });
-      
-      // Scroll listener
-      track.addEventListener('scroll', () => handleScroll(), { passive: true });
-      
-      // Swipe support - allow native scrolling
-      track.addEventListener('pointerdown', handlePointerDown, { passive: true });
-      track.addEventListener('pointermove', handlePointerMove, { passive: true });
-      track.addEventListener('pointerup', handlePointerUp, { passive: false });
-      track.addEventListener('pointercancel', handlePointerUp, { passive: true });
-      
-      // Overlay buttons
-      const overlayNextButtons = section.querySelectorAll('.gmc-overlay-button--next');
-      overlayNextButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          scrollToNext();
-        });
-      });
-      
-      // Quick add buttons
-      const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
-      quickAddButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleQuickAdd(button);
-        });
-      });
-      
-      // Autoplay
-      if (autoplayEnabled) {
-        startAutoplay();
-        
-        section.addEventListener('mouseenter', () => pauseAutoplay());
-        section.addEventListener('mouseleave', () => resumeAutoplay());
-        section.addEventListener('focusin', () => pauseAutoplay());
-        section.addEventListener('focusout', () => resumeAutoplay());
-      }
-      
-      // Initial state
-      updateSlideWidth();
-      updateActiveSlide();
-      updateActiveState();
-      
-      // Update slide width on resize
-      window.addEventListener('resize', () => {
-        updateSlideWidth();
-      });
-    }
-    
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {
       init();
     }
-    
-    document.addEventListener('shopify:section:load', function(e) {
-      const sectionElement = e.detail || e.target;
-      const loadedSection = sectionElement.querySelector ? 
-        sectionElement.querySelector(`#GifMediaCarousel-${sectionId}`) :
-        (sectionElement.id && sectionElement.id === `GifMediaCarousel-${sectionId}` ? sectionElement : null);
-      if (loadedSection) {
-        // Re-initialize if needed
-        setTimeout(init, 100);
-      }
+
+    document.addEventListener('shopify:section:load', function (e) {
+      const root = e.detail || e.target;
+      const loaded = root.querySelector
+        ? root.querySelector(`#GifMediaCarousel-${sectionId}`)
+        : (root.id === `GifMediaCarousel-${sectionId}` ? root : null);
+
+      if (loaded) setTimeout(init, 60);
     });
+
   })();
 </script>
 
