@@ -9,10 +9,9 @@
   assign show_dots = section.settings.show_dots
   assign autoplay = section.settings.autoplay
   assign autoplay_seconds = section.settings.autoplay_seconds | default: 5
-  assign collection = section.settings.collection
-  assign products_to_show = section.settings.products_to_show | default: 10
   assign show_vendor = section.settings.show_vendor
   assign show_color_swatches = section.settings.show_color_swatches
+  assign item_blocks = section.blocks | where: 'type', 'product'
 -%}
 
 <section
@@ -36,7 +35,7 @@
       </div>
     {%- endif -%}
 
-    {%- if collection != blank and collection.products.size > 0 -%}
+    {%- if item_blocks.size > 0 -%}
       <div class="cpc-carousel-wrapper">
         {%- if show_arrows -%}
           <button type="button" class="cpc-arrow cpc-arrow--prev" aria-label="{{ 'general.accessibility.previous' | t | default: 'Previous' }}">
@@ -52,82 +51,123 @@
         {%- endif -%}
 
         <div class="cpc-track" data-track>
-          {%- for product in collection.products limit: products_to_show -%}
-            <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" data-slide-index="{{ forloop.index0 }}">
-              <a href="{{ product.url }}" class="cpc-card">
-                <div class="cpc-card-media">
-                  {%- if product.featured_media != blank -%}
-                    <img
-                      src="{{ product.featured_media | image_url: width: 600 }}"
-                      srcset="{{ product.featured_media | image_url: width: 300 }} 300w,
-                              {{ product.featured_media | image_url: width: 600 }} 600w,
-                              {{ product.featured_media | image_url: width: 900 }} 900w"
-                      sizes="(max-width: 749px) 85vw, 400px"
-                      alt="{{ product.featured_media.alt | default: product.title | escape }}"
-                      class="cpc-card-image"
-                      {% unless forloop.first %}loading="lazy"{% endunless %}
-                      width="{{ product.featured_media.width }}"
-                      height="{{ product.featured_media.height }}"
-                    >
-                  {%- else -%}
-                    <div class="cpc-card-placeholder">
-                      {{ 'product-1' | placeholder_svg_tag: 'cpc-placeholder-svg' }}
-                    </div>
-                  {%- endif -%}
-                </div>
+          {%- for block in item_blocks -%}
+            {%- assign product = block.settings.product -%}
+            {%- if product != blank -%}
+              <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+                <a href="{{ product.url }}" class="cpc-card">
+                  <div class="cpc-card-media">
+                    {%- liquid
+                      assign media_source = block.settings.media_source | default: 'product_featured'
+                      assign focal_position = block.settings.focal_position | default: 'center'
+                      assign object_position = 'center'
+                      if focal_position == 'top'
+                        assign object_position = 'top center'
+                      elsif focal_position == 'bottom'
+                        assign object_position = 'bottom center'
+                      endif
+                    -%}
 
-                <div class="cpc-card-content">
-                  {%- if show_vendor and product.vendor != blank -%}
-                    <p class="cpc-card-vendor">{{ product.vendor }}</p>
-                  {%- endif -%}
-                  
-                  <h3 class="cpc-card-title">{{ product.title }}</h3>
+                    {%- if block.settings.badge_text != blank -%}
+                      <div class="cpc-badge">{{ block.settings.badge_text }}</div>
+                    {%- endif -%}
 
-                  {%- if show_color_swatches -%}
-                    {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
-                    {%- if color_option != blank and color_option.values.size > 0 -%}
-                      <div class="cpc-card-colors">
-                        {%- for value in color_option.values limit: 5 -%}
-                          {%- assign color_name = value | downcase -%}
-                          {%- assign color_map = 'red,blue,green,yellow,black,white,gray,grey,pink,purple,orange,brown,navy,burgundy' | split: ',' -%}
-                          {%- assign color_found = false -%}
-                          {%- for color in color_map -%}
-                            {%- if color_name contains color -%}
-                              {%- assign color_found = true -%}
-                              {%- break -%}
-                            {%- endif -%}
-                          {%- endfor -%}
-                          <span class="cpc-color-swatch" style="background-color: {{ value | handleize }};" title="{{ value }}"></span>
-                        {%- endfor -%}
-                        {%- if color_option.values.size > 5 -%}
-                          <span class="cpc-color-more">+{{ color_option.values.size | minus: 5 }}</span>
-                        {%- endif -%}
+                    {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
+                      <img
+                        draggable="false"
+                        src="{{ block.settings.external_gif_url }}"
+                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                        class="cpc-card-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                      >
+                    {%- elsif media_source == 'custom_image_or_gif' and block.settings.custom_media != blank -%}
+                      <img
+                        draggable="false"
+                        src="{{ block.settings.custom_media | image_url: width: 1200 }}"
+                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                        class="cpc-card-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                      >
+                    {%- elsif product.featured_media != blank -%}
+                      <img
+                        draggable="false"
+                        src="{{ product.featured_media | image_url: width: 1200 }}"
+                        srcset="{{ product.featured_media | image_url: width: 300 }} 300w,
+                                {{ product.featured_media | image_url: width: 600 }} 600w,
+                                {{ product.featured_media | image_url: width: 900 }} 900w,
+                                {{ product.featured_media | image_url: width: 1200 }} 1200w"
+                        sizes="(max-width: 749px) 85vw, 400px"
+                        alt="{{ block.settings.alt_text | default: product.featured_media.alt | default: product.title | escape }}"
+                        class="cpc-card-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                        width="{{ product.featured_media.width }}"
+                        height="{{ product.featured_media.height }}"
+                      >
+                    {%- else -%}
+                      <div class="cpc-card-placeholder">
+                        {{ 'product-1' | placeholder_svg_tag: 'cpc-placeholder-svg' }}
                       </div>
                     {%- endif -%}
-                  {%- endif -%}
-
-                  <div class="cpc-card-price">
-                    {%- assign variant = product.selected_or_first_available_variant -%}
-                    {%- if variant.compare_at_price > variant.price -%}
-                      <span class="cpc-price-compare">{{ variant.compare_at_price | money }}</span>
-                    {%- endif -%}
-                    <span class="cpc-price-current">{{ variant.price | money }}</span>
                   </div>
-                </div>
-              </a>
-            </div>
+
+                  <div class="cpc-card-content">
+                    {%- if show_vendor and product.vendor != blank -%}
+                      <p class="cpc-card-vendor">{{ product.vendor }}</p>
+                    {%- endif -%}
+                    
+                    <h3 class="cpc-card-title">{{ product.title }}</h3>
+
+                    {%- if show_color_swatches -%}
+                      {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+                      {%- if color_option != blank and color_option.values.size > 0 -%}
+                        <div class="cpc-card-colors">
+                          {%- for value in color_option.values limit: 5 -%}
+                            {%- assign color_name = value | downcase -%}
+                            {%- assign color_map = 'red,blue,green,yellow,black,white,gray,grey,pink,purple,orange,brown,navy,burgundy' | split: ',' -%}
+                            {%- assign color_found = false -%}
+                            {%- for color in color_map -%}
+                              {%- if color_name contains color -%}
+                                {%- assign color_found = true -%}
+                                {%- break -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+                            <span class="cpc-color-swatch" style="background-color: {{ value | handleize }};" title="{{ value }}"></span>
+                          {%- endfor -%}
+                          {%- if color_option.values.size > 5 -%}
+                            <span class="cpc-color-more">+{{ color_option.values.size | minus: 5 }}</span>
+                          {%- endif -%}
+                        </div>
+                      {%- endif -%}
+                    {%- endif -%}
+
+                    <div class="cpc-card-price">
+                      {%- assign variant = product.selected_or_first_available_variant -%}
+                      {%- if variant.compare_at_price > variant.price -%}
+                        <span class="cpc-price-compare">{{ variant.compare_at_price | money }}</span>
+                      {%- endif -%}
+                      <span class="cpc-price-current">{{ variant.price | money }}</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {%- endif -%}
           {%- endfor -%}
         </div>
 
-        {%- if show_dots and collection.products.size > 1 -%}
+        {%- if show_dots and item_blocks.size > 1 -%}
           <div class="cpc-dots" data-dots>
-            {%- for product in collection.products limit: products_to_show -%}
-              <button
-                type="button"
-                class="cpc-dot{% if forloop.first %} cpc-dot--active{% endif %}"
-                data-dot-index="{{ forloop.index0 }}"
-                aria-label="{{ 'general.accessibility.go_to_slide' | t | default: 'Go to slide' }} {{ forloop.index }}"
-              ></button>
+            {%- for block in item_blocks -%}
+              {%- if block.settings.product != blank -%}
+                <button
+                  type="button"
+                  class="cpc-dot{% if forloop.first %} cpc-dot--active{% endif %}"
+                  data-dot-index="{{ forloop.index0 }}"
+                  aria-label="{{ 'general.accessibility.go_to_slide' | t | default: 'Go to slide' }} {{ forloop.index }}"
+                ></button>
+              {%- endif -%}
             {%- endfor -%}
           </div>
         {%- endif -%}
@@ -250,6 +290,19 @@
     aspect-ratio: 3 / 4;
     overflow: hidden;
     background: rgba(var(--color-foreground), 0.03);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-badge {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    background: rgba(var(--color-button), 1);
+    color: rgba(var(--color-button-text), 1);
+    padding: 0.6rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    z-index: 2;
   }
 
   .cpc-section--{{ section_id }} .cpc-card-image {
@@ -710,20 +763,6 @@
       "default": "center"
     },
     {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection"
-    },
-    {
-      "type": "range",
-      "id": "products_to_show",
-      "label": "Products to show",
-      "min": 2,
-      "max": 20,
-      "step": 1,
-      "default": 10
-    },
-    {
       "type": "range",
       "id": "gap",
       "label": "Gap between cards",
@@ -785,9 +824,97 @@
       "info": "Only applies if autoplay is enabled"
     }
   ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "info": "Optional badge text to display on the media"
+        },
+        {
+          "type": "select",
+          "id": "media_source",
+          "label": "Media source",
+          "options": [
+            {
+              "value": "product_featured",
+              "label": "Product featured image"
+            },
+            {
+              "value": "custom_image_or_gif",
+              "label": "Custom image/GIF"
+            },
+            {
+              "value": "external_gif_url",
+              "label": "External GIF URL"
+            }
+          ],
+          "default": "product_featured"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_media",
+          "label": "Custom image/GIF",
+          "info": "Only used if media source is 'Custom image/GIF'"
+        },
+        {
+          "type": "text",
+          "id": "external_gif_url",
+          "label": "External GIF URL",
+          "info": "Only used if media source is 'External GIF URL'"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Alt text",
+          "info": "Override default alt text for the image"
+        },
+        {
+          "type": "select",
+          "id": "focal_position",
+          "label": "Focal point",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Center Product Carousel"
+      "name": "Center Product Carousel",
+      "blocks": [
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        }
+      ]
     }
   ]
 }
