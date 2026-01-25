@@ -562,13 +562,10 @@
       return closestIndex;
     }
 
-    function getOriginalIndex(realIndex) {
-      if (realIndex < clonesCount) {
-        return realIndex + originalCount - clonesCount;
-      } else if (realIndex >= clonesCount + originalCount) {
-        return realIndex - clonesCount - originalCount;
-      }
-      return realIndex - clonesCount;
+    function getOriginalIndexByReal(realIndex) {
+      const s = slides[realIndex];
+      const v = s ? parseInt(s.dataset.originalIndex || '0', 10) : 0;
+      return Number.isNaN(v) ? 0 : v;
     }
 
     function getRealIndex(originalIndex) {
@@ -587,16 +584,26 @@
       });
     }
 
+    let scrollEndTimer = null;
+
+    function onScroll() {
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => {
+        correctPosition();
+      }, 120);
+    }
+
     function correctPosition() {
       if (isCorrecting || slides.length === 0) return;
       
-      const realIndex = getClosestIndexToCenter();
-      let correctedRealIndex = realIndex;
+      const closestReal = getClosestIndexToCenter();
+      let corrected = closestReal;
       
-      if (realIndex < clonesCount) {
+      if (closestReal < clonesCount) {
+        // In prepended copy - jump to middle copy
+        corrected = closestReal + originalCount;
         isCorrecting = true;
-        correctedRealIndex = realIndex + originalCount;
-        const target = slides[correctedRealIndex];
+        const target = slides[corrected];
         if (target) {
           track.scrollTo({
             left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -604,10 +611,11 @@
           });
         }
         setTimeout(() => { isCorrecting = false; }, 50);
-      } else if (realIndex >= clonesCount + originalCount) {
+      } else if (closestReal >= clonesCount + originalCount) {
+        // In appended copy - jump to middle copy
+        corrected = closestReal - originalCount;
         isCorrecting = true;
-        correctedRealIndex = realIndex - originalCount;
-        const target = slides[correctedRealIndex];
+        const target = slides[corrected];
         if (target) {
           track.scrollTo({
             left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -617,19 +625,11 @@
         setTimeout(() => { isCorrecting = false; }, 50);
       }
       
-      currentRealIndex = correctedRealIndex;
-      currentIndex = getOriginalIndex(correctedRealIndex);
-      setActiveByRealIndex(correctedRealIndex);
+      // Update indices (always lands in middle copy)
+      currentRealIndex = corrected;
+      currentIndex = getOriginalIndexByReal(corrected);
+      setActiveByRealIndex(corrected);
       updateDots();
-    }
-
-    function handleScrollRaf() {
-      if (scrollRaf) cancelAnimationFrame(scrollRaf);
-      scrollRaf = requestAnimationFrame(() => {
-        if (!isScrolling && !isCorrecting) {
-          correctPosition();
-        }
-      });
     }
 
     function scrollToRealIndex(realIndex, smooth = true) {
@@ -643,7 +643,7 @@
 
       isScrolling = true;
       currentRealIndex = realIndex;
-      currentIndex = getOriginalIndex(realIndex);
+      currentIndex = getOriginalIndexByReal(realIndex);
       
       track.scrollTo({
         left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
@@ -678,12 +678,20 @@
 
     function scrollToPrev() {
       if (slides.length <= 1) return;
+      // If extremely close to the start edge, recenter first
+      if (currentRealIndex <= 1) {
+        correctPosition();
+      }
       const newRealIndex = Math.max(0, currentRealIndex - 1);
       scrollToRealIndex(newRealIndex, true);
     }
 
     function scrollToNext() {
       if (slides.length <= 1) return;
+      // If extremely close to the end edge, recenter first
+      if (currentRealIndex >= slides.length - 2) {
+        correctPosition();
+      }
       const newRealIndex = Math.min(slides.length - 1, currentRealIndex + 1);
       scrollToRealIndex(newRealIndex, true);
     }
@@ -807,31 +815,34 @@
     }
 
     function buildInfiniteLoop() {
-      const slidesPerView = getSlidesPerView();
-      clonesCount = Math.min(slidesPerView, originalCount);
-      
-      if (originalCount <= clonesCount) {
+      // For 1 or fewer slides, no loop needed
+      if (originalCount <= 1) {
         slides = Array.from(originalSlides);
+        clonesCount = 0;
+        currentRealIndex = 0;
+        currentIndex = 0;
+        setActiveByRealIndex(0);
+        updateDots();
         return;
       }
 
       // Remove existing clones
-      slides.forEach(slide => {
-        if (slide.dataset.clone === '1') {
-          slide.remove();
-        }
-      });
+      const existingClones = track.querySelectorAll('.cpc-slide[data-clone="1"]');
+      existingClones.forEach(clone => clone.remove());
 
-      // Clone last N slides and prepend
-      for (let i = originalCount - clonesCount; i < originalCount; i++) {
+      // Set clonesCount to full copy size (originalCount)
+      clonesCount = originalCount;
+
+      // Prepend FULL copy in original order
+      for (let i = 0; i < originalCount; i++) {
         const clone = originalSlides[i].cloneNode(true);
         clone.dataset.clone = '1';
         clone.dataset.originalIndex = i;
         track.insertBefore(clone, originalSlides[0]);
       }
 
-      // Clone first N slides and append
-      for (let i = 0; i < clonesCount; i++) {
+      // Append FULL copy in original order
+      for (let i = 0; i < originalCount; i++) {
         const clone = originalSlides[i].cloneNode(true);
         clone.dataset.clone = '1';
         clone.dataset.originalIndex = i;
@@ -841,19 +852,18 @@
       // Rebuild slides array
       slides = Array.from(track.querySelectorAll('.cpc-slide'));
       
-      // Scroll to first real slide
-      const firstRealIndex = clonesCount;
-      const firstRealSlide = slides[firstRealIndex];
-      if (firstRealSlide) {
+      // Start in the middle copy (first slide of middle copy)
+      const middleStartIndex = clonesCount + currentIndex;
+      const middleStartSlide = slides[middleStartIndex];
+      if (middleStartSlide) {
         track.scrollTo({
-          left: firstRealSlide.offsetLeft - (track.offsetWidth / 2) + (firstRealSlide.offsetWidth / 2),
+          left: middleStartSlide.offsetLeft - (track.offsetWidth / 2) + (middleStartSlide.offsetWidth / 2),
           behavior: 'auto'
         });
       }
       
-      currentRealIndex = firstRealIndex;
-      currentIndex = 0;
-      setActiveByRealIndex(firstRealIndex);
+      currentRealIndex = middleStartIndex;
+      setActiveByRealIndex(middleStartIndex);
       updateDots();
     }
 
@@ -882,17 +892,17 @@
           const dotIndex = parseInt(dot.dataset.dotIndex, 10);
           if (Number.isNaN(dotIndex)) return;
           
-          // Find closest occurrence of this original slide
-          const base = clonesCount + dotIndex;
+          // Target middle copy (baseMiddle = clonesCount + dotIndex)
+          const baseMiddle = clonesCount + dotIndex;
           const candidates = [
-            base,
-            base + originalCount,
-            base - originalCount
+            baseMiddle,
+            baseMiddle + originalCount,
+            baseMiddle - originalCount
           ].filter(c => c >= 0 && c < slides.length);
           
           // Pick the candidate closest to currentRealIndex
-          let closestCandidate = base;
-          let minDistance = Math.abs(base - currentRealIndex);
+          let closestCandidate = baseMiddle;
+          let minDistance = Math.abs(baseMiddle - currentRealIndex);
           
           candidates.forEach(candidate => {
             const distance = Math.abs(candidate - currentRealIndex);
@@ -907,7 +917,7 @@
       });
 
       track.addEventListener('scroll', () => {
-        handleScrollRaf();
+        onScroll();
       }, { passive: true });
 
       track.addEventListener('pointerdown', handlePointerDown);
