@@ -771,17 +771,18 @@
       resumeAutoplay();
     }
     
-    // Swipe logic (exact same as hex prism carousel)
+    // Swipe logic - adapted for scroll-based carousel
+    // Allows native scrolling while detecting swipes for navigation
     function handlePointerDown(e) {
       if (slides.length <= 1) return;
       
       isDragging = true;
       startX = e.touches ? e.touches[0].clientX : e.clientX;
+      startScrollLeft = track.scrollLeft;
       currentX = startX;
       dragOffset = 0;
       track.style.cursor = 'grabbing';
-      track.style.userSelect = 'none';
-      e.preventDefault();
+      // Don't prevent default - allow native scrolling
     }
     
     function handlePointerMove(e) {
@@ -790,10 +791,7 @@
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = x - startX;
       currentX = x;
-      
-      if (Math.abs(dragOffset) > 5) {
-        e.preventDefault();
-      }
+      // Don't prevent default - allow native scrolling
     }
     
     function handlePointerUp(e) {
@@ -802,14 +800,17 @@
         return;
       }
       
+      // Check if scroll position changed (native scroll happened)
+      const scrollDiff = Math.abs(track.scrollLeft - startScrollLeft);
       const threshold = track.dataset.slideWidth ? parseFloat(track.dataset.slideWidth) * 0.1 : 40;
       const wasDrag = Math.abs(dragOffset) > threshold;
+      const wasScroll = scrollDiff > threshold;
       
       isDragging = false;
       track.style.cursor = 'grab';
-      track.style.userSelect = '';
       
-      if (wasDrag) {
+      // Only navigate if it was a swipe gesture, not native scrolling
+      if (wasDrag && !wasScroll) {
         e.preventDefault();
         e.stopPropagation();
         if (dragOffset > 0) {
@@ -821,7 +822,11 @@
         return;
       }
       
+      // Native scroll happened - just update active slide
       dragOffset = 0;
+      setTimeout(() => {
+        updateActiveSlide();
+      }, 100);
     }
     
     async function handleQuickAdd(button) {
@@ -902,11 +907,11 @@
       // Scroll listener
       track.addEventListener('scroll', () => handleScroll(), { passive: true });
       
-      // Swipe support (exact same as hex prism carousel)
-      track.addEventListener('pointerdown', handlePointerDown);
-      track.addEventListener('pointermove', handlePointerMove);
-      track.addEventListener('pointerup', handlePointerUp);
-      track.addEventListener('pointercancel', handlePointerUp);
+      // Swipe support - allow native scrolling
+      track.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      track.addEventListener('pointermove', handlePointerMove, { passive: true });
+      track.addEventListener('pointerup', handlePointerUp, { passive: false });
+      track.addEventListener('pointercancel', handlePointerUp, { passive: true });
       
       // Overlay buttons
       const overlayNextButtons = section.querySelectorAll('.gmc-overlay-button--next');
