@@ -322,12 +322,16 @@
         "card_radius": 16,
         "media_height_desktop": 500,
         "media_height_mobile": 400,
-        "show_arrows": true,
+        "show_arrows": false,
         "show_dots": false,
         "autoplay": false,
         "autoplay_seconds": 5,
+        "overlay_button_mode": "off",
         "product_bar_enabled": true,
-        "product_bar_action": "link"
+        "product_bar_bg_color": "",
+        "product_bar_text_color": "#000000",
+        "product_bar_action": "link",
+        "loop_enabled": true
       }
     }
   },
