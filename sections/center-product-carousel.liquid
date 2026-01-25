@@ -4,6 +4,8 @@
   assign subheading = section.settings.subheading
   assign alignment = section.settings.alignment
   assign card_radius = section.settings.card_radius | default: 18
+  assign card_bottom_radius = section.settings.card_bottom_radius | default: 18
+  assign card_width = section.settings.card_width
   assign gap = section.settings.gap | default: 20
   assign show_arrows = section.settings.show_arrows
   assign show_dots = section.settings.show_dots
@@ -28,7 +30,7 @@
   data-autoplay="{{ autoplay }}"
   data-autoplay-delay="{{ autoplay_seconds }}"
   data-loop="true"
-  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px; --cpc-card-content-margin: {{ card_content_margin }}px;"
+  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-card-bottom-radius: {{ card_bottom_radius }}px;{% if card_width != blank %} --cpc-card-width: {{ card_width }}px;{% endif %} --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px; --cpc-card-content-margin: {{ card_content_margin }}px;"
 >
   <div class="cpc-container">
     {%- if heading != blank or subheading != blank -%}
@@ -259,10 +261,12 @@
     height: 100%;
     text-decoration: none;
     color: inherit;
-    border-radius: var(--cpc-card-radius);
+    border-radius: var(--cpc-card-radius) var(--cpc-card-radius) var(--cpc-card-bottom-radius) var(--cpc-card-bottom-radius);
     overflow: hidden;
     background: rgba(var(--color-foreground), 0.02);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: var(--cpc-card-width, 100%);
+    width: 100%;
   }
 
   .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card {
@@ -978,12 +982,33 @@
     {
       "type": "range",
       "id": "card_radius",
-      "label": "Card border radius",
+      "label": "Card border radius (top)",
       "min": 0,
       "max": 50,
       "step": 2,
       "default": 18,
       "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_bottom_radius",
+      "label": "Card border radius (bottom)",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card max width",
+      "min": 200,
+      "max": 800,
+      "step": 20,
+      "default": 400,
+      "unit": "px",
+      "info": "Maximum width for each card. Leave empty for full width."
     },
     {
       "type": "checkbox",
