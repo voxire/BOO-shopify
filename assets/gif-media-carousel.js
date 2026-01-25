@@ -76,111 +76,79 @@
 
     /**
      * Setup touch/drag support for better mobile swiping
+     * Uses the same pointer event logic as hex prism carousel
      */
     setupTouchSupport() {
+      let isDragging = false;
       let startX = 0;
-      let startY = 0;
-      let startScrollLeft = 0;
-      let isHorizontalSwipe = false;
-      let touchStartTime = 0;
-      const swipeThreshold = 50; // Minimum distance for a swipe
-      const swipeVelocityThreshold = 0.3; // Minimum velocity for a swipe
+      let currentX = 0;
+      let dragOffset = 0;
 
-      this.track.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].pageX;
-        startY = e.touches[0].pageY;
-        startScrollLeft = this.track.scrollLeft;
-        touchStartTime = Date.now();
-        isHorizontalSwipe = false;
-      }, { passive: true });
+      const handlePointerDown = (e) => {
+        if (this.slides.length <= 1) return;
 
-      this.track.addEventListener('touchmove', (e) => {
-        const currentX = e.touches[0].pageX;
-        const currentY = e.touches[0].pageY;
-        const deltaX = currentX - startX;
-        const deltaY = Math.abs(currentY - startY);
-        const absDeltaX = Math.abs(deltaX);
+        isDragging = true;
+        startX = e.clientX;
+        currentX = startX;
+        dragOffset = 0;
+        this.track.style.cursor = 'grabbing';
+        this.track.style.userSelect = 'none';
+        e.preventDefault();
+      };
 
-        // Determine if this is a horizontal swipe (only after a threshold)
-        if (!isHorizontalSwipe && absDeltaX > 10) {
-          isHorizontalSwipe = absDeltaX > deltaY;
-        }
+      const handlePointerMove = (e) => {
+        if (!isDragging) return;
 
-        // Only prevent default if it's a horizontal gesture to stop vertical page scroll
-        if (isHorizontalSwipe && absDeltaX > 5) {
+        const x = e.clientX;
+        dragOffset = x - startX;
+        currentX = x;
+
+        if (Math.abs(dragOffset) > 5) {
           e.preventDefault();
         }
-      }, { passive: false });
+      };
 
-      this.track.addEventListener('touchend', (e) => {
-        const endX = e.changedTouches[0].pageX;
-        const endY = e.changedTouches[0].pageY;
-        const deltaX = endX - startX;
-        const deltaY = Math.abs(endY - startY);
-        const absDeltaX = Math.abs(deltaX);
-        const touchDuration = Date.now() - touchStartTime;
-        const velocity = touchDuration > 0 ? absDeltaX / touchDuration : 0; // pixels per ms
+      const handlePointerUp = (e) => {
+        if (!isDragging) {
+          dragOffset = 0;
+          return;
+        }
 
-        // Check if this was a significant horizontal swipe
-        if (isHorizontalSwipe && absDeltaX > swipeThreshold && absDeltaX > deltaY) {
-          // Determine swipe direction and navigate
-          if (deltaX > 0) {
+        // Calculate threshold: 10% of slide width or 40px default
+        const slideWidth = this.getSlideWidth();
+        const threshold = slideWidth ? slideWidth * 0.1 : 40;
+        const wasDrag = Math.abs(dragOffset) > threshold;
+
+        isDragging = false;
+        this.track.style.cursor = 'grab';
+        this.track.style.userSelect = '';
+
+        if (wasDrag) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (dragOffset > 0) {
             // Swiped right - go to previous
             this.scrollToPrev();
           } else {
             // Swiped left - go to next
             this.scrollToNext();
           }
-        } else if (isHorizontalSwipe && velocity > swipeVelocityThreshold && absDeltaX > 30) {
-          // Fast swipe even if distance is less
-          if (deltaX > 0) {
-            this.scrollToPrev();
-          } else {
-            this.scrollToNext();
-          }
-        } else {
-          // Normal scroll - just update active slide
-          setTimeout(() => {
-            this.updateActiveSlide();
-          }, 100);
+          dragOffset = 0;
+          return;
         }
 
-        isHorizontalSwipe = false;
-      }, { passive: true });
+        dragOffset = 0;
+        // Update active slide if it was just a small movement
+        setTimeout(() => {
+          this.updateActiveSlide();
+        }, 100);
+      };
 
-      // Mouse drag support for desktop
-      let isDragging = false;
-      let mouseStartX = 0;
-      let mouseStartScrollLeft = 0;
-
-      this.track.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        mouseStartX = e.pageX - this.track.getBoundingClientRect().left;
-        mouseStartScrollLeft = this.track.scrollLeft;
-        this.track.style.scrollBehavior = 'auto';
-        this.track.style.cursor = 'grabbing';
-      });
-
-      this.track.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - this.track.getBoundingClientRect().left;
-        const walk = (x - mouseStartX) * 1.5;
-        this.track.scrollLeft = mouseStartScrollLeft - walk;
-      });
-
-      this.track.addEventListener('mouseup', () => {
-        isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
-        this.track.style.cursor = 'grab';
-        this.updateActiveSlide();
-      });
-
-      this.track.addEventListener('mouseleave', () => {
-        isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
-        this.track.style.cursor = 'grab';
-      });
+      // Use pointer events (same as hex prism carousel)
+      this.track.addEventListener('pointerdown', handlePointerDown);
+      this.track.addEventListener('pointermove', handlePointerMove);
+      this.track.addEventListener('pointerup', handlePointerUp);
+      this.track.addEventListener('pointercancel', handlePointerUp);
 
       // Set initial cursor
       this.track.style.cursor = 'grab';
