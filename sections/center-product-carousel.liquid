@@ -39,19 +39,6 @@
 
     {%- if item_blocks.size > 0 -%}
       <div class="cpc-carousel-wrapper">
-        {%- if show_arrows -%}
-          <button type="button" class="cpc-arrow cpc-arrow--prev" aria-label="{{ 'general.accessibility.previous' | t | default: 'Previous' }}">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button type="button" class="cpc-arrow cpc-arrow--next" aria-label="{{ 'general.accessibility.next' | t | default: 'Next' }}">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        {%- endif -%}
-
         <div class="cpc-viewport" data-viewport>
           <div class="cpc-track" data-track>
             {%- for block in item_blocks -%}
@@ -160,21 +147,6 @@
             {%- endfor -%}
           </div>
         </div>
-
-        {%- if show_dots and item_blocks.size > 1 -%}
-          <div class="cpc-dots" data-dots>
-            {%- for block in item_blocks -%}
-              {%- if block.settings.product != blank -%}
-                <button
-                  type="button"
-                  class="cpc-dot{% if forloop.first %} cpc-dot--active{% endif %}"
-                  data-dot-index="{{ forloop.index0 }}"
-                  aria-label="{{ 'general.accessibility.go_to_slide' | t | default: 'Go to slide' }} {{ forloop.index }}"
-                ></button>
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        {%- endif -%}
       </div>
     {%- else -%}
       <div class="cpc-empty">
@@ -580,9 +552,7 @@
     }
 
     function updateDots() {
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('cpc-dot--active', i === currentIndex);
-      });
+      // Dots removed - no-op
     }
 
     let scrollEndTimer = null;
@@ -607,13 +577,17 @@
       let corrected = closestReal;
       let needsJump = false;
       
+      // With 3 copies per side, we have: [PRE x3] + [MIDDLE] + [POST x3]
+      // Middle starts at clonesCount, ends at clonesCount + originalCount
       if (closestReal < clonesCount) {
-        // In prepended copy - jump to middle copy
-        corrected = closestReal + originalCount;
+        // In prepended copies - jump to corresponding position in middle copy
+        const offsetInPre = closestReal % originalCount;
+        corrected = clonesCount + offsetInPre;
         needsJump = true;
       } else if (closestReal >= clonesCount + originalCount) {
-        // In appended copy - jump to middle copy
-        corrected = closestReal - originalCount;
+        // In appended copies - jump to corresponding position in middle copy
+        const offsetInPost = (closestReal - clonesCount - originalCount) % originalCount;
+        corrected = clonesCount + offsetInPost;
         needsJump = true;
       }
       
@@ -836,23 +810,28 @@
       const existingClones = track.querySelectorAll('.cpc-slide[data-clone="1"]');
       existingClones.forEach(clone => clone.remove());
 
-      // Set clonesCount to full copy size (originalCount)
-      clonesCount = originalCount;
+      // Create 3 full copies on each side for seamless infinite loop
+      const copiesPerSide = 3;
+      clonesCount = originalCount * copiesPerSide;
 
-      // Prepend FULL copy in original order
-      for (let i = 0; i < originalCount; i++) {
-        const clone = originalSlides[i].cloneNode(true);
-        clone.dataset.clone = '1';
-        clone.dataset.originalIndex = i;
-        track.insertBefore(clone, originalSlides[0]);
+      // Prepend 3 FULL copies in original order
+      for (let copy = 0; copy < copiesPerSide; copy++) {
+        for (let i = 0; i < originalCount; i++) {
+          const clone = originalSlides[i].cloneNode(true);
+          clone.dataset.clone = '1';
+          clone.dataset.originalIndex = i;
+          track.insertBefore(clone, originalSlides[0]);
+        }
       }
 
-      // Append FULL copy in original order
-      for (let i = 0; i < originalCount; i++) {
-        const clone = originalSlides[i].cloneNode(true);
-        clone.dataset.clone = '1';
-        clone.dataset.originalIndex = i;
-        track.appendChild(clone);
+      // Append 3 FULL copies in original order
+      for (let copy = 0; copy < copiesPerSide; copy++) {
+        for (let i = 0; i < originalCount; i++) {
+          const clone = originalSlides[i].cloneNode(true);
+          clone.dataset.clone = '1';
+          clone.dataset.originalIndex = i;
+          track.appendChild(clone);
+        }
       }
 
       // Rebuild slides array
@@ -887,40 +866,6 @@
 
       // Build infinite loop
       buildInfiniteLoop();
-
-      // Event listeners
-      if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPrev(); });
-      if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToNext(); });
-
-      dots.forEach((dot) => {
-        dot.addEventListener('click', (e) => {
-          e.preventDefault();
-          const dotIndex = parseInt(dot.dataset.dotIndex, 10);
-          if (Number.isNaN(dotIndex)) return;
-          
-          // Target middle copy (baseMiddle = clonesCount + dotIndex)
-          const baseMiddle = clonesCount + dotIndex;
-          const candidates = [
-            baseMiddle,
-            baseMiddle + originalCount,
-            baseMiddle - originalCount
-          ].filter(c => c >= 0 && c < slides.length);
-          
-          // Pick the candidate closest to currentRealIndex
-          let closestCandidate = baseMiddle;
-          let minDistance = Math.abs(baseMiddle - currentRealIndex);
-          
-          candidates.forEach(candidate => {
-            const distance = Math.abs(candidate - currentRealIndex);
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestCandidate = candidate;
-            }
-          });
-          
-          scrollToRealIndex(closestCandidate, true);
-        });
-      });
 
       track.addEventListener('scroll', () => {
         onScroll();
