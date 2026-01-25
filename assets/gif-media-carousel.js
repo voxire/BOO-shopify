@@ -80,12 +80,16 @@
     setupTouchSupport() {
       let startX = 0;
       let startY = 0;
+      let startScrollLeft = 0;
       let isHorizontalSwipe = false;
       let touchStartTime = 0;
+      const swipeThreshold = 50; // Minimum distance for a swipe
+      const swipeVelocityThreshold = 0.3; // Minimum velocity for a swipe
 
       this.track.addEventListener('touchstart', (e) => {
         startX = e.touches[0].pageX;
         startY = e.touches[0].pageY;
+        startScrollLeft = this.track.scrollLeft;
         touchStartTime = Date.now();
         isHorizontalSwipe = false;
       }, { passive: true });
@@ -93,34 +97,66 @@
       this.track.addEventListener('touchmove', (e) => {
         const currentX = e.touches[0].pageX;
         const currentY = e.touches[0].pageY;
-        const deltaX = Math.abs(currentX - startX);
+        const deltaX = currentX - startX;
         const deltaY = Math.abs(currentY - startY);
+        const absDeltaX = Math.abs(deltaX);
 
         // Determine if this is a horizontal swipe (only after a threshold)
-        if (!isHorizontalSwipe && deltaX > 10) {
-          isHorizontalSwipe = deltaX > deltaY;
+        if (!isHorizontalSwipe && absDeltaX > 10) {
+          isHorizontalSwipe = absDeltaX > deltaY;
         }
 
         // Only prevent default if it's a horizontal gesture to stop vertical page scroll
-        // But let the browser handle the actual scrolling naturally
-        if (isHorizontalSwipe && deltaX > 5) {
+        if (isHorizontalSwipe && absDeltaX > 5) {
           e.preventDefault();
         }
       }, { passive: false });
 
-      this.track.addEventListener('touchend', () => {
-        // Update active slide after touch ends (native scroll will handle the movement)
-        setTimeout(() => {
-          this.updateActiveSlide();
-        }, 100);
+      this.track.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].pageX;
+        const endY = e.changedTouches[0].pageY;
+        const deltaX = endX - startX;
+        const deltaY = Math.abs(endY - startY);
+        const absDeltaX = Math.abs(deltaX);
+        const touchDuration = Date.now() - touchStartTime;
+        const velocity = touchDuration > 0 ? absDeltaX / touchDuration : 0; // pixels per ms
+
+        // Check if this was a significant horizontal swipe
+        if (isHorizontalSwipe && absDeltaX > swipeThreshold && absDeltaX > deltaY) {
+          // Determine swipe direction and navigate
+          if (deltaX > 0) {
+            // Swiped right - go to previous
+            this.scrollToPrev();
+          } else {
+            // Swiped left - go to next
+            this.scrollToNext();
+          }
+        } else if (isHorizontalSwipe && velocity > swipeVelocityThreshold && absDeltaX > 30) {
+          // Fast swipe even if distance is less
+          if (deltaX > 0) {
+            this.scrollToPrev();
+          } else {
+            this.scrollToNext();
+          }
+        } else {
+          // Normal scroll - just update active slide
+          setTimeout(() => {
+            this.updateActiveSlide();
+          }, 100);
+        }
+
         isHorizontalSwipe = false;
       }, { passive: true });
 
       // Mouse drag support for desktop
+      let isDragging = false;
+      let mouseStartX = 0;
+      let mouseStartScrollLeft = 0;
+
       this.track.addEventListener('mousedown', (e) => {
         isDragging = true;
-        startX = e.pageX - this.track.offsetLeft;
-        scrollLeft = this.track.scrollLeft;
+        mouseStartX = e.pageX - this.track.getBoundingClientRect().left;
+        mouseStartScrollLeft = this.track.scrollLeft;
         this.track.style.scrollBehavior = 'auto';
         this.track.style.cursor = 'grabbing';
       });
@@ -128,9 +164,9 @@
       this.track.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
-        const x = e.pageX - this.track.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        this.track.scrollLeft = scrollLeft - walk;
+        const x = e.pageX - this.track.getBoundingClientRect().left;
+        const walk = (x - mouseStartX) * 1.5;
+        this.track.scrollLeft = mouseStartScrollLeft - walk;
       });
 
       this.track.addEventListener('mouseup', () => {
