@@ -17,6 +17,7 @@
   assign card_content_border_width = section.settings.card_content_border_width | default: 0
   assign card_content_border_radius = section.settings.card_content_border_radius | default: 0
   assign card_content_padding = section.settings.card_content_padding | default: 24
+  assign card_content_margin = section.settings.card_content_margin | default: 0
   assign item_blocks = section.blocks | where: 'type', 'product'
 -%}
 
@@ -27,7 +28,7 @@
   data-autoplay="{{ autoplay }}"
   data-autoplay-delay="{{ autoplay_seconds }}"
   data-loop="true"
-  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px;"
+  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px; --cpc-card-content-margin: {{ card_content_margin }}px;"
 >
   <div class="cpc-container">
     {%- if heading != blank or subheading != blank -%}
@@ -313,6 +314,7 @@
 
   .cpc-section--{{ section_id }} .cpc-card-content {
     padding: var(--cpc-card-content-padding, 1.5rem);
+    margin: var(--cpc-card-content-margin, 0);
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
@@ -1044,6 +1046,16 @@
       "max": 60,
       "step": 2,
       "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_content_margin",
+      "label": "Margin",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "default": 0,
       "unit": "px"
     },
     {
