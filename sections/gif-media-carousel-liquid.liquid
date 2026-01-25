@@ -1,0 +1,1243 @@
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign alignment = section.settings.alignment
+  assign layout = section.settings.layout
+  assign slides_per_view_desktop = section.settings.slides_per_view_desktop | default: 6
+  assign slides_per_view_tablet = section.settings.slides_per_view_tablet | default: 3
+  assign slides_per_view_mobile = section.settings.slides_per_view_mobile | default: 1.3
+  assign gap = section.settings.gap | default: 18
+  assign card_radius = section.settings.card_radius | default: 18
+  assign media_height_desktop = section.settings.media_height_desktop | default: 420
+  assign media_height_mobile = section.settings.media_height_mobile | default: 340
+  assign show_arrows = section.settings.show_arrows
+  assign show_dots = section.settings.show_dots
+  assign autoplay = section.settings.autoplay
+  assign autoplay_seconds = section.settings.autoplay_seconds | default: 5
+  assign product_bar_enabled = section.settings.product_bar_enabled
+  assign product_bar_action = section.settings.product_bar_action | default: 'link'
+  assign overlay_button_mode = section.settings.overlay_button_mode | default: 'off'
+  assign product_bar_bg_color = section.settings.product_bar_bg_color
+  assign product_bar_text_color = section.settings.product_bar_text_color
+  assign item_blocks = section.blocks | where: 'type', 'item'
+-%}
+
+<section
+  id="GifMediaCarousel-{{ section_id }}"
+  class="gmc-section gmc-section--{{ section_id }}"
+  data-section-id="{{ section_id }}"
+  data-autoplay="{{ autoplay }}"
+  data-autoplay-delay="{{ autoplay_seconds }}"
+  data-loop="true"
+  style="--gmc-gap: {{ gap }}px; --gmc-card-radius: {{ card_radius }}px; --gmc-media-height-desktop: {{ media_height_desktop }}px; --gmc-media-height-mobile: {{ media_height_mobile }}px; --gmc-slides-desktop: {{ slides_per_view_desktop }}; --gmc-slides-tablet: {{ slides_per_view_tablet }}; --gmc-slides-mobile: {{ slides_per_view_mobile }}; --gmc-autoplay-delay: {{ autoplay_seconds }}s;{% if product_bar_bg_color != blank %} --gmc-productbar-bg: {{ product_bar_bg_color }};{% endif %}{% if product_bar_text_color != blank %} --gmc-productbar-text: {{ product_bar_text_color }};{% endif %}"
+>
+  <div class="gmc-container{% if layout == 'full-width' %} gmc-container--full-width{% endif %}">
+    {%- if heading != blank or subheading != blank -%}
+      <div class="gmc-header gmc-header--{{ alignment }}">
+        {%- if heading != blank -%}
+          <h2 class="gmc-heading">{{ heading }}</h2>
+        {%- endif -%}
+        {%- if subheading != blank -%}
+          <p class="gmc-subheading">{{ subheading }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if item_blocks.size > 0 -%}
+      <div class="gmc-carousel-wrapper">
+        {%- if show_arrows -%}
+          <button type="button" class="gmc-arrow gmc-arrow--prev" aria-label="{{ 'general.accessibility.previous' | t | default: 'Previous' }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button type="button" class="gmc-arrow gmc-arrow--next" aria-label="{{ 'general.accessibility.next' | t | default: 'Next' }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        {%- endif -%}
+
+        <div class="gmc-track" data-track>
+          {%- for block in item_blocks -%}
+            {%- assign product = block.settings.product -%}
+            {%- if product != blank -%}
+              <div class="gmc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+                <div class="gmc-slide-inner">
+                  {%- comment -%} Media Card {%- endcomment -%}
+                  <div class="gmc-media">
+                    {%- if block.settings.badge_text != blank -%}
+                      <div class="gmc-badge">{{ block.settings.badge_text }}</div>
+                    {%- endif -%}
+                    
+                    {%- liquid
+                      assign media_source = block.settings.media_source | default: 'product_featured'
+                      assign focal_position = block.settings.focal_position | default: 'center'
+                      assign object_position = 'center'
+                      if focal_position == 'top'
+                        assign object_position = 'top center'
+                      elsif focal_position == 'bottom'
+                        assign object_position = 'bottom center'
+                      endif
+                    -%}
+
+                    {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
+                      <img
+                        src="{{ block.settings.external_gif_url }}"
+                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                        class="gmc-media-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                      >
+                    {%- elsif media_source == 'custom_image_or_gif' and block.settings.custom_media != blank -%}
+                      <img
+                        src="{{ block.settings.custom_media | image_url: width: 1200 }}"
+                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                        class="gmc-media-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                      >
+                    {%- elsif product.featured_media != blank -%}
+                      <img
+                        src="{{ product.featured_media.preview_image | image_url: width: 1200 }}"
+                        alt="{{ block.settings.alt_text | default: product.featured_media.alt | default: product.title | escape }}"
+                        class="gmc-media-image"
+                        style="object-position: {{ object_position }};"
+                        {% unless forloop.first %}loading="lazy"{% endunless %}
+                      >
+                    {%- else -%}
+                      <div class="gmc-media-placeholder">
+                        {{ 'product-1' | placeholder_svg_tag: 'gmc-placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+
+                    {%- comment -%} Overlay Button {%- endcomment -%}
+                    {%- if overlay_button_mode != 'off' -%}
+                      <div class="gmc-overlay-button-wrapper">
+                        {%- if overlay_button_mode == 'next' -%}
+                          <button type="button" class="gmc-overlay-button gmc-overlay-button--next" aria-label="{{ 'general.accessibility.next' | t | default: 'Next' }}">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          </button>
+                        {%- elsif overlay_button_mode == 'link' -%}
+                          <a href="{{ product.url }}" class="gmc-overlay-button gmc-overlay-button--link" aria-label="{{ product.title | escape }}">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          </a>
+                        {%- elsif overlay_button_mode == 'quick_add' -%}
+                          {%- assign variant = product.selected_or_first_available_variant -%}
+                          {%- if variant.available -%}
+                            <button
+                              type="button"
+                              class="gmc-overlay-button gmc-overlay-button--quick-add"
+                              data-variant-id="{{ variant.id }}"
+                              data-product-id="{{ product.id }}"
+                              aria-label="{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }}"
+                            >
+                              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                              </svg>
+                            </button>
+                          {%- endif -%}
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+                  </div>
+
+                  {%- comment -%} Product Bar {%- endcomment -%}
+                  {%- if product_bar_enabled -%}
+                    <div class="gmc-productbar">
+                      {%- if product.featured_image != blank -%}
+                        <div class="gmc-productbar-thumb">
+                          <img
+                            src="{{ product.featured_image | image_url: width: 100 }}"
+                            alt="{{ product.title | escape }}"
+                            loading="lazy"
+                            width="50"
+                            height="50"
+                          >
+                        </div>
+                      {%- endif -%}
+                      
+                      <div class="gmc-productbar-content">
+                        <h3 class="gmc-productbar-title">
+                          <a href="{{ product.url }}" class="gmc-productbar-title-link">{{ product.title }}</a>
+                        </h3>
+                        <div class="gmc-productbar-price">
+                          {%- if product.compare_at_price > product.price -%}
+                            <span class="gmc-price-compare">{{ product.compare_at_price | money }}</span>
+                          {%- endif -%}
+                          <span class="gmc-price-current">{{ product.price | money }}</span>
+                        </div>
+                      </div>
+
+                      <div class="gmc-productbar-action">
+                        {%- if product_bar_action == 'quick_add' -%}
+                          {%- assign variant = product.selected_or_first_available_variant -%}
+                          {%- if variant.available -%}
+                            <button
+                              type="button"
+                              class="gmc-quick-add-btn"
+                              data-variant-id="{{ variant.id }}"
+                              data-product-id="{{ product.id }}"
+                              aria-label="{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }}"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                              </svg>
+                            </button>
+                          {%- else -%}
+                            <span class="gmc-sold-out">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+                          {%- endif -%}
+                        {%- else -%}
+                          <a href="{{ product.url }}" class="gmc-product-link" aria-label="{{ product.title | escape }}">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M6 3L10 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          </a>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if show_dots and item_blocks.size > 1 -%}
+          <div class="gmc-dots" data-dots>
+            {%- for block in item_blocks -%}
+              {%- if block.settings.product != blank -%}
+                <button
+                  type="button"
+                  class="gmc-dot{% if forloop.first %} gmc-dot--active{% endif %}"
+                  data-dot-index="{{ forloop.index0 }}"
+                  aria-label="{{ 'general.accessibility.go_to_slide' | t | default: 'Go to slide' }} {{ forloop.index }}"
+                ></button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <div class="gmc-empty">
+        <p>{{ 'sections.collection_template.empty' | t | default: 'Add products to this carousel' }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  /* GIF Media Carousel - All styles embedded in Liquid */
+  .gmc-section--{{ section_id }} {
+    padding: 4rem 0;
+    position: relative;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-container {
+    max-width: var(--page-width, 120rem);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-container--full-width {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-header {
+    margin-bottom: 3rem;
+    text-align: {{ alignment }};
+  }
+
+  .gmc-section--{{ section_id }} .gmc-heading {
+    font-size: 2.4rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-subheading {
+    font-size: 1.6rem;
+    color: rgba(var(--color-foreground), 0.7);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-carousel-wrapper {
+    position: relative;
+    padding: 0 4rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .gmc-section--{{ section_id }} .gmc-carousel-wrapper {
+      padding: 0 3rem;
+    }
+  }
+
+  .gmc-section--{{ section_id }} .gmc-track {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    gap: var(--gmc-gap);
+    padding: 2rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-x;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-track:active {
+    cursor: grabbing;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-slide {
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 0.5rem;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform-origin: center;
+    opacity: 0.88;
+  }
+
+  @media screen and (max-width: 749px) {
+    .gmc-section--{{ section_id }} .gmc-slide {
+      flex: 0 0 calc(100% / var(--gmc-slides-mobile) - var(--gmc-gap) * 0.3);
+      transform: scale(0.95);
+    }
+    
+    .gmc-section--{{ section_id }} .gmc-slide.is-active {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .gmc-section--{{ section_id }} .gmc-slide {
+      flex: 0 0 calc((100% - (var(--gmc-gap) * (var(--gmc-slides-tablet) - 1))) / var(--gmc-slides-tablet));
+      transform: scale(0.96);
+    }
+    
+    .gmc-section--{{ section_id }} .gmc-slide.is-active {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .gmc-section--{{ section_id }} .gmc-slide {
+      flex: 0 0 calc((100% - (var(--gmc-gap) * (var(--gmc-slides-desktop) - 1))) / var(--gmc-slides-desktop));
+      transform: scale(0.96);
+    }
+    
+    .gmc-section--{{ section_id }} .gmc-slide.is-active {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  .gmc-section--{{ section_id }} .gmc-slide-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-media {
+    position: relative;
+    width: 100%;
+    height: var(--gmc-media-height-mobile);
+    border-radius: var(--gmc-card-radius);
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.03);
+  }
+
+  @media screen and (min-width: 750px) {
+    .gmc-section--{{ section_id }} .gmc-media {
+      height: var(--gmc-media-height-desktop);
+    }
+  }
+
+  .gmc-section--{{ section_id }} .gmc-media-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-media-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-foreground), 0.03);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-badge {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    background: rgba(var(--color-button), 1);
+    color: rgba(var(--color-button-text), 1);
+    padding: 0.6rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    z-index: 2;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-overlay-button-wrapper {
+    position: absolute;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    z-index: 2;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-overlay-button {
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    color: rgba(var(--color-foreground), 1);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-overlay-button:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-overlay-button--link {
+    text-decoration: none;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem;
+    border-radius: var(--gmc-card-radius);
+    background: var(--gmc-productbar-bg, rgba(var(--color-foreground), 0.03));
+    color: var(--gmc-productbar-text, rgba(var(--color-foreground), 1));
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-thumb {
+    flex-shrink: 0;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 0.8rem;
+    overflow: hidden;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 0.4rem;
+    line-height: 1.3;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-title-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-price {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.3rem;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-price-compare {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-productbar-action {
+    flex-shrink: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-quick-add-btn,
+  .gmc-section--{{ section_id }} .gmc-product-link {
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: 50%;
+    background: rgba(var(--color-button), 1);
+    color: rgba(var(--color-button-text), 1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    text-decoration: none;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-quick-add-btn:hover,
+  .gmc-section--{{ section_id }} .gmc-product-link:hover {
+    transform: scale(1.1);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-quick-add-btn.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-quick-add-btn.success {
+    background: #10b981;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-sold-out {
+    font-size: 1.2rem;
+    opacity: 0.6;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(var(--color-foreground), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.2s ease, background 0.2s ease;
+    color: rgba(var(--color-foreground), 1);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-arrow:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.1);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-arrow--prev {
+    left: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-arrow--next {
+    right: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-dot {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-foreground), 0.3);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    padding: 0;
+  }
+
+  .gmc-section--{{ section_id }} .gmc-dot:hover {
+    transform: scale(1.2);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-dot--active {
+    background: rgba(var(--color-foreground), 1);
+    transform: scale(1.3);
+  }
+
+  .gmc-section--{{ section_id }} .gmc-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector(`#GifMediaCarousel-${sectionId}`);
+    if (!section) return;
+    
+    const track = section.querySelector('[data-track]');
+    const prevBtn = section.querySelector('.gmc-arrow--prev');
+    const nextBtn = section.querySelector('.gmc-arrow--next');
+    const dots = section.querySelectorAll('[data-dot-index]');
+    const slides = section.querySelectorAll('.gmc-slide');
+    const autoplayEnabled = section.dataset.autoplay === 'true';
+    const autoplayDelay = parseInt(section.dataset.autoplayDelay) || 5000;
+    
+    if (!track || slides.length === 0) return;
+    
+    let autoplayTimer = null;
+    let isPaused = false;
+    let currentIndex = 0;
+    let scrollRaf = null;
+    let isDragging = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let currentX = 0;
+    let dragOffset = 0;
+    
+    function getSlideWidth() {
+      if (slides.length === 0) return 0;
+      const firstSlide = slides[0];
+      const gap = parseInt(getComputedStyle(track).gap) || 18;
+      return firstSlide.offsetWidth + gap;
+    }
+    
+    function findActiveSlideIndex() {
+      if (slides.length === 0) return 0;
+      
+      const trackRect = track.getBoundingClientRect();
+      const trackCenter = trackRect.left + trackRect.width / 2;
+      
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+      
+      slides.forEach((slide, index) => {
+        const slideRect = slide.getBoundingClientRect();
+        const slideCenter = slideRect.left + slideRect.width / 2;
+        const distance = Math.abs(trackCenter - slideCenter);
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+      
+      return closestIndex;
+    }
+    
+    function updateActiveSlide() {
+      const activeIndex = findActiveSlideIndex();
+      
+      slides.forEach((slide, index) => {
+        if (index === activeIndex) {
+          slide.classList.add('is-active');
+        } else {
+          slide.classList.remove('is-active');
+        }
+      });
+      
+      currentIndex = activeIndex;
+    }
+    
+    function updateActiveState() {
+      dots.forEach((dot, index) => {
+        if (index === currentIndex) {
+          dot.classList.add('gmc-dot--active');
+        } else {
+          dot.classList.remove('gmc-dot--active');
+        }
+      });
+      
+      if (prevBtn) prevBtn.disabled = false;
+      if (nextBtn) nextBtn.disabled = false;
+    }
+    
+    function handleScroll() {
+      if (scrollRaf) {
+        cancelAnimationFrame(scrollRaf);
+      }
+      
+      scrollRaf = requestAnimationFrame(() => {
+        updateActiveSlide();
+        updateActiveState();
+      });
+    }
+    
+    function scrollToIndex(index, smooth = true) {
+      if (slides.length === 0) return;
+      
+      // Loop enabled
+      if (index < 0) {
+        index = slides.length - 1;
+      } else if (index >= slides.length) {
+        index = 0;
+      }
+      
+      const slideWidth = getSlideWidth();
+      const scrollPosition = slideWidth * index;
+      
+      if (smooth) {
+        track.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      } else {
+        track.scrollLeft = scrollPosition;
+      }
+      
+      currentIndex = index;
+      updateActiveSlide();
+      updateActiveState();
+      
+      if (autoplayEnabled && !isPaused) {
+        resetAutoplay();
+      }
+    }
+    
+    function scrollToPrev() {
+      const newIndex = currentIndex - 1 < 0 ? slides.length - 1 : currentIndex - 1;
+      scrollToIndex(newIndex);
+    }
+    
+    function scrollToNext() {
+      const newIndex = (currentIndex + 1) % slides.length;
+      scrollToIndex(newIndex);
+    }
+    
+    function startAutoplay() {
+      if (isPaused) return;
+      
+      autoplayTimer = setInterval(() => {
+        scrollToNext();
+      }, autoplayDelay);
+    }
+    
+    function pauseAutoplay() {
+      isPaused = true;
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    }
+    
+    function resumeAutoplay() {
+      isPaused = false;
+      startAutoplay();
+    }
+    
+    function resetAutoplay() {
+      pauseAutoplay();
+      resumeAutoplay();
+    }
+    
+    // Swipe logic (same as hex prism carousel)
+    function handlePointerDown(e) {
+      if (slides.length <= 1) return;
+      
+      isDragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      startScrollLeft = track.scrollLeft;
+      currentX = startX;
+      dragOffset = 0;
+      track.style.cursor = 'grabbing';
+    }
+    
+    function handlePointerMove(e) {
+      if (!isDragging) return;
+      
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      dragOffset = x - startX;
+      currentX = x;
+    }
+    
+    function handlePointerUp(e) {
+      if (!isDragging) {
+        dragOffset = 0;
+        return;
+      }
+      
+      const slideWidth = getSlideWidth();
+      const threshold = slideWidth ? slideWidth * 0.1 : 40;
+      const wasDrag = Math.abs(dragOffset) > threshold;
+      
+      isDragging = false;
+      track.style.cursor = 'grab';
+      
+      if (wasDrag) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (dragOffset > 0) {
+          scrollToPrev();
+        } else {
+          scrollToNext();
+        }
+        dragOffset = 0;
+        return;
+      }
+      
+      dragOffset = 0;
+      setTimeout(() => {
+        updateActiveSlide();
+      }, 100);
+    }
+    
+    async function handleQuickAdd(button) {
+      const variantId = button.dataset.variantId;
+      
+      if (!variantId) {
+        console.error('Variant ID not found');
+        return;
+      }
+      
+      button.disabled = true;
+      button.classList.add('loading');
+      
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: variantId,
+            quantity: 1
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && !data.status) {
+          button.classList.remove('loading');
+          button.classList.add('success');
+          
+          if (typeof publish !== 'undefined' && typeof PUB_SUB_EVENTS !== 'undefined') {
+            const cartResponse = await fetch('/cart.js');
+            const cartData = await cartResponse.json();
+            publish(PUB_SUB_EVENTS.cartUpdate, {
+              source: 'gif-media-carousel-liquid',
+              productVariantId: variantId,
+              cartData: cartData
+            });
+          } else {
+            document.dispatchEvent(new CustomEvent('cart:refresh'));
+          }
+          
+          setTimeout(() => {
+            button.classList.remove('success');
+            button.disabled = false;
+          }, 2000);
+          
+          const cartDrawer = document.querySelector('cart-drawer');
+          if (cartDrawer && typeof cartDrawer.open === 'function') {
+            cartDrawer.open();
+          }
+        } else {
+          throw new Error(data.description || 'Failed to add to cart');
+        }
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        button.classList.remove('loading');
+        button.disabled = false;
+        alert(error.message || 'Unable to add product to cart. Please try again.');
+      }
+    }
+    
+    function init() {
+      // Navigation buttons
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => scrollToPrev());
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => scrollToNext());
+      }
+      
+      // Dots
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => scrollToIndex(index));
+      });
+      
+      // Scroll listener
+      track.addEventListener('scroll', () => handleScroll(), { passive: true });
+      
+      // Swipe support (same as hex prism)
+      track.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      track.addEventListener('pointermove', handlePointerMove, { passive: true });
+      track.addEventListener('pointerup', handlePointerUp, { passive: false });
+      track.addEventListener('pointercancel', handlePointerUp, { passive: true });
+      track.addEventListener('touchstart', handlePointerDown, { passive: true });
+      track.addEventListener('touchmove', handlePointerMove, { passive: true });
+      track.addEventListener('touchend', handlePointerUp, { passive: false });
+      track.addEventListener('touchcancel', handlePointerUp, { passive: true });
+      
+      // Overlay buttons
+      const overlayNextButtons = section.querySelectorAll('.gmc-overlay-button--next');
+      overlayNextButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          scrollToNext();
+        });
+      });
+      
+      // Quick add buttons
+      const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
+      quickAddButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleQuickAdd(button);
+        });
+      });
+      
+      // Autoplay
+      if (autoplayEnabled) {
+        startAutoplay();
+        
+        section.addEventListener('mouseenter', () => pauseAutoplay());
+        section.addEventListener('mouseleave', () => resumeAutoplay());
+        section.addEventListener('focusin', () => pauseAutoplay());
+        section.addEventListener('focusout', () => resumeAutoplay());
+      }
+      
+      // Initial state
+      updateActiveSlide();
+      updateActiveState();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+    document.addEventListener('shopify:section:load', function(e) {
+      const sectionElement = e.detail || e.target;
+      const loadedSection = sectionElement.querySelector ? 
+        sectionElement.querySelector(`#GifMediaCarousel-${sectionId}`) :
+        (sectionElement.id && sectionElement.id === `GifMediaCarousel-${sectionId}` ? sectionElement : null);
+      if (loadedSection) {
+        // Re-initialize if needed
+        setTimeout(init, 100);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "GIF Media Carousel (Liquid)",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Products"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_desktop",
+      "label": "Slides per view (Desktop)",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_tablet",
+      "label": "Slides per view (Tablet)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_mobile",
+      "label": "Slides per view (Mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.3
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between slides",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "media_height_desktop",
+      "label": "Media height (Desktop)",
+      "min": 200,
+      "max": 800,
+      "step": 20,
+      "default": 420,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "media_height_mobile",
+      "label": "Media height (Mobile)",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "default": 340,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots indicator",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_seconds",
+      "label": "Autoplay delay",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "unit": "s",
+      "info": "Only applies if autoplay is enabled"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_bar_enabled",
+      "label": "Show product bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "product_bar_action",
+      "label": "Product bar action",
+      "options": [
+        {
+          "value": "link",
+          "label": "Link to product"
+        },
+        {
+          "value": "quick_add",
+          "label": "Quick add to cart"
+        }
+      ],
+      "default": "link"
+    },
+    {
+      "type": "select",
+      "id": "overlay_button_mode",
+      "label": "Overlay button mode",
+      "options": [
+        {
+          "value": "off",
+          "label": "Off"
+        },
+        {
+          "value": "next",
+          "label": "Next slide"
+        },
+        {
+          "value": "link",
+          "label": "Link to product"
+        },
+        {
+          "value": "quick_add",
+          "label": "Quick add to cart"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "color",
+      "id": "product_bar_bg_color",
+      "label": "Product bar background color"
+    },
+    {
+      "type": "color",
+      "id": "product_bar_text_color",
+      "label": "Product bar text color"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "info": "Optional badge text to display on the media"
+        },
+        {
+          "type": "select",
+          "id": "media_source",
+          "label": "Media source",
+          "options": [
+            {
+              "value": "product_featured",
+              "label": "Product featured image"
+            },
+            {
+              "value": "custom_image_or_gif",
+              "label": "Custom image/GIF"
+            },
+            {
+              "value": "external_gif_url",
+              "label": "External GIF URL"
+            }
+          ],
+          "default": "product_featured"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_media",
+          "label": "Custom image/GIF",
+          "info": "Only used if media source is 'Custom image/GIF'"
+        },
+        {
+          "type": "text",
+          "id": "external_gif_url",
+          "label": "External GIF URL",
+          "info": "Only used if media source is 'External GIF URL'"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Alt text",
+          "info": "Override default alt text for the image"
+        },
+        {
+          "type": "select",
+          "id": "focal_position",
+          "label": "Focal point",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "GIF Media Carousel (Liquid)"
+    }
+  ]
+}
+{% endschema %}
+
