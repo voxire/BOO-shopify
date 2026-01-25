@@ -1,0 +1,795 @@
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign alignment = section.settings.alignment
+  assign card_radius = section.settings.card_radius | default: 18
+  assign gap = section.settings.gap | default: 20
+  assign show_arrows = section.settings.show_arrows
+  assign show_dots = section.settings.show_dots
+  assign autoplay = section.settings.autoplay
+  assign autoplay_seconds = section.settings.autoplay_seconds | default: 5
+  assign collection = section.settings.collection
+  assign products_to_show = section.settings.products_to_show | default: 10
+  assign show_vendor = section.settings.show_vendor
+  assign show_color_swatches = section.settings.show_color_swatches
+-%}
+
+<section
+  id="CenterProductCarousel-{{ section_id }}"
+  class="cpc-section cpc-section--{{ section_id }}"
+  data-section-id="{{ section_id }}"
+  data-autoplay="{{ autoplay }}"
+  data-autoplay-delay="{{ autoplay_seconds }}"
+  data-loop="true"
+  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;"
+>
+  <div class="cpc-container">
+    {%- if heading != blank or subheading != blank -%}
+      <div class="cpc-header cpc-header--{{ alignment }}">
+        {%- if heading != blank -%}
+          <h2 class="cpc-heading">{{ heading }}</h2>
+        {%- endif -%}
+        {%- if subheading != blank -%}
+          <p class="cpc-subheading">{{ subheading }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if collection != blank and collection.products.size > 0 -%}
+      <div class="cpc-carousel-wrapper">
+        {%- if show_arrows -%}
+          <button type="button" class="cpc-arrow cpc-arrow--prev" aria-label="{{ 'general.accessibility.previous' | t | default: 'Previous' }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button type="button" class="cpc-arrow cpc-arrow--next" aria-label="{{ 'general.accessibility.next' | t | default: 'Next' }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        {%- endif -%}
+
+        <div class="cpc-track" data-track>
+          {%- for product in collection.products limit: products_to_show -%}
+            <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" data-slide-index="{{ forloop.index0 }}">
+              <a href="{{ product.url }}" class="cpc-card">
+                <div class="cpc-card-media">
+                  {%- if product.featured_media != blank -%}
+                    <img
+                      src="{{ product.featured_media | image_url: width: 600 }}"
+                      srcset="{{ product.featured_media | image_url: width: 300 }} 300w,
+                              {{ product.featured_media | image_url: width: 600 }} 600w,
+                              {{ product.featured_media | image_url: width: 900 }} 900w"
+                      sizes="(max-width: 749px) 85vw, 400px"
+                      alt="{{ product.featured_media.alt | default: product.title | escape }}"
+                      class="cpc-card-image"
+                      {% unless forloop.first %}loading="lazy"{% endunless %}
+                      width="{{ product.featured_media.width }}"
+                      height="{{ product.featured_media.height }}"
+                    >
+                  {%- else -%}
+                    <div class="cpc-card-placeholder">
+                      {{ 'product-1' | placeholder_svg_tag: 'cpc-placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <div class="cpc-card-content">
+                  {%- if show_vendor and product.vendor != blank -%}
+                    <p class="cpc-card-vendor">{{ product.vendor }}</p>
+                  {%- endif -%}
+                  
+                  <h3 class="cpc-card-title">{{ product.title }}</h3>
+
+                  {%- if show_color_swatches -%}
+                    {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+                    {%- if color_option != blank and color_option.values.size > 0 -%}
+                      <div class="cpc-card-colors">
+                        {%- for value in color_option.values limit: 5 -%}
+                          {%- assign color_name = value | downcase -%}
+                          {%- assign color_map = 'red,blue,green,yellow,black,white,gray,grey,pink,purple,orange,brown,navy,burgundy' | split: ',' -%}
+                          {%- assign color_found = false -%}
+                          {%- for color in color_map -%}
+                            {%- if color_name contains color -%}
+                              {%- assign color_found = true -%}
+                              {%- break -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+                          <span class="cpc-color-swatch" style="background-color: {{ value | handleize }};" title="{{ value }}"></span>
+                        {%- endfor -%}
+                        {%- if color_option.values.size > 5 -%}
+                          <span class="cpc-color-more">+{{ color_option.values.size | minus: 5 }}</span>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  <div class="cpc-card-price">
+                    {%- assign variant = product.selected_or_first_available_variant -%}
+                    {%- if variant.compare_at_price > variant.price -%}
+                      <span class="cpc-price-compare">{{ variant.compare_at_price | money }}</span>
+                    {%- endif -%}
+                    <span class="cpc-price-current">{{ variant.price | money }}</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if show_dots and collection.products.size > 1 -%}
+          <div class="cpc-dots" data-dots>
+            {%- for product in collection.products limit: products_to_show -%}
+              <button
+                type="button"
+                class="cpc-dot{% if forloop.first %} cpc-dot--active{% endif %}"
+                data-dot-index="{{ forloop.index0 }}"
+                aria-label="{{ 'general.accessibility.go_to_slide' | t | default: 'Go to slide' }} {{ forloop.index }}"
+              ></button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <div class="cpc-empty">
+        <p>{{ 'sections.collection_template.empty' | t | default: 'Add products to this carousel' }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  /* Center Product Carousel Styles */
+  .cpc-section--{{ section_id }} {
+    padding: 4rem 0;
+    position: relative;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-container {
+    max-width: var(--page-width, 120rem);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-header {
+    margin-bottom: 3rem;
+    text-align: {{ alignment }};
+  }
+
+  .cpc-section--{{ section_id }} .cpc-heading {
+    font-size: 2.4rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-subheading {
+    font-size: 1.6rem;
+    color: rgba(var(--color-foreground), 0.7);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-carousel-wrapper {
+    position: relative;
+    padding: 0 4rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .cpc-section--{{ section_id }} .cpc-carousel-wrapper {
+      padding: 0 3rem;
+    }
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    gap: var(--cpc-gap);
+    padding: 2rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-slide {
+    min-width: 0;
+    flex: 0 0 calc(100% - var(--cpc-gap) * 2);
+    scroll-snap-align: center;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    transform-origin: center;
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+
+  @media screen and (min-width: 750px) {
+    .cpc-section--{{ section_id }} .cpc-slide {
+      flex: 0 0 calc(50% - var(--cpc-gap));
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .cpc-section--{{ section_id }} .cpc-slide {
+      flex: 0 0 calc(33.333% - var(--cpc-gap) * 1.5);
+    }
+  }
+
+  .cpc-section--{{ section_id }} .cpc-slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 2;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--cpc-card-radius);
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.02);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card {
+    box-shadow: 0 10px 40px rgba(var(--color-foreground), 0.1);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.03);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card-image {
+    transform: scale(1.02);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-foreground), 0.03);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    flex: 1;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-vendor {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.6);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+    color: rgba(var(--color-foreground), 1);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-colors {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-color-swatch {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--color-foreground), 0.1);
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-color-swatch:hover {
+    transform: scale(1.1);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-color-more {
+    font-size: 1.2rem;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-price {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: auto;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-price-compare {
+    text-decoration: line-through;
+    opacity: 0.6;
+    font-size: 1.3rem;
+    font-weight: 400;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-price-current {
+    color: rgba(var(--color-foreground), 1);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(var(--color-foreground), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    color: rgba(var(--color-foreground), 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-arrow:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.1);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-arrow--prev {
+    left: 0;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-arrow--next {
+    right: 0;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-dot {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-foreground), 0.3);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    padding: 0;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-dot:hover {
+    transform: scale(1.2);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-dot--active {
+    background: rgba(var(--color-foreground), 1);
+    transform: scale(1.3);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card-image {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
+    if (!section) return;
+
+    const track = section.querySelector('[data-track]');
+    const prevBtn = section.querySelector('.cpc-arrow--prev');
+    const nextBtn = section.querySelector('.cpc-arrow--next');
+    const dots = Array.from(section.querySelectorAll('[data-dot-index]'));
+    let slides = Array.from(section.querySelectorAll('.cpc-slide'));
+
+    const autoplayEnabled = section.dataset.autoplay === 'true';
+    const autoplayDelay = (parseInt(section.dataset.autoplayDelay, 10) || 5) * 1000;
+
+    if (!track || slides.length === 0) return;
+
+    let autoplayTimer = null;
+    let isPaused = false;
+    let currentIndex = 0;
+    let scrollRaf = null;
+    let isScrolling = false;
+
+    function mod(n, m) {
+      return ((n % m) + m) % m;
+    }
+
+    function getClosestIndexToCenter() {
+      const trackRect = track.getBoundingClientRect();
+      const trackCenter = trackRect.left + trackRect.width / 2;
+
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
+      slides.forEach((slide, index) => {
+        const r = slide.getBoundingClientRect();
+        const c = r.left + r.width / 2;
+        const d = Math.abs(trackCenter - c);
+        if (d < closestDistance) {
+          closestDistance = d;
+          closestIndex = index;
+        }
+      });
+
+      return closestIndex;
+    }
+
+    function setActiveByIndex(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === index);
+      });
+    }
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('cpc-dot--active', i === currentIndex);
+      });
+    }
+
+    function handleScrollRaf() {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = requestAnimationFrame(() => {
+        if (!isScrolling) {
+          const idx = getClosestIndexToCenter();
+          setActiveByIndex(idx);
+          currentIndex = idx;
+          updateDots();
+        }
+      });
+    }
+
+    function scrollToIndex(index, smooth = true) {
+      if (slides.length === 0) return;
+
+      const numSlides = slides.length;
+      index = mod(index, numSlides);
+
+      const target = slides[index];
+      if (!target) return;
+
+      isScrolling = true;
+      track.scrollTo({
+        left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+
+      currentIndex = index;
+      setActiveByIndex(index);
+      updateDots();
+
+      setTimeout(() => {
+        isScrolling = false;
+      }, smooth ? 500 : 100);
+
+      if (autoplayEnabled && !isPaused) resetAutoplay();
+    }
+
+    function scrollToPrev() {
+      if (slides.length <= 1) return;
+      scrollToIndex(currentIndex - 1, true);
+    }
+
+    function scrollToNext() {
+      if (slides.length <= 1) return;
+      scrollToIndex(currentIndex + 1, true);
+    }
+
+    function startAutoplay() {
+      if (!autoplayEnabled || isPaused || slides.length <= 1) return;
+      autoplayTimer = window.setInterval(() => {
+        scrollToNext();
+      }, autoplayDelay);
+    }
+
+    function pauseAutoplay() {
+      isPaused = true;
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    }
+
+    function resumeAutoplay() {
+      isPaused = false;
+      startAutoplay();
+    }
+
+    function resetAutoplay() {
+      pauseAutoplay();
+      resumeAutoplay();
+    }
+
+    // Swipe detection
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let dragOffset = 0;
+
+    function handlePointerDown(e) {
+      if (slides.length <= 1) return;
+      
+      isDragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      currentX = startX;
+      dragOffset = 0;
+      track.style.cursor = 'grabbing';
+      track.style.userSelect = 'none';
+      e.preventDefault();
+    }
+
+    function handlePointerMove(e) {
+      if (!isDragging) return;
+      
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      dragOffset = x - startX;
+      currentX = x;
+      
+      if (Math.abs(dragOffset) > 5) {
+        e.preventDefault();
+      }
+    }
+
+    function handlePointerUp(e) {
+      if (!isDragging) {
+        dragOffset = 0;
+        return;
+      }
+      
+      const slideWidth = slides[0] ? slides[0].offsetWidth : 0;
+      const threshold = slideWidth ? slideWidth * 0.15 : 50;
+      const wasDrag = Math.abs(dragOffset) > threshold;
+      
+      isDragging = false;
+      track.style.cursor = 'grab';
+      track.style.userSelect = '';
+      
+      if (wasDrag) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (dragOffset > 0) {
+          scrollToPrev();
+        } else {
+          scrollToNext();
+        }
+        dragOffset = 0;
+        return;
+      }
+      
+      dragOffset = 0;
+    }
+
+    function init() {
+      slides = Array.from(section.querySelectorAll('.cpc-slide'));
+
+      if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPrev(); });
+      if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToNext(); });
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const idx = parseInt(dot.dataset.dotIndex, 10);
+          if (!Number.isNaN(idx)) scrollToIndex(idx, true);
+        });
+      });
+
+      track.addEventListener('scroll', () => {
+        handleScrollRaf();
+      }, { passive: true });
+
+      track.addEventListener('pointerdown', handlePointerDown);
+      track.addEventListener('pointermove', handlePointerMove);
+      track.addEventListener('pointerup', handlePointerUp);
+      track.addEventListener('pointercancel', handlePointerUp);
+
+      if (autoplayEnabled) {
+        startAutoplay();
+        section.addEventListener('mouseenter', pauseAutoplay);
+        section.addEventListener('mouseleave', resumeAutoplay);
+        section.addEventListener('focusin', pauseAutoplay);
+        section.addEventListener('focusout', resumeAutoplay);
+      }
+
+      const initial = getClosestIndexToCenter();
+      currentIndex = initial;
+      setActiveByIndex(initial);
+      updateDots();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    document.addEventListener('shopify:section:load', function (e) {
+      const root = e.detail || e.target;
+      const loaded = root.querySelector
+        ? root.querySelector(`#CenterProductCarousel-${sectionId}`)
+        : (root.id === `CenterProductCarousel-${sectionId}` ? root : null);
+
+      if (loaded) setTimeout(init, 60);
+    });
+
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Center Product Carousel",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Products"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between cards",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 18,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatches",
+      "label": "Show color swatches",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots indicator",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_seconds",
+      "label": "Autoplay delay",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "unit": "s",
+      "info": "Only applies if autoplay is enabled"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Center Product Carousel"
+    }
+  ]
+}
+{% endschema %}
+
