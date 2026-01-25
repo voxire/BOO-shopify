@@ -1,7 +1,8 @@
 /**
  * GIF Media Carousel
- * Handles carousel navigation, autoplay, and quick add to cart
+ * Handles carousel navigation, autoplay, active slide detection, and quick add to cart
  * Supports multiple instances on the same page
+ * Active slide is determined by which slide's center is closest to the track's center
  */
 
 (function() {
@@ -20,6 +21,7 @@
       this.autoplayTimer = null;
       this.isPaused = false;
       this.currentIndex = 0;
+      this.scrollRaf = null;
 
       if (!this.track || this.slides.length === 0) return;
 
@@ -40,8 +42,8 @@
         dot.addEventListener('click', () => this.scrollToIndex(index));
       });
 
-      // Setup scroll listener for updating dots and arrows
-      this.track.addEventListener('scroll', () => this.updateActiveState());
+      // Setup scroll listener for updating active slide and dots/arrows
+      this.track.addEventListener('scroll', () => this.handleScroll(), { passive: true });
       
       // Setup autoplay
       if (this.autoplayEnabled) {
@@ -54,18 +56,80 @@
         this.section.addEventListener('focusout', () => this.resumeAutoplay());
       }
 
-      // Setup quick add buttons
+      // Setup quick add buttons (both product bar and overlay)
       this.setupQuickAdd();
 
+      // Setup overlay buttons
+      this.setupOverlayButtons();
+
       // Initial state update
+      this.updateActiveSlide();
       this.updateActiveState();
     }
 
     getSlideWidth() {
       if (this.slides.length === 0) return 0;
       const firstSlide = this.slides[0];
-      const gap = parseInt(getComputedStyle(this.track).gap) || 20;
+      const gap = parseInt(getComputedStyle(this.track).gap) || 18;
       return firstSlide.offsetWidth + gap;
+    }
+
+    /**
+     * Find the slide whose center is closest to the track's center
+     * This determines which slide should be marked as active
+     */
+    findActiveSlideIndex() {
+      if (this.slides.length === 0) return 0;
+
+      const trackRect = this.track.getBoundingClientRect();
+      const trackCenter = trackRect.left + trackRect.width / 2;
+      
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
+      this.slides.forEach((slide, index) => {
+        const slideRect = slide.getBoundingClientRect();
+        const slideCenter = slideRect.left + slideRect.width / 2;
+        const distance = Math.abs(trackCenter - slideCenter);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      return closestIndex;
+    }
+
+    /**
+     * Update which slide has the .is-active class based on center position
+     */
+    updateActiveSlide() {
+      const activeIndex = this.findActiveSlideIndex();
+      
+      this.slides.forEach((slide, index) => {
+        if (index === activeIndex) {
+          slide.classList.add('is-active');
+        } else {
+          slide.classList.remove('is-active');
+        }
+      });
+
+      this.currentIndex = activeIndex;
+    }
+
+    /**
+     * Throttled scroll handler using requestAnimationFrame
+     */
+    handleScroll() {
+      if (this.scrollRaf) {
+        cancelAnimationFrame(this.scrollRaf);
+      }
+
+      this.scrollRaf = requestAnimationFrame(() => {
+        this.updateActiveSlide();
+        this.updateActiveState();
+      });
     }
 
     scrollToIndex(index) {
@@ -79,7 +143,9 @@
         behavior: 'smooth'
       });
       
+      // Update immediately for better UX
       this.currentIndex = index;
+      this.updateActiveSlide();
       this.updateActiveState();
       
       // Reset autoplay timer
@@ -99,15 +165,6 @@
     }
 
     updateActiveState() {
-      // Calculate current index based on scroll position
-      const slideWidth = this.getSlideWidth();
-      const scrollLeft = this.track.scrollLeft;
-      const newIndex = Math.round(scrollLeft / slideWidth);
-      
-      if (newIndex !== this.currentIndex) {
-        this.currentIndex = newIndex;
-      }
-
       // Update dots
       this.dots.forEach((dot, index) => {
         if (index === this.currentIndex) {
@@ -157,12 +214,34 @@
       this.resumeAutoplay();
     }
 
-    setupQuickAdd() {
-      const quickAddButtons = this.section.querySelectorAll('.gmc-quick-add-btn');
-      
-      quickAddButtons.forEach(button => {
+    setupOverlayButtons() {
+      // Handle overlay "next" buttons
+      const overlayNextButtons = this.section.querySelectorAll('.gmc-overlay-button--next');
+      overlayNextButtons.forEach(button => {
         button.addEventListener('click', (e) => {
           e.preventDefault();
+          e.stopPropagation();
+          this.scrollToNext();
+        });
+      });
+
+      // Overlay quick add buttons are handled in setupQuickAdd
+      // Overlay link buttons are just regular links, no JS needed
+    }
+
+    setupQuickAdd() {
+      // Product bar quick add buttons
+      const quickAddButtons = this.section.querySelectorAll('.gmc-quick-add-btn');
+      
+      // Overlay quick add buttons
+      const overlayQuickAddButtons = this.section.querySelectorAll('.gmc-overlay-button--quick-add');
+      
+      const allQuickAddButtons = [...quickAddButtons, ...overlayQuickAddButtons];
+      
+      allQuickAddButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           this.handleQuickAdd(button);
         });
       });
@@ -180,7 +259,6 @@
       // Disable button and show loading state
       button.disabled = true;
       button.classList.add('loading');
-      const originalText = button.querySelector('.gmc-quick-add-text')?.textContent;
 
       try {
         const response = await fetch('/cart/add.js', {
@@ -246,6 +324,9 @@
       if (this.autoplayTimer) {
         clearInterval(this.autoplayTimer);
       }
+      if (this.scrollRaf) {
+        cancelAnimationFrame(this.scrollRaf);
+      }
     }
   }
 
@@ -295,4 +376,3 @@
     });
   }
 })();
-
