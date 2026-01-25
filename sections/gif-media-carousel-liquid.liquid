@@ -758,14 +758,19 @@
     }
     
     // Swipe logic (same as hex prism carousel)
+    let startY = 0;
+    let isHorizontalSwipe = false;
+    
     function handlePointerDown(e) {
       if (slides.length <= 1) return;
       
       isDragging = true;
       startX = e.touches ? e.touches[0].clientX : e.clientX;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
       startScrollLeft = track.scrollLeft;
       currentX = startX;
       dragOffset = 0;
+      isHorizontalSwipe = false;
       track.style.cursor = 'grabbing';
     }
     
@@ -773,8 +778,21 @@
       if (!isDragging) return;
       
       const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const y = e.touches ? e.touches[0].clientY : e.clientY;
       dragOffset = x - startX;
+      const deltaY = Math.abs(y - startY);
+      const absDeltaX = Math.abs(dragOffset);
       currentX = x;
+      
+      // Determine if this is a horizontal swipe
+      if (!isHorizontalSwipe && absDeltaX > 10) {
+        isHorizontalSwipe = absDeltaX > deltaY;
+      }
+      
+      // Prevent default only for horizontal swipes
+      if (isHorizontalSwipe && absDeltaX > 5) {
+        e.preventDefault();
+      }
     }
     
     function handlePointerUp(e) {
@@ -785,10 +803,11 @@
       
       const slideWidth = getSlideWidth();
       const threshold = slideWidth ? slideWidth * 0.1 : 40;
-      const wasDrag = Math.abs(dragOffset) > threshold;
+      const wasDrag = Math.abs(dragOffset) > threshold && isHorizontalSwipe;
       
       isDragging = false;
       track.style.cursor = 'grab';
+      isHorizontalSwipe = false;
       
       if (wasDrag) {
         e.preventDefault();
@@ -888,11 +907,11 @@
       
       // Swipe support (same as hex prism)
       track.addEventListener('pointerdown', handlePointerDown, { passive: true });
-      track.addEventListener('pointermove', handlePointerMove, { passive: true });
+      track.addEventListener('pointermove', handlePointerMove, { passive: false });
       track.addEventListener('pointerup', handlePointerUp, { passive: false });
       track.addEventListener('pointercancel', handlePointerUp, { passive: true });
       track.addEventListener('touchstart', handlePointerDown, { passive: true });
-      track.addEventListener('touchmove', handlePointerMove, { passive: true });
+      track.addEventListener('touchmove', handlePointerMove, { passive: false });
       track.addEventListener('touchend', handlePointerUp, { passive: false });
       track.addEventListener('touchcancel', handlePointerUp, { passive: true });
       
