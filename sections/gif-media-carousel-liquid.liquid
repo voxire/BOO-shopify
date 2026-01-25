@@ -720,44 +720,66 @@
       resumeAutoplay();
     }
 
-    // Swipe detection for jumping between cards
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    const swipeThreshold = 50; // Minimum distance for a swipe
-    const swipeMaxVertical = 100; // Maximum vertical movement to still count as horizontal swipe
+    // Swipe detection (exact same as hex prism carousel)
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let dragOffset = 0;
 
-    function handleTouchStart(e) {
+    function handlePointerDown(e) {
       if (slides.length <= 1) return;
-      const touch = e.touches ? e.touches[0] : e;
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      touchStartTime = Date.now();
+      
+      isDragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      currentX = startX;
+      dragOffset = 0;
+      track.style.cursor = 'grabbing';
+      track.style.userSelect = 'none';
+      e.preventDefault();
     }
 
-    function handleTouchEnd(e) {
-      if (slides.length <= 1) return;
-      const touch = e.changedTouches ? e.changedTouches[0] : e;
-      const touchEndX = touch.clientX;
-      const touchEndY = touch.clientY;
+    function handlePointerMove(e) {
+      if (!isDragging) return;
       
-      const deltaX = touchEndX - touchStartX;
-      const deltaY = Math.abs(touchEndY - touchStartY);
-      const absDeltaX = Math.abs(deltaX);
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      dragOffset = x - startX;
+      currentX = x;
       
-      // Check if it's a horizontal swipe (not vertical scroll)
-      if (absDeltaX > swipeThreshold && absDeltaX > deltaY && deltaY < swipeMaxVertical) {
+      if (Math.abs(dragOffset) > 5) {
+        e.preventDefault();
+      }
+    }
+
+    function handlePointerUp(e) {
+      if (!isDragging) {
+        dragOffset = 0;
+        return;
+      }
+      
+      // Calculate threshold: 10% of slide width or 40px default (same as hex prism)
+      const slideWidth = slides[0] ? slides[0].offsetWidth : 0;
+      const threshold = slideWidth ? slideWidth * 0.1 : 40;
+      const wasDrag = Math.abs(dragOffset) > threshold;
+      
+      isDragging = false;
+      track.style.cursor = 'grab';
+      track.style.userSelect = '';
+      
+      if (wasDrag) {
         e.preventDefault();
         e.stopPropagation();
-        
-        if (deltaX > 0) {
+        if (dragOffset > 0) {
           // Swiped right - go to previous card
           scrollToPrev();
         } else {
           // Swiped left - go to next card
           scrollToNext();
         }
+        dragOffset = 0;
+        return;
       }
+      
+      dragOffset = 0;
     }
 
     function init() {
@@ -782,22 +804,11 @@
         handleScrollRaf();
       }, { passive: true });
 
-      // Swipe detection for jumping between cards
-      track.addEventListener('touchstart', handleTouchStart, { passive: true });
-      track.addEventListener('touchend', handleTouchEnd, { passive: false });
-      
-      // Also support pointer events for touch devices
-      track.addEventListener('pointerdown', (e) => {
-        if (e.pointerType === 'touch') {
-          handleTouchStart(e);
-        }
-      }, { passive: true });
-      
-      track.addEventListener('pointerup', (e) => {
-        if (e.pointerType === 'touch') {
-          handleTouchEnd(e);
-        }
-      }, { passive: false });
+      // Swipe detection (exact same as hex prism carousel)
+      track.addEventListener('pointerdown', handlePointerDown);
+      track.addEventListener('pointermove', handlePointerMove);
+      track.addEventListener('pointerup', handlePointerUp);
+      track.addEventListener('pointercancel', handlePointerUp);
 
       // Quick add buttons remain as-is
       const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
