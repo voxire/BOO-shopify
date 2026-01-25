@@ -235,7 +235,6 @@
     padding: 2rem 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-snap-type: x mandatory;
   }
 
   .cpc-section--{{ section_id }} .cpc-track::-webkit-scrollbar {
@@ -244,23 +243,16 @@
 
   .cpc-section--{{ section_id }} .cpc-slide {
     min-width: 0;
-    flex: 0 0 calc(100% - var(--cpc-gap) * 2);
-    scroll-snap-align: center;
+    flex: 0 0 calc(33.333% - var(--cpc-gap) * 0.666);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
     transform-origin: center;
     opacity: 0.6;
     transform: scale(0.9);
   }
 
-  @media screen and (min-width: 750px) {
+  @media screen and (max-width: 749px) {
     .cpc-section--{{ section_id }} .cpc-slide {
-      flex: 0 0 calc(50% - var(--cpc-gap));
-    }
-  }
-
-  @media screen and (min-width: 990px) {
-    .cpc-section--{{ section_id }} .cpc-slide {
-      flex: 0 0 calc(33.333% - var(--cpc-gap) * 1.5);
+      flex: 0 0 calc(33.333% - var(--cpc-gap) * 0.666);
     }
   }
 
@@ -561,14 +553,24 @@
       if (slides.length === 0) return;
 
       const numSlides = slides.length;
-      index = mod(index, numSlides);
+      
+      // Handle infinite loop
+      if (index < 0) {
+        index = numSlides - 1;
+      } else if (index >= numSlides) {
+        index = 0;
+      }
 
       const target = slides[index];
       if (!target) return;
 
       isScrolling = true;
+      
+      // Calculate scroll position to center the slide
+      const scrollLeft = target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2);
+      
       track.scrollTo({
-        left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+        left: scrollLeft,
         behavior: smooth ? 'smooth' : 'auto'
       });
 
@@ -706,6 +708,13 @@
         section.addEventListener('mouseleave', resumeAutoplay);
         section.addEventListener('focusin', pauseAutoplay);
         section.addEventListener('focusout', resumeAutoplay);
+      }
+
+      // Center the first slide on initial load
+      if (slides.length > 0) {
+        setTimeout(() => {
+          scrollToIndex(0, false);
+        }, 100);
       }
 
       const initial = getClosestIndexToCenter();
