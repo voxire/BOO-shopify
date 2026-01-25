@@ -455,7 +455,7 @@
             "custom_media": "shopify://shop_images/Shaboo.png",
             "external_gif_url": "",
             "alt_text": "",
-            "focal_position": "center"
+            "focal_position": "top"
           }
         },
         "product_hcRtUT": {
@@ -467,7 +467,7 @@
             "custom_media": "shopify://shop_images/GriBoo.png",
             "external_gif_url": "",
             "alt_text": "",
-            "focal_position": "center"
+            "focal_position": "top"
           }
         },
         "product_iHPJcm": {
@@ -479,7 +479,7 @@
             "custom_media": "shopify://shop_images/BunBoo.png",
             "external_gif_url": "",
             "alt_text": "",
-            "focal_position": "center"
+            "focal_position": "top"
           }
         },
         "product_whTEC3": {
@@ -491,7 +491,7 @@
             "custom_media": "shopify://shop_images/DinoBoo.png",
             "external_gif_url": "",
             "alt_text": "",
-            "focal_position": "center"
+            "focal_position": "top"
           }
         },
         "product_kjEqXT": {
@@ -503,7 +503,7 @@
             "custom_media": "shopify://shop_images/FoxBoo.png",
             "external_gif_url": "",
             "alt_text": "",
-            "focal_position": "center"
+            "focal_position": "top"
           }
         }
       },
