@@ -77,10 +77,19 @@
   /* Hide scrollbar but keep functionality */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+  /* Improve touch/drag experience */
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
 }
 
 .gmc-section .gmc-track::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
+}
+
+.gmc-section .gmc-track:active {
+  cursor: grabbing;
 }
 
 /* ===== SLIDE ===== */
@@ -249,11 +258,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: rgb(var(--color-background));
+  background: var(--gmc-productbar-bg, rgb(var(--color-background)));
   border-radius: calc(var(--gmc-card-radius, 18px) * 0.6);
   padding: 0.8rem 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   min-height: 5.5rem;
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 1));
 }
 
 .gmc-section .gmc-productbar-thumb {
@@ -291,13 +301,13 @@
 }
 
 .gmc-section .gmc-productbar-title-link {
-  color: rgba(var(--color-foreground), 1);
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 1));
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .gmc-section .gmc-productbar-title-link:hover {
-  color: rgba(var(--color-foreground), 0.7);
+  opacity: 0.7;
 }
 
 .gmc-section .gmc-productbar-price {
@@ -310,13 +320,14 @@
 }
 
 .gmc-section .gmc-price-compare {
-  color: rgba(var(--color-foreground), 0.5);
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 0.5));
+  opacity: 0.6;
   text-decoration: line-through;
   font-size: 1.1rem;
 }
 
 .gmc-section .gmc-price-current {
-  color: rgba(var(--color-foreground), 1);
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 1));
   font-weight: 600;
 }
 
@@ -364,7 +375,8 @@
 
 .gmc-section .gmc-sold-out {
   font-size: 1.1rem;
-  color: rgba(var(--color-foreground), 0.5);
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 0.5));
+  opacity: 0.6;
   padding: 0.6rem;
 }
 
@@ -375,14 +387,15 @@
   width: 3.2rem;
   height: 3.2rem;
   border-radius: 50%;
-  background: rgba(var(--color-foreground), 0.05);
-  color: rgba(var(--color-foreground), 1);
+  background: var(--gmc-productbar-text, rgba(var(--color-foreground), 0.05));
+  opacity: 0.1;
+  color: var(--gmc-productbar-text, rgba(var(--color-foreground), 1));
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
 .gmc-section .gmc-product-link:hover {
-  background: rgba(var(--color-foreground), 0.1);
+  opacity: 0.2;
   transform: scale(1.1);
 }
 

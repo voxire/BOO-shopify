@@ -22,6 +22,10 @@
       this.isPaused = false;
       this.currentIndex = 0;
       this.scrollRaf = null;
+      this.loopEnabled = section.dataset.loop === 'true';
+      this.isScrolling = false;
+      this.touchStartX = 0;
+      this.touchStartY = 0;
 
       if (!this.track || this.slides.length === 0) return;
 
@@ -45,6 +49,9 @@
       // Setup scroll listener for updating active slide and dots/arrows
       this.track.addEventListener('scroll', () => this.handleScroll(), { passive: true });
       
+      // Setup touch/drag support for better swiping
+      this.setupTouchSupport();
+      
       // Setup autoplay
       if (this.autoplayEnabled) {
         this.startAutoplay();
@@ -65,6 +72,69 @@
       // Initial state update
       this.updateActiveSlide();
       this.updateActiveState();
+    }
+
+    /**
+     * Setup touch/drag support for better mobile swiping
+     */
+    setupTouchSupport() {
+      let isDragging = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      this.track.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].pageX - this.track.offsetLeft;
+        scrollLeft = this.track.scrollLeft;
+        this.track.style.scrollBehavior = 'auto';
+      }, { passive: true });
+
+      this.track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - this.track.offsetLeft;
+        const walk = (x - startX) * 1.5; // Scroll speed multiplier
+        this.track.scrollLeft = scrollLeft - walk;
+      }, { passive: false });
+
+      this.track.addEventListener('touchend', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.updateActiveSlide();
+      }, { passive: true });
+
+      // Mouse drag support for desktop
+      this.track.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - this.track.offsetLeft;
+        scrollLeft = this.track.scrollLeft;
+        this.track.style.scrollBehavior = 'auto';
+        this.track.style.cursor = 'grabbing';
+      });
+
+      this.track.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - this.track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        this.track.scrollLeft = scrollLeft - walk;
+      });
+
+      this.track.addEventListener('mouseup', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.track.style.cursor = 'grab';
+        this.updateActiveSlide();
+      });
+
+      this.track.addEventListener('mouseleave', () => {
+        isDragging = false;
+        this.track.style.scrollBehavior = 'smooth';
+        this.track.style.cursor = 'grab';
+      });
+
+      // Set initial cursor
+      this.track.style.cursor = 'grab';
     }
 
     getSlideWidth() {
@@ -132,16 +202,33 @@
       });
     }
 
-    scrollToIndex(index) {
-      if (index < 0 || index >= this.slides.length) return;
+    scrollToIndex(index, smooth = true) {
+      if (this.slides.length === 0) return;
+      
+      // Handle infinite loop
+      if (this.loopEnabled) {
+        // Allow wrapping around
+        if (index < 0) {
+          index = this.slides.length - 1;
+        } else if (index >= this.slides.length) {
+          index = 0;
+        }
+      } else {
+        // No loop - clamp to bounds
+        if (index < 0 || index >= this.slides.length) return;
+      }
       
       const slideWidth = this.getSlideWidth();
       const scrollPosition = slideWidth * index;
       
-      this.track.scrollTo({
-        left: scrollPosition,
-        behavior: 'smooth'
-      });
+      if (smooth) {
+        this.track.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      } else {
+        this.track.scrollLeft = scrollPosition;
+      }
       
       // Update immediately for better UX
       this.currentIndex = index;
@@ -155,13 +242,23 @@
     }
 
     scrollToPrev() {
-      const newIndex = Math.max(0, this.currentIndex - 1);
-      this.scrollToIndex(newIndex);
+      if (this.loopEnabled) {
+        const newIndex = this.currentIndex - 1 < 0 ? this.slides.length - 1 : this.currentIndex - 1;
+        this.scrollToIndex(newIndex);
+      } else {
+        const newIndex = Math.max(0, this.currentIndex - 1);
+        this.scrollToIndex(newIndex);
+      }
     }
 
     scrollToNext() {
-      const newIndex = Math.min(this.slides.length - 1, this.currentIndex + 1);
-      this.scrollToIndex(newIndex);
+      if (this.loopEnabled) {
+        const newIndex = (this.currentIndex + 1) % this.slides.length;
+        this.scrollToIndex(newIndex);
+      } else {
+        const newIndex = Math.min(this.slides.length - 1, this.currentIndex + 1);
+        this.scrollToIndex(newIndex);
+      }
     }
 
     updateActiveState() {
@@ -174,12 +271,20 @@
         }
       });
 
-      // Update arrow states
+      // Update arrow states (disabled only if loop is off and at boundaries)
       if (this.prevBtn) {
-        this.prevBtn.disabled = this.currentIndex === 0;
+        if (this.loopEnabled) {
+          this.prevBtn.disabled = false;
+        } else {
+          this.prevBtn.disabled = this.currentIndex === 0;
+        }
       }
       if (this.nextBtn) {
-        this.nextBtn.disabled = this.currentIndex >= this.slides.length - 1;
+        if (this.loopEnabled) {
+          this.nextBtn.disabled = false;
+        } else {
+          this.nextBtn.disabled = this.currentIndex >= this.slides.length - 1;
+        }
       }
     }
 
@@ -187,12 +292,8 @@
       if (this.isPaused) return;
       
       this.autoplayTimer = setInterval(() => {
-        if (this.currentIndex >= this.slides.length - 1) {
-          // Loop back to start
-          this.scrollToIndex(0);
-        } else {
-          this.scrollToNext();
-        }
+        // Always use scrollToNext which handles loop automatically
+        this.scrollToNext();
       }, this.autoplayDelay);
     }
 

@@ -21,6 +21,9 @@
   assign product_bar_enabled = section.settings.product_bar_enabled
   assign product_bar_action = section.settings.product_bar_action | default: 'link'
   assign overlay_button_mode = section.settings.overlay_button_mode | default: 'off'
+  assign product_bar_bg_color = section.settings.product_bar_bg_color
+  assign product_bar_text_color = section.settings.product_bar_text_color
+  assign loop_enabled = section.settings.loop_enabled
   assign item_blocks = section.blocks | where: 'type', 'item'
 -%}
 
@@ -34,10 +37,16 @@
     --gmc-slides-tablet: {{ slides_per_view_tablet }};
     --gmc-slides-mobile: {{ slides_per_view_mobile }};
     --gmc-autoplay-delay: {{ autoplay_seconds }}s;
+    {%- if product_bar_bg_color != blank -%}
+      --gmc-productbar-bg: {{ product_bar_bg_color }};
+    {%- endif -%}
+    {%- if product_bar_text_color != blank -%}
+      --gmc-productbar-text: {{ product_bar_text_color }};
+    {%- endif -%}
   }
 {%- endstyle -%}
 
-<section id="GifMediaCarousel-{{ section_id }}" class="gmc-section" data-section-id="{{ section_id }}" data-autoplay="{{ autoplay }}" data-autoplay-delay="{{ autoplay_seconds }}">
+<section id="GifMediaCarousel-{{ section_id }}" class="gmc-section" data-section-id="{{ section_id }}" data-autoplay="{{ autoplay }}" data-autoplay-delay="{{ autoplay_seconds }}" data-loop="{{ loop_enabled }}">
   <div class="gmc-container{% if layout == 'full-width' %} gmc-container--full-width{% endif %}">
     {%- if heading != blank or subheading != blank -%}
       <div class="gmc-header gmc-header--{{ alignment }}">
@@ -445,6 +454,18 @@
       "default": true
     },
     {
+      "type": "color",
+      "id": "product_bar_bg_color",
+      "label": "Product bar background color",
+      "info": "Leave blank to use theme default"
+    },
+    {
+      "type": "color",
+      "id": "product_bar_text_color",
+      "label": "Product bar text color",
+      "info": "Leave blank to use theme default"
+    },
+    {
       "type": "select",
       "id": "product_bar_action",
       "label": "Product bar action",
@@ -460,6 +481,17 @@
       ],
       "default": "link",
       "info": "Action when clicking the product bar button"
+    },
+    {
+      "type": "header",
+      "content": "Carousel Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop_enabled",
+      "label": "Enable infinite loop",
+      "default": true,
+      "info": "Carousel loops continuously (no start/end)"
     }
   ],
   "blocks": [
