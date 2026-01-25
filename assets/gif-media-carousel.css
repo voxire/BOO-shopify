@@ -64,20 +64,14 @@
   }
 }
 
-/* ===== TRACK (Scroll Container) ===== */
+/* ===== TRACK (Transform Container) ===== */
 .gmc-section .gmc-track {
   display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x proximity;
-  scroll-snap-stop: normal;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  overflow: hidden; /* Changed from overflow-x: auto - no scrolling needed with transform */
   gap: var(--gmc-gap, 18px);
   padding: 2rem 0;
-  /* Hide scrollbar but keep functionality */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  /* Transform-based movement - no scrollbar needed */
+  will-change: transform;
   /* Improve touch/drag experience */
   touch-action: pan-x pan-y;
   user-select: none;
@@ -85,20 +79,20 @@
   cursor: grab;
 }
 
-.gmc-section .gmc-track::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
-
 .gmc-section .gmc-track:active {
   cursor: grabbing;
+}
+
+/* Clone slides - hidden from screen readers */
+.gmc-section .gmc-slide.gmc-clone {
+  /* Clones are visually identical but marked for JS identification */
 }
 
 /* ===== SLIDE ===== */
 /* Mobile: Support partial peek (1.3 slides) */
 .gmc-section .gmc-slide {
   min-width: 0;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
+  flex-shrink: 0; /* Prevent slides from shrinking */
   padding: 0.5rem;
   transition: transform 0.3s ease, opacity 0.3s ease;
   transform-origin: center;
