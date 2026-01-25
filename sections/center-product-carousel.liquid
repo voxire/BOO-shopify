@@ -279,7 +279,6 @@
     aspect-ratio: 3 / 4;
     overflow: hidden;
     background: rgba(var(--color-foreground), 0.03);
-    border-radius: var(--cpc-card-radius) var(--cpc-card-radius) 0 0;
   }
 
   .cpc-section--{{ section_id }} .cpc-badge {
@@ -324,12 +323,10 @@
     flex-direction: column;
     gap: 0.8rem;
     flex: 1;
-    width: 100%;
-    min-width: 0;
     background: var(--cpc-card-content-bg, transparent);
     color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
     border: var(--cpc-card-content-border-width, 0) solid var(--cpc-card-content-border-color, transparent);
-    border-radius: 0 0 var(--cpc-card-bottom-radius) var(--cpc-card-bottom-radius);
+    border-radius: var(--cpc-card-content-border-radius, 0);
   }
 
   .cpc-section--{{ section_id }} .cpc-card-vendor {
