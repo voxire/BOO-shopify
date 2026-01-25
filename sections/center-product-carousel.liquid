@@ -535,6 +535,7 @@
     let scrollRaf = null;
     let isScrolling = false;
     let isCorrecting = false;
+    let isProgrammaticScroll = false;
 
     function getSlidesPerView() {
       if (window.matchMedia('(min-width: 990px)').matches) return 3;
@@ -587,49 +588,63 @@
     let scrollEndTimer = null;
 
     function onScroll() {
+      // Don't correct during programmatic scrolling
+      if (isScrolling || isProgrammaticScroll) return;
+      
       if (scrollEndTimer) clearTimeout(scrollEndTimer);
       scrollEndTimer = setTimeout(() => {
-        correctPosition();
-      }, 120);
+        // Only correct if user-initiated scroll has stopped
+        if (!isScrolling && !isProgrammaticScroll) {
+          correctPosition();
+        }
+      }, 150);
     }
 
     function correctPosition() {
-      if (isCorrecting || slides.length === 0) return;
+      if (isCorrecting || slides.length === 0 || isScrolling) return;
       
       const closestReal = getClosestIndexToCenter();
       let corrected = closestReal;
+      let needsJump = false;
       
       if (closestReal < clonesCount) {
         // In prepended copy - jump to middle copy
         corrected = closestReal + originalCount;
-        isCorrecting = true;
-        const target = slides[corrected];
-        if (target) {
-          track.scrollTo({
-            left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
-            behavior: 'auto'
-          });
-        }
-        setTimeout(() => { isCorrecting = false; }, 50);
+        needsJump = true;
       } else if (closestReal >= clonesCount + originalCount) {
         // In appended copy - jump to middle copy
         corrected = closestReal - originalCount;
+        needsJump = true;
+      }
+      
+      // Only jump if we're actually in a clone region
+      if (needsJump) {
         isCorrecting = true;
         const target = slides[corrected];
         if (target) {
-          track.scrollTo({
-            left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
-            behavior: 'auto'
+          // Use requestAnimationFrame to ensure smooth jump
+          requestAnimationFrame(() => {
+            track.scrollTo({
+              left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+              behavior: 'auto'
+            });
+            // Update indices after jump
+            currentRealIndex = corrected;
+            currentIndex = getOriginalIndexByReal(corrected);
+            setActiveByRealIndex(corrected);
+            updateDots();
+            setTimeout(() => { isCorrecting = false; }, 50);
           });
+        } else {
+          isCorrecting = false;
         }
-        setTimeout(() => { isCorrecting = false; }, 50);
+      } else {
+        // We're in the middle copy - just update indices without jumping
+        currentRealIndex = corrected;
+        currentIndex = getOriginalIndexByReal(corrected);
+        setActiveByRealIndex(corrected);
+        updateDots();
       }
-      
-      // Update indices (always lands in middle copy)
-      currentRealIndex = corrected;
-      currentIndex = getOriginalIndexByReal(corrected);
-      setActiveByRealIndex(corrected);
-      updateDots();
     }
 
     function scrollToRealIndex(realIndex, smooth = true) {
@@ -642,6 +657,7 @@
       if (!target) return;
 
       isScrolling = true;
+      isProgrammaticScroll = true;
       currentRealIndex = realIndex;
       currentIndex = getOriginalIndexByReal(realIndex);
       
@@ -655,15 +671,11 @@
 
       setTimeout(() => {
         isScrolling = false;
-        if (smooth) {
-          // After smooth scroll settles, check if we need to correct position
-          setTimeout(() => {
-            correctPosition();
-          }, 100);
-        } else {
-          correctPosition();
-        }
-      }, smooth ? 500 : 100);
+        // Keep programmatic flag a bit longer to prevent correction
+        setTimeout(() => {
+          isProgrammaticScroll = false;
+        }, smooth ? 200 : 100);
+      }, smooth ? 600 : 150);
 
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
@@ -678,20 +690,14 @@
 
     function scrollToPrev() {
       if (slides.length <= 1) return;
-      // If extremely close to the start edge, recenter first
-      if (currentRealIndex <= 1) {
-        correctPosition();
-      }
+      // Allow going into prepended copy naturally - correction only happens on user scroll
       const newRealIndex = Math.max(0, currentRealIndex - 1);
       scrollToRealIndex(newRealIndex, true);
     }
 
     function scrollToNext() {
       if (slides.length <= 1) return;
-      // If extremely close to the end edge, recenter first
-      if (currentRealIndex >= slides.length - 2) {
-        correctPosition();
-      }
+      // Allow going into appended copy naturally - correction only happens on user scroll
       const newRealIndex = Math.min(slides.length - 1, currentRealIndex + 1);
       scrollToRealIndex(newRealIndex, true);
     }
