@@ -13,6 +13,10 @@
   assign show_color_swatches = section.settings.show_color_swatches
   assign card_content_bg_color = section.settings.card_content_bg_color
   assign card_content_text_color = section.settings.card_content_text_color
+  assign card_content_border_color = section.settings.card_content_border_color
+  assign card_content_border_width = section.settings.card_content_border_width | default: 0
+  assign card_content_border_radius = section.settings.card_content_border_radius | default: 0
+  assign card_content_padding = section.settings.card_content_padding | default: 24
   assign item_blocks = section.blocks | where: 'type', 'product'
 -%}
 
@@ -23,7 +27,7 @@
   data-autoplay="{{ autoplay }}"
   data-autoplay-delay="{{ autoplay_seconds }}"
   data-loop="true"
-  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}"
+  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px;"
 >
   <div class="cpc-container">
     {%- if heading != blank or subheading != blank -%}
@@ -308,13 +312,15 @@
   }
 
   .cpc-section--{{ section_id }} .cpc-card-content {
-    padding: 1.5rem;
+    padding: var(--cpc-card-content-padding, 1.5rem);
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
     flex: 1;
     background: var(--cpc-card-content-bg, transparent);
     color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
+    border: var(--cpc-card-content-border-width, 0) solid var(--cpc-card-content-border-color, transparent);
+    border-radius: var(--cpc-card-content-border-radius, 0);
   }
 
   .cpc-section--{{ section_id }} .cpc-card-vendor {
@@ -1000,6 +1006,45 @@
       "id": "card_content_text_color",
       "label": "Card content text color",
       "info": "Text color for product title, price, and vendor"
+    },
+    {
+      "type": "header",
+      "content": "Card Content Border"
+    },
+    {
+      "type": "color",
+      "id": "card_content_border_color",
+      "label": "Border color"
+    },
+    {
+      "type": "range",
+      "id": "card_content_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_content_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_content_padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "default": 24,
+      "unit": "px"
     },
     {
       "type": "checkbox",
