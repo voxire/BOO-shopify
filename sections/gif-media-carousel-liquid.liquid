@@ -720,6 +720,46 @@
       resumeAutoplay();
     }
 
+    // Swipe detection for jumping between cards
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    const swipeThreshold = 50; // Minimum distance for a swipe
+    const swipeMaxVertical = 100; // Maximum vertical movement to still count as horizontal swipe
+
+    function handleTouchStart(e) {
+      if (slides.length <= 1) return;
+      const touch = e.touches ? e.touches[0] : e;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+    }
+
+    function handleTouchEnd(e) {
+      if (slides.length <= 1) return;
+      const touch = e.changedTouches ? e.changedTouches[0] : e;
+      const touchEndX = touch.clientX;
+      const touchEndY = touch.clientY;
+      
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = Math.abs(touchEndY - touchStartY);
+      const absDeltaX = Math.abs(deltaX);
+      
+      // Check if it's a horizontal swipe (not vertical scroll)
+      if (absDeltaX > swipeThreshold && absDeltaX > deltaY && deltaY < swipeMaxVertical) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (deltaX > 0) {
+          // Swiped right - go to previous card
+          scrollToPrev();
+        } else {
+          // Swiped left - go to next card
+          scrollToNext();
+        }
+      }
+    }
+
     function init() {
       // Refresh slides NodeList (in case of section reload)
       slides = Array.from(section.querySelectorAll('.gmc-slide'));
@@ -741,6 +781,23 @@
       track.addEventListener('scroll', () => {
         handleScrollRaf();
       }, { passive: true });
+
+      // Swipe detection for jumping between cards
+      track.addEventListener('touchstart', handleTouchStart, { passive: true });
+      track.addEventListener('touchend', handleTouchEnd, { passive: false });
+      
+      // Also support pointer events for touch devices
+      track.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') {
+          handleTouchStart(e);
+        }
+      }, { passive: true });
+      
+      track.addEventListener('pointerup', (e) => {
+        if (e.pointerType === 'touch') {
+          handleTouchEnd(e);
+        }
+      }, { passive: false });
 
       // Quick add buttons remain as-is
       const quickAddButtons = section.querySelectorAll('.gmc-quick-add-btn, .gmc-overlay-button--quick-add');
