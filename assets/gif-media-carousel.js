@@ -78,24 +78,19 @@
      * Setup touch/drag support for better mobile swiping
      */
     setupTouchSupport() {
-      let isDragging = false;
       let startX = 0;
       let startY = 0;
-      let scrollLeft = 0;
       let isHorizontalSwipe = false;
+      let touchStartTime = 0;
 
       this.track.addEventListener('touchstart', (e) => {
-        isDragging = true;
         startX = e.touches[0].pageX;
         startY = e.touches[0].pageY;
-        scrollLeft = this.track.scrollLeft;
-        this.track.style.scrollBehavior = 'auto';
+        touchStartTime = Date.now();
         isHorizontalSwipe = false;
       }, { passive: true });
 
       this.track.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-
         const currentX = e.touches[0].pageX;
         const currentY = e.touches[0].pageY;
         const deltaX = Math.abs(currentX - startX);
@@ -106,21 +101,18 @@
           isHorizontalSwipe = deltaX > deltaY;
         }
 
-        // Only prevent default and handle swipe if it's a horizontal gesture
-        if (isHorizontalSwipe) {
+        // Only prevent default if it's a horizontal gesture to stop vertical page scroll
+        // But let the browser handle the actual scrolling naturally
+        if (isHorizontalSwipe && deltaX > 5) {
           e.preventDefault();
-          const x = currentX - this.track.getBoundingClientRect().left;
-          const walk = (x - startX) * 1.5; // Scroll speed multiplier
-          this.track.scrollLeft = scrollLeft - walk;
         }
       }, { passive: false });
 
       this.track.addEventListener('touchend', () => {
-        isDragging = false;
-        this.track.style.scrollBehavior = 'smooth';
-        if (isHorizontalSwipe) {
+        // Update active slide after touch ends (native scroll will handle the movement)
+        setTimeout(() => {
           this.updateActiveSlide();
-        }
+        }, 100);
         isHorizontalSwipe = false;
       }, { passive: true });
 
