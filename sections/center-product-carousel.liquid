@@ -53,7 +53,7 @@
               {%- if product != blank -%}
                 <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
                 <a href="{{ product.url }}" class="cpc-card" draggable="false">
-                  <div class="cpc-card-media">
+                  <div class="cpc-media-tile">
                     {%- liquid
                       assign media_source = block.settings.media_source | default: 'product_featured'
                       assign focal_position = block.settings.focal_position | default: 'center'
@@ -110,42 +110,40 @@
                     {%- endif -%}
                   </div>
 
-                  <div class="cpc-card-content">
-                    {%- if show_vendor and product.vendor != blank -%}
-                      <p class="cpc-card-vendor">{{ product.vendor }}</p>
-                    {%- endif -%}
-                    
-                    <h3 class="cpc-card-title">{{ product.title }}</h3>
-
-                    {%- if show_color_swatches -%}
-                      {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
-                      {%- if color_option != blank and color_option.values.size > 0 -%}
-                        <div class="cpc-card-colors">
-                          {%- for value in color_option.values limit: 5 -%}
-                            {%- assign color_name = value | downcase -%}
-                            {%- assign color_map = 'red,blue,green,yellow,black,white,gray,grey,pink,purple,orange,brown,navy,burgundy' | split: ',' -%}
-                            {%- assign color_found = false -%}
-                            {%- for color in color_map -%}
-                              {%- if color_name contains color -%}
-                                {%- assign color_found = true -%}
-                                {%- break -%}
-                              {%- endif -%}
-                            {%- endfor -%}
-                            <span class="cpc-color-swatch" style="background-color: {{ value | handleize }};" title="{{ value }}"></span>
-                          {%- endfor -%}
-                          {%- if color_option.values.size > 5 -%}
-                            <span class="cpc-color-more">+{{ color_option.values.size | minus: 5 }}</span>
-                          {%- endif -%}
+                  <div class="cpc-info-card">
+                    <div class="cpc-info-thumb">
+                      {%- if product.featured_media != blank -%}
+                        <img
+                          draggable="false"
+                          src="{{ product.featured_media | image_url: width: 120 }}"
+                          alt="{{ product.featured_media.alt | default: product.title | escape }}"
+                          class="cpc-info-thumb-image"
+                          {% unless forloop.first %}loading="lazy"{% endunless %}
+                          width="120"
+                          height="120"
+                        >
+                      {%- else -%}
+                        <div class="cpc-info-thumb-placeholder">
+                          {{ 'product-1' | placeholder_svg_tag: 'cpc-info-thumb-placeholder-svg' }}
                         </div>
                       {%- endif -%}
-                    {%- endif -%}
+                    </div>
+                    
+                    <div class="cpc-info-text">
+                      <h3 class="cpc-info-title">{{ product.title }}</h3>
+                      <div class="cpc-info-price">
+                        {%- assign variant = product.selected_or_first_available_variant -%}
+                        {%- if variant.compare_at_price > variant.price -%}
+                          <span class="cpc-price-compare">{{ variant.compare_at_price | money }}</span>
+                        {%- endif -%}
+                        <span class="cpc-price-current">{{ variant.price | money }}</span>
+                      </div>
+                    </div>
 
-                    <div class="cpc-card-price">
-                      {%- assign variant = product.selected_or_first_available_variant -%}
-                      {%- if variant.compare_at_price > variant.price -%}
-                        <span class="cpc-price-compare">{{ variant.compare_at_price | money }}</span>
-                      {%- endif -%}
-                      <span class="cpc-price-current">{{ variant.price | money }}</span>
+                    <div class="cpc-info-caret">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
                     </div>
                   </div>
                 </a>
@@ -233,8 +231,8 @@
     scroll-snap-align: center;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
     transform-origin: center;
-    opacity: 0.6;
-    transform: scale(0.9);
+    opacity: 0.88;
+    transform: scale(0.95);
   }
 
   @media screen and (min-width: 750px) {
@@ -261,24 +259,25 @@
     height: 100%;
     text-decoration: none;
     color: inherit;
-    border-radius: var(--cpc-card-radius) var(--cpc-card-radius) var(--cpc-card-bottom-radius) var(--cpc-card-bottom-radius);
-    overflow: hidden;
-    background: rgba(var(--color-foreground), 0.02);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: transparent;
+    transition: transform 0.3s ease;
     max-width: var(--cpc-card-width, 100%);
     width: 100%;
   }
 
-  .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card {
-    box-shadow: 0 10px 40px rgba(var(--color-foreground), 0.1);
-  }
-
-  .cpc-section--{{ section_id }} .cpc-card-media {
+  .cpc-section--{{ section_id }} .cpc-media-tile {
     position: relative;
     width: 100%;
     aspect-ratio: 3 / 4;
     overflow: hidden;
     background: rgba(var(--color-foreground), 0.03);
+    border-radius: var(--cpc-card-radius);
+    box-shadow: 0 4px 16px rgba(var(--color-foreground), 0.08);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-media-tile {
+    box-shadow: 0 8px 24px rgba(var(--color-foreground), 0.12);
   }
 
   .cpc-section--{{ section_id }} .cpc-badge {
@@ -316,86 +315,141 @@
     background: rgba(var(--color-foreground), 0.03);
   }
 
-  .cpc-section--{{ section_id }} .cpc-card-content {
-    padding: var(--cpc-card-content-padding, 1.5rem);
-    margin: var(--cpc-card-content-margin, 0);
+  .cpc-section--{{ section_id }} .cpc-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: calc(100% - 2.4rem);
+    margin-left: 1.2rem;
+    margin-right: 1.2rem;
+    margin-top: -1.8rem;
+    padding: var(--cpc-card-content-padding, 1.2rem);
+    background: var(--cpc-card-content-bg, rgba(var(--color-background), 1));
+    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
+    {%- if card_content_border_width > 0 -%}
+      border: var(--cpc-card-content-border-width) solid var(--cpc-card-content-border-color, rgba(var(--color-foreground), 0.12));
+    {%- else -%}
+      border: 1px solid var(--cpc-card-content-border-color, rgba(var(--color-foreground), 0.12));
+    {%- endif -%}
+    {%- if card_content_border_radius > 0 -%}
+      border-radius: var(--cpc-card-content-border-radius);
+    {%- else -%}
+      border-radius: 1.4rem;
+    {%- endif -%}
+    box-shadow: 0 2px 12px rgba(var(--color-foreground), 0.06);
+    position: relative;
+    z-index: 1;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-thumb {
+    flex-shrink: 0;
+    width: 5.6rem;
+    height: 5.6rem;
+    border-radius: 0.8rem;
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.03);
+  }
+
+  @media screen and (max-width: 749px) {
+    .cpc-section--{{ section_id }} .cpc-info-thumb {
+      width: 4.4rem;
+      height: 4.4rem;
+    }
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-thumb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-thumb-placeholder svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-text {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    flex: 1;
-    background: var(--cpc-card-content-bg, transparent);
-    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
-    border: var(--cpc-card-content-border-width, 0) solid var(--cpc-card-content-border-color, transparent);
-    border-radius: var(--cpc-card-content-border-radius, 0);
+    gap: 0.4rem;
   }
 
-  .cpc-section--{{ section_id }} .cpc-card-vendor {
-    font-size: 1.2rem;
-    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 0.6));
-    opacity: 0.8;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .cpc-section--{{ section_id }} .cpc-card-title {
-    font-size: 1.6rem;
+  .cpc-section--{{ section_id }} .cpc-info-title {
+    font-size: 1.5rem;
     font-weight: 600;
     margin: 0;
     line-height: 1.3;
     color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .cpc-section--{{ section_id }} .cpc-card-colors {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
+  @media screen and (max-width: 749px) {
+    .cpc-section--{{ section_id }} .cpc-info-title {
+      font-size: 1.4rem;
+    }
   }
 
-  .cpc-section--{{ section_id }} .cpc-color-swatch {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    border: 2px solid rgba(var(--color-foreground), 0.1);
-    display: inline-block;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
-  .cpc-section--{{ section_id }} .cpc-color-swatch:hover {
-    transform: scale(1.1);
-  }
-
-  .cpc-section--{{ section_id }} .cpc-color-more {
-    font-size: 1.2rem;
-    color: rgba(var(--color-foreground), 0.6);
-  }
-
-  .cpc-section--{{ section_id }} .cpc-card-price {
+  .cpc-section--{{ section_id }} .cpc-info-price {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 600;
-    margin-top: auto;
     color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
+  }
+
+  @media screen and (max-width: 749px) {
+    .cpc-section--{{ section_id }} .cpc-info-price {
+      font-size: 1.3rem;
+    }
   }
 
   .cpc-section--{{ section_id }} .cpc-price-compare {
     text-decoration: line-through;
     opacity: 0.6;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 400;
-    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
+    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 0.6));
+  }
+
+  @media screen and (max-width: 749px) {
+    .cpc-section--{{ section_id }} .cpc-price-compare {
+      font-size: 1.1rem;
+    }
   }
 
   .cpc-section--{{ section_id }} .cpc-price-current {
     color: var(--cpc-card-content-text, rgba(var(--color-foreground), 1));
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-caret {
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cpc-card-content-text, rgba(var(--color-foreground), 0.5));
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-caret svg {
+    width: 100%;
+    height: 100%;
   }
 
   .cpc-section--{{ section_id }} .cpc-arrow {
