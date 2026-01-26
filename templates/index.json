@@ -254,6 +254,7 @@
       "name": "Best Sellers on Sale",
       "settings": {
         "heading": "Best Sellers on Sale",
+        "heading_color": "#0d4c07",
         "button_label": "SHOP NOW",
         "button_link": "shopify://collections",
         "top_cta_1_label": "Age 0.5-4",
