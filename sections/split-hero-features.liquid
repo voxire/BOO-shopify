@@ -54,34 +54,64 @@
               assign image_position = block.settings.image_position | default: 'top'
               assign title_color = block.settings.title_color
               assign description_color = block.settings.description_color
+              assign image_size = block.settings.image_size | default: 120
+              assign image_padding = block.settings.image_padding | default: 0
+              assign box_width = block.settings.box_width
+              assign box_height = block.settings.box_height
             -%}
             <div 
               class="split-feature-box split-feature-box--image-{{ image_position }}" 
               {{ block.shopify_attributes }}
-              style="{% if title_color != blank %}--feature-title-color: {{ title_color }};{% endif %}{% if description_color != blank %}--feature-description-color: {{ description_color }};{% endif %}"
+              style="{% if title_color != blank %}--feature-title-color: {{ title_color }};{% endif %}{% if description_color != blank %}--feature-description-color: {{ description_color }};{% endif %}{% if image_size != blank %}--feature-image-size: {{ image_size }}px;{% endif %}{% if image_padding != blank %}--feature-image-padding: {{ image_padding }}px;{% endif %}{% if box_width != blank and box_width > 0 %}--feature-box-width: {{ box_width }}px;{% endif %}{% if box_height != blank and box_height > 0 %}--feature-box-height: {{ box_height }}px;{% endif %}"
             >
-              {%- if block.settings.feature_image != blank -%}
-                <div class="split-feature-image">
-                  <img
-                    src="{{ block.settings.feature_image | image_url: width: 400 }}"
-                    alt="{{ block.settings.feature_image.alt | default: block.settings.feature_title | escape }}"
-                    loading="lazy"
-                    width="{{ block.settings.feature_image.width }}"
-                    height="{{ block.settings.feature_image.height }}"
-                  >
-                </div>
-              {%- elsif block.settings.feature_icon != blank -%}
-                <div class="split-feature-icon">
-                  {{ block.settings.feature_icon }}
-                </div>
-              {%- endif -%}
-              
-              {%- if block.settings.feature_title != blank -%}
-                <h3 class="split-feature-title">{{ block.settings.feature_title }}</h3>
-              {%- endif -%}
-              
-              {%- if block.settings.feature_description != blank -%}
-                <p class="split-feature-description">{{ block.settings.feature_description }}</p>
+              {%- if image_position == 'middle' -%}
+                {%- if block.settings.feature_title != blank -%}
+                  <h3 class="split-feature-title split-feature-title--left">{{ block.settings.feature_title }}</h3>
+                {%- endif -%}
+                
+                {%- if block.settings.feature_image != blank -%}
+                  <div class="split-feature-image split-feature-image--middle">
+                    <img
+                      src="{{ block.settings.feature_image | image_url: width: 400 }}"
+                      alt="{{ block.settings.feature_image.alt | default: block.settings.feature_title | escape }}"
+                      loading="lazy"
+                      width="{{ block.settings.feature_image.width }}"
+                      height="{{ block.settings.feature_image.height }}"
+                    >
+                  </div>
+                {%- elsif block.settings.feature_icon != blank -%}
+                  <div class="split-feature-icon split-feature-icon--middle">
+                    {{ block.settings.feature_icon }}
+                  </div>
+                {%- endif -%}
+                
+                {%- if block.settings.feature_description != blank -%}
+                  <p class="split-feature-description split-feature-description--right">{{ block.settings.feature_description }}</p>
+                {%- endif -%}
+              {%- else -%}
+                {%- if block.settings.feature_image != blank -%}
+                  <div class="split-feature-image">
+                    <img
+                      src="{{ block.settings.feature_image | image_url: width: 400 }}"
+                      alt="{{ block.settings.feature_image.alt | default: block.settings.feature_title | escape }}"
+                      loading="lazy"
+                      width="{{ block.settings.feature_image.width }}"
+                      height="{{ block.settings.feature_image.height }}"
+                    >
+                  </div>
+                {%- elsif block.settings.feature_icon != blank -%}
+                  <div class="split-feature-icon">
+                    {{ block.settings.feature_icon }}
+                  </div>
+                {%- endif -%}
+                
+                {%- if block.settings.feature_title != blank -%}
+                  <h3 class="split-feature-title">{{ block.settings.feature_title }}</h3>
+                {%- endif -%}
+                
+                {%- if block.settings.feature_description != blank -%}
+                  <p class="split-feature-description">{{ block.settings.feature_description }}</p>
+                {%- endif -%}
               {%- endif -%}
             </div>
           {%- endfor -%}
@@ -276,6 +306,19 @@
     align-items: center;
     text-align: center;
     height: 100%;
+    width: 100%;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box[style*="--feature-box-height"] {
+    height: var(--feature-box-height);
+    min-height: var(--feature-box-height);
+  }
+
+  .split-section--{{ section_id }} .split-feature-box[style*="--feature-box-width"] {
+    width: var(--feature-box-width);
+    max-width: var(--feature-box-width);
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* Image Position: Top (default) */
@@ -320,41 +363,85 @@
     flex-shrink: 0;
   }
 
+  /* Image Position: Middle (text on both sides) */
+  .split-section--{{ section_id }} .split-feature-box--image-middle {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-title--left {
+    flex: 1;
+    text-align: left;
+    margin: 0 1.6rem 0 0;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-image--middle,
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-icon--middle {
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-description--right {
+    flex: 1;
+    text-align: right;
+    margin: 0 0 0 1.6rem;
+  }
+
   .split-section--{{ section_id }} .split-feature-box:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(var(--color-foreground), 0.12);
   }
 
   .split-section--{{ section_id }} .split-feature-image {
-    width: 100%;
-    max-width: 120px;
+    width: var(--feature-image-size, 120px);
+    max-width: var(--feature-image-size, 120px);
+    height: var(--feature-image-size, 120px);
     margin: 0 auto 1.6rem;
     border-radius: 1.2rem;
     overflow: hidden;
+    padding: var(--feature-image-padding, 0);
+    box-sizing: border-box;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-image,
   .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-image {
-    max-width: 100px;
+    margin: 0;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-image--middle {
+    width: var(--feature-image-size, 120px);
+    max-width: var(--feature-image-size, 120px);
+    height: var(--feature-image-size, 120px);
     margin: 0;
   }
 
   .split-section--{{ section_id }} .split-feature-image img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     object-fit: cover;
   }
 
   .split-section--{{ section_id }} .split-feature-icon {
-    font-size: 4.8rem;
+    font-size: calc(var(--feature-image-size, 120px) * 0.4);
     margin-bottom: 1.6rem;
     line-height: 1;
+    padding: var(--feature-image-padding, 0);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-icon,
   .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-icon {
     margin-bottom: 0;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-icon--middle {
+    margin: 0;
   }
 
   .split-section--{{ section_id }} .split-feature-title {
@@ -396,7 +483,8 @@
 
     /* Mobile: Force top image position for better mobile UX */
     .split-section--{{ section_id }} .split-feature-box--image-left,
-    .split-section--{{ section_id }} .split-feature-box--image-right {
+    .split-section--{{ section_id }} .split-feature-box--image-right,
+    .split-section--{{ section_id }} .split-feature-box--image-middle {
       flex-direction: column;
       align-items: center;
       text-align: center;
@@ -408,6 +496,17 @@
     .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-icon {
       margin: 0 auto 1.6rem;
       max-width: 120px;
+    }
+
+    .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-title--left,
+    .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-description--right {
+      text-align: center;
+      margin: 0;
+    }
+
+    .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-image--middle,
+    .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-icon--middle {
+      margin: 0 auto 1.6rem;
     }
   }
 </style>
@@ -606,10 +705,58 @@
             {
               "value": "right",
               "label": "Right"
+            },
+            {
+              "value": "middle",
+              "label": "Middle (Text on Both Sides)"
             }
           ],
           "default": "top",
           "info": "Position of the image or icon within the feature box"
+        },
+        {
+          "type": "range",
+          "id": "image_size",
+          "label": "Image/Icon Size",
+          "min": 40,
+          "max": 300,
+          "step": 10,
+          "default": 120,
+          "unit": "px",
+          "info": "Size of the feature image or icon"
+        },
+        {
+          "type": "range",
+          "id": "image_padding",
+          "label": "Image/Icon Padding",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "default": 0,
+          "unit": "px",
+          "info": "Padding around the image or icon"
+        },
+        {
+          "type": "range",
+          "id": "box_width",
+          "label": "Feature Box Width",
+          "min": 200,
+          "max": 800,
+          "step": 20,
+          "default": 0,
+          "unit": "px",
+          "info": "Leave at 0 for auto width (100%)"
+        },
+        {
+          "type": "range",
+          "id": "box_height",
+          "label": "Feature Box Height",
+          "min": 200,
+          "max": 800,
+          "step": 20,
+          "default": 0,
+          "unit": "px",
+          "info": "Leave at 0 for auto height"
         },
         {
           "type": "color",
