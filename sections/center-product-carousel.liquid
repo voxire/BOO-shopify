@@ -3,6 +3,8 @@
   assign heading = section.settings.heading
   assign subheading = section.settings.subheading
   assign alignment = section.settings.alignment
+  assign heading_size = section.settings.heading_size | default: 24
+  assign heading_color = section.settings.heading_color
   assign card_radius = section.settings.card_radius | default: 18
   assign card_bottom_radius = section.settings.card_bottom_radius | default: 18
   assign card_width = section.settings.card_width
@@ -30,7 +32,7 @@
   data-autoplay="{{ autoplay }}"
   data-autoplay-delay="{{ autoplay_seconds }}"
   data-loop="true"
-  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-card-bottom-radius: {{ card_bottom_radius }}px;{% if card_width != blank %} --cpc-card-width: {{ card_width }}px;{% endif %} --cpc-autoplay-delay: {{ autoplay_seconds }}s;{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px; --cpc-card-content-margin: {{ card_content_margin }}px;"
+  style="--cpc-gap: {{ gap }}px; --cpc-card-radius: {{ card_radius }}px; --cpc-card-bottom-radius: {{ card_bottom_radius }}px;{% if card_width != blank %} --cpc-card-width: {{ card_width }}px;{% endif %} --cpc-autoplay-delay: {{ autoplay_seconds }}s; --cpc-heading-size: {{ heading_size }}px;{% if heading_color != blank %} --cpc-heading-color: {{ heading_color }};{% endif %}{% if card_content_bg_color != blank %} --cpc-card-content-bg: {{ card_content_bg_color }};{% endif %}{% if card_content_text_color != blank %} --cpc-card-content-text: {{ card_content_text_color }};{% endif %}{% if card_content_border_color != blank %} --cpc-card-content-border-color: {{ card_content_border_color }};{% endif %} --cpc-card-content-border-width: {{ card_content_border_width }}px; --cpc-card-content-border-radius: {{ card_content_border_radius }}px; --cpc-card-content-padding: {{ card_content_padding }}px; --cpc-card-content-margin: {{ card_content_margin }}px;"
 >
   <div class="cpc-container">
     {%- if heading != blank or subheading != blank -%}
@@ -180,10 +182,13 @@
   }
 
   .cpc-section--{{ section_id }} .cpc-heading {
-    font-size: 2.4rem;
+    font-size: var(--cpc-heading-size, 2.4rem);
     font-weight: 600;
     margin: 0 0 1rem;
     line-height: 1.2;
+    {%- if heading_color != blank -%}
+      color: var(--cpc-heading-color);
+    {%- endif -%}
   }
 
   .cpc-section--{{ section_id }} .cpc-subheading {
@@ -1022,6 +1027,22 @@
         }
       ],
       "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "info": "Leave empty to use theme default text color"
     },
     {
       "type": "range",
