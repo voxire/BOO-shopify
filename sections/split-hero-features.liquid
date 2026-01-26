@@ -11,6 +11,8 @@
   assign top_bg_gradient = section.settings.top_bg_gradient
   assign top_min_height = section.settings.top_min_height | default: 60
   assign bottom_bg_color = section.settings.bottom_bg_color
+  assign bottom_padding = section.settings.bottom_padding | default: 4
+  assign features_layout = section.settings.features_layout | default: '3-columns'
   assign section_radius = section.settings.section_radius | default: 24
   assign feature_blocks = section.blocks | where: 'type', 'feature'
 -%}
@@ -18,7 +20,7 @@
 <section
   id="SplitHeroFeatures-{{ section_id }}"
   class="split-section split-section--{{ section_id }}"
-  style="--split-section-radius: {{ section_radius }}px;{% if bottom_bg_color != blank %} --split-bottom-bg: {{ bottom_bg_color }};{% endif %}{% if top_bg_type == 'gradient' and top_bg_gradient != blank %} --split-top-bg: {{ top_bg_gradient }};{% elsif top_bg_type == 'image' and top_bg_image != blank %} --split-top-bg-image: url({{ top_bg_image | image_url: width: 1920 }});{% endif %}"
+  style="--split-section-radius: {{ section_radius }}px;--split-bottom-padding: {{ bottom_padding }}rem;{% if bottom_bg_color != blank %} --split-bottom-bg: {{ bottom_bg_color }};{% endif %}{% if top_bg_type == 'gradient' and top_bg_gradient != blank %} --split-top-bg: {{ top_bg_gradient }};{% elsif top_bg_type == 'image' and top_bg_image != blank %} --split-top-bg-image: url({{ top_bg_image | image_url: width: 1920 }});{% endif %}"
 >
   <div class="split-top">
     <div class="split-top-content">
@@ -46,9 +48,18 @@
   <div class="split-bottom">
     <div class="split-bottom-container">
       {%- if feature_blocks.size > 0 -%}
-        <div class="split-features-grid">
+        <div class="split-features-grid split-features-grid--{{ features_layout }}">
           {%- for block in feature_blocks -%}
-            <div class="split-feature-box" {{ block.shopify_attributes }}>
+            {%- liquid
+              assign image_position = block.settings.image_position | default: 'top'
+              assign title_color = block.settings.title_color
+              assign description_color = block.settings.description_color
+            -%}
+            <div 
+              class="split-feature-box split-feature-box--image-{{ image_position }}" 
+              {{ block.shopify_attributes }}
+              style="{% if title_color != blank %}--feature-title-color: {{ title_color }};{% endif %}{% if description_color != blank %}--feature-description-color: {{ description_color }};{% endif %}"
+            >
               {%- if block.settings.feature_image != blank -%}
                 <div class="split-feature-image">
                   <img
@@ -188,7 +199,7 @@
     width: 100%;
     background: var(--split-bottom-bg, rgba(var(--color-background), 1));
     border-radius: 0 0 var(--split-section-radius) var(--split-section-radius);
-    padding: 4rem 2rem;
+    padding: var(--split-bottom-padding, 4rem) 2rem;
   }
 
   .split-section--{{ section_id }} .split-bottom-container {
@@ -204,8 +215,52 @@
   }
 
   @media screen and (min-width: 750px) {
-    .split-section--{{ section_id }} .split-features-grid {
+    /* 3 Columns Layout */
+    .split-section--{{ section_id }} .split-features-grid--3-columns {
       grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* 1 Top, 2 Bottom Layout */
+    .split-section--{{ section_id }} .split-features-grid--1-top-2-bottom {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .split-section--{{ section_id }} .split-features-grid--1-top-2-bottom .split-feature-box:first-child {
+      grid-column: 1 / -1;
+      max-width: 60%;
+      margin: 0 auto 2.4rem;
+    }
+
+    /* 2 Top, 1 Bottom Layout */
+    .split-section--{{ section_id }} .split-features-grid--2-top-1-bottom {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .split-section--{{ section_id }} .split-features-grid--2-top-1-bottom .split-feature-box:last-child {
+      grid-column: 1 / -1;
+      max-width: 60%;
+      margin: 2.4rem auto 0;
+    }
+
+    /* 1 Left, 2 Right Layout */
+    .split-section--{{ section_id }} .split-features-grid--1-left-2-right {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .split-section--{{ section_id }} .split-features-grid--1-left-2-right .split-feature-box:first-child {
+      grid-row: 1 / -1;
+    }
+
+    /* 2 Left, 1 Right Layout */
+    .split-section--{{ section_id }} .split-features-grid--2-left-1-right {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .split-section--{{ section_id }} .split-features-grid--2-left-1-right .split-feature-box:last-child {
+      grid-row: 1 / -1;
+      grid-column: 2;
     }
   }
 
@@ -223,6 +278,48 @@
     height: 100%;
   }
 
+  /* Image Position: Top (default) */
+  .split-section--{{ section_id }} .split-feature-box--image-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Image Position: Bottom */
+  .split-section--{{ section_id }} .split-feature-box--image-bottom {
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Image Position: Left */
+  .split-section--{{ section_id }} .split-feature-box--image-left {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-image,
+  .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-icon {
+    margin-right: 2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  /* Image Position: Right */
+  .split-section--{{ section_id }} .split-feature-box--image-right {
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    text-align: right;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-image,
+  .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-icon {
+    margin-left: 2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
   .split-section--{{ section_id }} .split-feature-box:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(var(--color-foreground), 0.12);
@@ -234,6 +331,12 @@
     margin: 0 auto 1.6rem;
     border-radius: 1.2rem;
     overflow: hidden;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-image,
+  .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-image {
+    max-width: 100px;
+    margin: 0;
   }
 
   .split-section--{{ section_id }} .split-feature-image img {
@@ -249,11 +352,16 @@
     line-height: 1;
   }
 
+  .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-icon,
+  .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-icon {
+    margin-bottom: 0;
+  }
+
   .split-section--{{ section_id }} .split-feature-title {
     font-size: 2rem;
     font-weight: 600;
     margin: 0 0 1.2rem;
-    color: rgba(var(--color-foreground), 1);
+    color: var(--feature-title-color, rgba(var(--color-foreground), 1));
     line-height: 1.3;
   }
 
@@ -261,7 +369,7 @@
     font-size: 1.5rem;
     line-height: 1.6;
     margin: 0;
-    color: rgba(var(--color-foreground), 0.7);
+    color: var(--feature-description-color, rgba(var(--color-foreground), 0.7));
     flex: 1;
   }
 
@@ -284,6 +392,22 @@
     .split-section--{{ section_id }} .split-button {
       width: 100%;
       text-align: center;
+    }
+
+    /* Mobile: Force top image position for better mobile UX */
+    .split-section--{{ section_id }} .split-feature-box--image-left,
+    .split-section--{{ section_id }} .split-feature-box--image-right {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-image,
+    .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-image,
+    .split-section--{{ section_id }} .split-feature-box--image-left .split-feature-icon,
+    .split-section--{{ section_id }} .split-feature-box--image-right .split-feature-icon {
+      margin: 0 auto 1.6rem;
+      max-width: 120px;
     }
   }
 </style>
@@ -380,6 +504,46 @@
       "info": "Leave empty to use theme default"
     },
     {
+      "type": "range",
+      "id": "bottom_padding",
+      "label": "Bottom Area Padding",
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "default": 4,
+      "unit": "rem",
+      "info": "Controls the vertical padding of the bottom section"
+    },
+    {
+      "type": "select",
+      "id": "features_layout",
+      "label": "Features Layout",
+      "options": [
+        {
+          "value": "3-columns",
+          "label": "3 Columns (Equal)"
+        },
+        {
+          "value": "1-top-2-bottom",
+          "label": "1 on Top, 2 on Bottom"
+        },
+        {
+          "value": "2-top-1-bottom",
+          "label": "2 on Top, 1 on Bottom"
+        },
+        {
+          "value": "1-left-2-right",
+          "label": "1 on Left, 2 on Right"
+        },
+        {
+          "value": "2-left-1-right",
+          "label": "2 on Left, 1 on Right"
+        }
+      ],
+      "default": "3-columns",
+      "info": "Layout arrangement for feature boxes (desktop only)"
+    },
+    {
       "type": "header",
       "content": "Section Settings"
     },
@@ -421,6 +585,43 @@
           "id": "feature_description",
           "label": "Feature Description",
           "default": "Describe your feature here"
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "label": "Image/Icon Position",
+          "options": [
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "top",
+          "info": "Position of the image or icon within the feature box"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title Color",
+          "info": "Leave empty to use theme default"
+        },
+        {
+          "type": "color",
+          "id": "description_color",
+          "label": "Description Color",
+          "info": "Leave empty to use theme default"
         }
       ]
     }
