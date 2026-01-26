@@ -631,7 +631,19 @@
       {% assign p = block.settings.product %}
       {% assign img = block.settings.custom_image %}
       {% if p %}
-        <div class="scg-carousel__slide" data-age-range="{{ block.settings.age_range | default: 'all' }}">
+        {%- liquid
+          comment
+            Support multiple age ranges: comma-separated values like "0.5-4,5-7" or "all"
+            Normalize by converting to lowercase and trimming
+          endcomment
+          assign age_ranges_raw = block.settings.age_range | default: 'all'
+          assign age_ranges = age_ranges_raw | downcase | strip
+          comment
+            Liquid doesn't support map with strip, so we'll store as-is and let JS handle trimming
+            The data attribute will contain comma-separated values
+          endcomment
+        -%}
+        <div class="scg-carousel__slide" data-age-range="{{ age_ranges }}">
           <a
             href="{{ p.url }}"
             class="scg-carousel__link"
@@ -671,7 +683,19 @@
           href="{{ p.url }}"
           class="scg-{{ sid }}__tile"
           style="--scg-text: {{ block.settings.text_color }};"
-          data-age-range="{{ block.settings.age_range | default: 'all' }}"
+          {%- liquid
+            comment
+              Support multiple age ranges: comma-separated values like "0.5-4,5-7" or "all"
+              Normalize by converting to lowercase and trimming
+            endcomment
+            assign age_ranges_raw = block.settings.age_range | default: 'all'
+            assign age_ranges = age_ranges_raw | downcase | strip
+            comment
+              Liquid doesn't support map with strip, so we'll store as-is and let JS handle trimming
+              The data attribute will contain comma-separated values
+            endcomment
+          -%}
+          data-age-range="{{ age_ranges }}"
           {{ block.shopify_attributes }}
         >
           <div class="scg-{{ sid }}__media" aria-hidden="true">
@@ -1011,9 +1035,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Filter desktop tiles (add/remove scg-filtered-out class)
+    // Support multiple age ranges per tile (comma-separated)
     desktopTiles.forEach(tile => {
-      const tileAgeRange = tile.dataset.ageRange || 'all';
-      if (ageRange === 'all' || tileAgeRange === 'all' || tileAgeRange === ageRange) {
+      const tileAgeRanges = (tile.dataset.ageRange || 'all').toLowerCase().trim();
+      const tileAgeArray = tileAgeRanges.split(',').map(r => r.trim());
+      
+      let shouldShow = false;
+      if (ageRange === 'all') {
+        shouldShow = true;
+      } else if (tileAgeArray.includes('all')) {
+        shouldShow = true; // "all" always shows
+      } else {
+        // Check if any of the tile's age ranges match the filter
+        shouldShow = tileAgeArray.includes(ageRange.toLowerCase().trim());
+      }
+      
+      if (shouldShow) {
         tile.classList.remove('scg-filtered-out');
       } else {
         tile.classList.add('scg-filtered-out');
@@ -1021,9 +1058,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Filter mobile carousel slides (add/remove scg-filtered-out class)
+    // Support multiple age ranges per slide (comma-separated)
     mobileSlides.forEach(slide => {
-      const slideAgeRange = slide.dataset.ageRange || 'all';
-      if (ageRange === 'all' || slideAgeRange === 'all' || slideAgeRange === ageRange) {
+      const slideAgeRanges = (slide.dataset.ageRange || 'all').toLowerCase().trim();
+      const slideAgeArray = slideAgeRanges.split(',').map(r => r.trim());
+      
+      let shouldShow = false;
+      if (ageRange === 'all') {
+        shouldShow = true;
+      } else if (slideAgeArray.includes('all')) {
+        shouldShow = true; // "all" always shows
+      } else {
+        // Check if any of the slide's age ranges match the filter
+        shouldShow = slideAgeArray.includes(ageRange.toLowerCase().trim());
+      }
+      
+      if (shouldShow) {
         slide.classList.remove('scg-filtered-out');
       } else {
         slide.classList.add('scg-filtered-out');
@@ -1325,11 +1375,11 @@ document.addEventListener('DOMContentLoaded', function() {
         { "type": "image_picker", "id": "custom_image", "label": "Custom image" },
         { "type": "color", "id": "text_color", "label": "Hover text color", "default": "#ffffff" },
         {
-          "type": "text",
+          "type": "textarea",
           "id": "age_range",
-          "label": "Age Range",
+          "label": "Age Range(s)",
           "default": "all",
-          "info": "Enter the age range value (e.g., '0.5-4', '4-7', 'all'). This must match the age range set on filter buttons."
+          "info": "Enter one or more age ranges separated by commas (e.g., '0.5-4', '5-7', '0.5-4,5-7', or 'all'). Each range must match the age range set on filter buttons. Use 'all' to show for all filters."
         }
       ]
     }
