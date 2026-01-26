@@ -686,8 +686,39 @@
 
     function setActiveByRealIndex(realIndex) {
       slides.forEach((slide, i) => {
-        slide.classList.toggle('is-active', i === realIndex);
+        const isActive = i === realIndex;
+        slide.classList.toggle('is-active', isActive);
+        
+        // Preload GIF for active slide immediately (in background, doesn't display yet)
+        if (isActive && !isDragging) {
+          const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+          gifImages.forEach((img) => {
+            const gifUrl = img.dataset.gifUrl;
+            if (gifUrl) {
+              // Preload in background for faster display when scroll settles
+              preloadGif(gifUrl);
+            }
+          });
+        }
       });
+    }
+
+    /**
+     * Preload GIF in background (doesn't display it, just loads into browser cache)
+     */
+    function preloadGif(gifUrl) {
+      if (!gifUrl) return;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = gifUrl;
+      document.head.appendChild(link);
+      // Remove after a short delay to clean up
+      setTimeout(() => {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link);
+        }
+      }, 1000);
     }
 
     /**
@@ -724,9 +755,13 @@
             const placeholderUrl = img.dataset.placeholderUrl;
             
             if (gifUrl && placeholderUrl) {
-              // Always append cache-busting param when starting a GIF
+              // Preload the GIF in background for faster loading
+              preloadGif(gifUrl);
+              
+              // Set src directly with cache-busting param for immediate display
               const separator = gifUrl.includes('?') ? '&' : '?';
-              img.src = gifUrl + separator + '_t=' + Date.now();
+              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
+              img.src = gifUrlWithTimestamp;
             }
           });
         }
@@ -798,13 +833,13 @@
             updateDots();
             setTimeout(() => { isCorrecting = false; }, 50);
             
-            // Update GIF ONLY after scroll settles (debounce 120ms)
+            // Update GIF ONLY after scroll settles (reduced debounce for faster response)
             if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
             gifUpdateTimer = setTimeout(() => {
               if (!isDragging && !isScrolling) {
                 updateCenterGif(corrected);
               }
-            }, 120);
+            }, 50);
           });
         } else {
           isCorrecting = false;
@@ -816,13 +851,13 @@
         setActiveByRealIndex(corrected);
         updateDots();
         
-        // Update GIF ONLY after scroll settles (debounce 120ms)
+        // Update GIF ONLY after scroll settles (reduced debounce for faster response)
         if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
         gifUpdateTimer = setTimeout(() => {
           if (!isDragging && !isScrolling) {
             updateCenterGif(corrected);
           }
-        }, 120);
+        }, 50);
       }
     }
 
@@ -848,14 +883,14 @@
       setActiveByRealIndex(realIndex);
       updateDots();
 
-      // Update GIF ONLY after scroll settles (debounce based on scroll duration)
+      // Update GIF ONLY after scroll settles (reduced debounce for faster response)
       const scrollDuration = smooth ? 600 : 150;
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(realIndex);
         }
-      }, scrollDuration + 120);
+      }, scrollDuration + 50);
 
       setTimeout(() => {
         isScrolling = false;
@@ -1065,13 +1100,13 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Update GIF ONLY after initialization settles (debounce 150ms)
+      // Update GIF ONLY after initialization settles (reduced debounce for faster response)
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(middleStartIndex);
         }
-      }, 150);
+      }, 50);
     }
 
     function init() {
