@@ -11,6 +11,7 @@
   assign button_text = section.settings.button_text | default: '#ffffff'
   assign badge_bg = section.settings.badge_bg | default: '#d8d0c8'
   assign badge_text_color = section.settings.badge_text_color | default: '#4b4b4b'
+  assign heading_color = section.settings.heading_color
   assign top_cta_1_label = section.settings.top_cta_1_label | default: 'SHOP BEST SELLERS'
   assign top_cta_2_label = section.settings.top_cta_2_label | default: 'SHOP ALL AW25'
   assign top_cta_bg = section.settings.top_cta_bg | default: button_bg
@@ -53,7 +54,7 @@
 
     <div class="best-sellers-on-sale__header">
       {%- if heading != blank -%}
-        <h2 class="best-sellers-on-sale__heading">{{ heading }}</h2>
+        <h2 class="best-sellers-on-sale__heading"{% if heading_color != blank %} style="color: {{ heading_color }};"{% endif %}>{{ heading }}</h2>
       {%- endif -%}
       {%- if button_label != blank -%}
         <span class="best-sellers-on-sale__button">
@@ -601,6 +602,12 @@
       "id": "heading",
       "label": "Heading",
       "default": "Best Sellers on Sale"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "info": "Leave blank to use default text color"
     },
     {
       "type": "text",
