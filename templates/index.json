@@ -425,6 +425,58 @@
         "overlay_opacity": 0,
         "overlay_hover_opacity": 15
       }
+    },
+    "split_hero_features_hJ4mnm": {
+      "type": "split-hero-features",
+      "blocks": {
+        "feature_WaC7m8": {
+          "type": "feature",
+          "settings": {
+            "feature_image": "shopify://shop_images/ELement_2.png",
+            "feature_icon": "",
+            "feature_title": "Feature Title",
+            "feature_description": "Describe your feature here"
+          }
+        },
+        "feature_RGtrUV": {
+          "type": "feature",
+          "settings": {
+            "feature_image": "shopify://shop_images/ELEMENT_1.png",
+            "feature_icon": "",
+            "feature_title": "Feature Title",
+            "feature_description": "Describe your feature here"
+          }
+        },
+        "feature_BjimTf": {
+          "type": "feature",
+          "settings": {
+            "feature_image": "shopify://shop_images/ELement_3.png",
+            "feature_icon": "",
+            "feature_title": "Feature Title",
+            "feature_description": "Describe your feature here"
+          }
+        }
+      },
+      "block_order": [
+        "feature_WaC7m8",
+        "feature_RGtrUV",
+        "feature_BjimTf"
+      ],
+      "name": "Split Hero & Features",
+      "settings": {
+        "top_heading": "Welcome to Our Store",
+        "top_subheading": "Discover amazing products and services",
+        "top_button_text": "Shop Now",
+        "top_button_url": "",
+        "top_button_text_2": "",
+        "top_button_url_2": "",
+        "top_bg_type": "image",
+        "top_bg_image": "shopify://shop_images/Background_extended_430x_46cf53e1-53ca-4423-982e-dc4b6ab0f8d2.jpg",
+        "top_bg_gradient": "",
+        "top_min_height": 60,
+        "bottom_bg_color": "#0d4c07",
+        "section_radius": 24
+      }
     }
   },
   "order": [
@@ -432,6 +484,7 @@
     "3d_card_carousel_x3rUgj",
     "best_sellers_on_sale_ygnM6X",
     "hers_labs_hero_AAQ9WT",
-    "shop_color_grid_ifdnEa"
+    "shop_color_grid_ifdnEa",
+    "split_hero_features_hJ4mnm"
   ]
 }
