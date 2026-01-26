@@ -689,14 +689,25 @@
         const isActive = i === realIndex;
         slide.classList.toggle('is-active', isActive);
         
-        // Preload GIF for active slide immediately (in background, doesn't display yet)
+        // Start loading GIF immediately when slide becomes active (don't wait for scroll to settle)
         if (isActive && !isDragging) {
           const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
-            if (gifUrl) {
-              // Preload in background for faster display when scroll settles
+            const placeholderUrl = img.dataset.placeholderUrl;
+            
+            if (gifUrl && placeholderUrl) {
+              // Aggressively preload the GIF immediately
               preloadGif(gifUrl);
+              
+              // Also start loading it in a hidden Image object for immediate caching
+              const preloadImg = new Image();
+              const separator = gifUrl.includes('?') ? '&' : '?';
+              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
+              preloadImg.src = gifUrlWithTimestamp;
+              
+              // Store the preloaded URL for quick swap later
+              img.dataset.preloadedGifUrl = gifUrlWithTimestamp;
             }
           });
         }
@@ -704,21 +715,33 @@
     }
 
     /**
-     * Preload GIF in background (doesn't display it, just loads into browser cache)
+     * Aggressively preload GIF using multiple methods for fastest loading
      */
     function preloadGif(gifUrl) {
       if (!gifUrl) return;
+      
+      // Method 1: Link preload
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
       link.href = gifUrl;
       document.head.appendChild(link);
-      // Remove after a short delay to clean up
+      
+      // Method 2: Fetch to force download into cache
+      fetch(gifUrl, { mode: 'no-cors', cache: 'force-cache' }).catch(() => {
+        // Ignore CORS errors, still helps with caching
+      });
+      
+      // Method 3: Create Image object to trigger browser download
+      const img = new Image();
+      img.src = gifUrl;
+      
+      // Clean up link after a delay
       setTimeout(() => {
         if (link.parentNode) {
           link.parentNode.removeChild(link);
         }
-      }, 1000);
+      }, 2000);
     }
 
     /**
@@ -755,13 +778,16 @@
             const placeholderUrl = img.dataset.placeholderUrl;
             
             if (gifUrl && placeholderUrl) {
-              // Preload the GIF in background for faster loading
-              preloadGif(gifUrl);
-              
-              // Set src directly with cache-busting param for immediate display
-              const separator = gifUrl.includes('?') ? '&' : '?';
-              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-              img.src = gifUrlWithTimestamp;
+              // Use preloaded URL if available (browser will use cache if already loaded)
+              const preloadedUrl = img.dataset.preloadedGifUrl;
+              if (preloadedUrl) {
+                img.src = preloadedUrl;
+              } else {
+                // Fallback: load now with cache-busting
+                const separator = gifUrl.includes('?') ? '&' : '?';
+                const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
+                img.src = gifUrlWithTimestamp;
+              }
             }
           });
         }
@@ -833,13 +859,13 @@
             updateDots();
             setTimeout(() => { isCorrecting = false; }, 50);
             
-            // Update GIF ONLY after scroll settles (reduced debounce for faster response)
+            // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
             if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
             gifUpdateTimer = setTimeout(() => {
               if (!isDragging && !isScrolling) {
                 updateCenterGif(corrected);
               }
-            }, 50);
+            }, 20);
           });
         } else {
           isCorrecting = false;
@@ -851,13 +877,13 @@
         setActiveByRealIndex(corrected);
         updateDots();
         
-        // Update GIF ONLY after scroll settles (reduced debounce for faster response)
+        // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
         if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
         gifUpdateTimer = setTimeout(() => {
           if (!isDragging && !isScrolling) {
             updateCenterGif(corrected);
           }
-        }, 50);
+        }, 20);
       }
     }
 
@@ -883,14 +909,14 @@
       setActiveByRealIndex(realIndex);
       updateDots();
 
-      // Update GIF ONLY after scroll settles (reduced debounce for faster response)
+      // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
       const scrollDuration = smooth ? 600 : 150;
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(realIndex);
         }
-      }, scrollDuration + 50);
+      }, scrollDuration + 20);
 
       setTimeout(() => {
         isScrolling = false;
@@ -1100,13 +1126,13 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Update GIF ONLY after initialization settles (reduced debounce for faster response)
+      // Update GIF immediately on init (GIF should already be preloading from setActiveByRealIndex)
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(middleStartIndex);
         }
-      }, 50);
+      }, 20);
     }
 
     function init() {
