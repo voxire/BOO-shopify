@@ -775,16 +775,16 @@
     let scrollEndTimer = null;
 
     function onScroll() {
-      // Don't process during programmatic scrolling or dragging
-      if (isScrolling || isProgrammaticScroll || isDragging) return;
+      // ONLY block during active drag - allow scroll-end handler to run after programmatic scrolls
+      if (isDragging) return;
       
       // Clear any pending scroll-end handler
       if (scrollEndTimer) clearTimeout(scrollEndTimer);
       
       // Single debounced handler: compute center, set active, update GIF
       scrollEndTimer = setTimeout(() => {
-        // Double-check we're not in an invalid state
-        if (isScrolling || isProgrammaticScroll || isDragging || slides.length === 0) return;
+        // Only block if actively dragging or no slides
+        if (isDragging || slides.length === 0) return;
         
         // Compute centered slide
         const centeredIndex = getClosestIndexToCenter();
