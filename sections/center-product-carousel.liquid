@@ -773,25 +773,43 @@
     }
 
     let scrollEndTimer = null;
-    let gifUpdateTimer = null;
 
     function onScroll() {
-      // Don't correct during programmatic scrolling
-      if (isScrolling || isProgrammaticScroll) return;
+      // Don't process during programmatic scrolling or dragging
+      if (isScrolling || isProgrammaticScroll || isDragging) return;
       
-      // Clear any pending GIF updates during scroll
-      if (gifUpdateTimer) {
-        clearTimeout(gifUpdateTimer);
-        gifUpdateTimer = null;
-      }
-      
+      // Clear any pending scroll-end handler
       if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      
+      // Single debounced handler: compute center, set active, update GIF
       scrollEndTimer = setTimeout(() => {
-        // Only correct if user-initiated scroll has stopped
-        if (!isScrolling && !isProgrammaticScroll) {
-          correctPosition();
+        // Double-check we're not in an invalid state
+        if (isScrolling || isProgrammaticScroll || isDragging || slides.length === 0) return;
+        
+        // Compute centered slide
+        const centeredIndex = getClosestIndexToCenter();
+        
+        // Handle infinite loop correction if needed
+        let correctedIndex = centeredIndex;
+        if (centeredIndex < clonesCount) {
+          // In prepended copies - jump to corresponding position in middle copy
+          const offsetInPre = centeredIndex % originalCount;
+          correctedIndex = clonesCount + offsetInPre;
+        } else if (centeredIndex >= clonesCount + originalCount) {
+          // In appended copies - jump to corresponding position in middle copy
+          const offsetInPost = (centeredIndex - clonesCount - originalCount) % originalCount;
+          correctedIndex = clonesCount + offsetInPost;
         }
-      }, 150);
+        
+        // Update indices and active state
+        currentRealIndex = correctedIndex;
+        currentIndex = getOriginalIndexByReal(correctedIndex);
+        setActiveByRealIndex(correctedIndex);
+        updateDots();
+        
+        // Update GIF immediately after scroll settles (80-120ms debounce)
+        updateCenterGif(correctedIndex);
+      }, 100);
     }
 
     function correctPosition() {
@@ -832,14 +850,7 @@
             setActiveByRealIndex(corrected);
             updateDots();
             setTimeout(() => { isCorrecting = false; }, 50);
-            
-            // Update GIF ONLY after scroll settles (reduced debounce for faster response)
-            if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
-            gifUpdateTimer = setTimeout(() => {
-              if (!isDragging && !isScrolling) {
-                updateCenterGif(corrected);
-              }
-            }, 50);
+            // GIF update will be handled by onScroll() debounce
           });
         } else {
           isCorrecting = false;
@@ -850,14 +861,7 @@
         currentIndex = getOriginalIndexByReal(corrected);
         setActiveByRealIndex(corrected);
         updateDots();
-        
-        // Update GIF ONLY after scroll settles (reduced debounce for faster response)
-        if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
-        gifUpdateTimer = setTimeout(() => {
-          if (!isDragging && !isScrolling) {
-            updateCenterGif(corrected);
-          }
-        }, 50);
+        // GIF update will be handled by onScroll() debounce
       }
     }
 
@@ -883,15 +887,8 @@
       setActiveByRealIndex(realIndex);
       updateDots();
 
-      // Update GIF ONLY after scroll settles (reduced debounce for faster response)
+      // GIF update will be handled by onScroll() debounce after scroll settles
       const scrollDuration = smooth ? 600 : 150;
-      if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
-      gifUpdateTimer = setTimeout(() => {
-        if (!isDragging && !isScrolling) {
-          updateCenterGif(realIndex);
-        }
-      }, scrollDuration + 50);
-
       setTimeout(() => {
         isScrolling = false;
         // Keep programmatic flag a bit longer to prevent correction
@@ -1100,13 +1097,13 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Update GIF ONLY after initialization settles (reduced debounce for faster response)
-      if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
-      gifUpdateTimer = setTimeout(() => {
-        if (!isDragging && !isScrolling) {
-          updateCenterGif(middleStartIndex);
+      // Trigger scroll handler after initialization to update GIF (uses same debounce logic)
+      setTimeout(() => {
+        if (track) {
+          // Manually trigger scroll end handler for initial load
+          onScroll();
         }
-      }, 50);
+      }, 100);
     }
 
     function init() {
