@@ -432,19 +432,25 @@
         "feature_WaC7m8": {
           "type": "feature",
           "settings": {
-            "feature_image": "shopify://shop_images/ELement_2.png",
+            "feature_image": "shopify://shop_images/ELEMENT_1.png",
             "feature_icon": "",
             "feature_title": "Feature Title",
-            "feature_description": "Describe your feature here"
+            "feature_description": "Describe your feature here",
+            "image_position": "top",
+            "title_color": "",
+            "description_color": ""
           }
         },
         "feature_RGtrUV": {
           "type": "feature",
           "settings": {
-            "feature_image": "shopify://shop_images/ELEMENT_1.png",
+            "feature_image": "shopify://shop_images/ELement_2.png",
             "feature_icon": "",
             "feature_title": "Feature Title",
-            "feature_description": "Describe your feature here"
+            "feature_description": "Describe your feature here",
+            "image_position": "top",
+            "title_color": "",
+            "description_color": ""
           }
         },
         "feature_BjimTf": {
@@ -453,7 +459,10 @@
             "feature_image": "shopify://shop_images/ELement_3.png",
             "feature_icon": "",
             "feature_title": "Feature Title",
-            "feature_description": "Describe your feature here"
+            "feature_description": "Describe your feature here",
+            "image_position": "top",
+            "title_color": "",
+            "description_color": ""
           }
         }
       },
@@ -475,6 +484,8 @@
         "top_bg_gradient": "",
         "top_min_height": 60,
         "bottom_bg_color": "#0d4c07",
+        "bottom_padding": 4,
+        "features_layout": "1-top-2-bottom",
         "section_radius": 24
       }
     }
