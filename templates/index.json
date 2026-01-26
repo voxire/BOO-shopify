@@ -498,6 +498,7 @@
         "bottom_bg_color": "#0d4c07",
         "bottom_padding": 4,
         "features_layout": "1-top-2-bottom",
+        "features_container_width": 1000,
         "section_radius": 24
       }
     }
