@@ -684,64 +684,53 @@
       return clonesCount + originalIndex;
     }
 
-    function stopAllGifs() {
-      const allSlides = track ? track.querySelectorAll('.cpc-slide') : document.querySelectorAll('.cpc-slide');
-      allSlides.forEach((slide) => {
-        // Don't stop GIFs in active slides
-        if (slide.classList.contains('is-active')) return;
-        
-        const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
-        gifImages.forEach((img) => {
-          if (img.dataset.gifUrl && img.dataset.placeholderUrl) {
-            const placeholderUrl = img.dataset.placeholderUrl;
-            const gifUrl = img.dataset.gifUrl;
-            // Only swap if it's currently showing the GIF
-            if (img.src.includes(gifUrl.split('?')[0].split('#')[0])) {
-              img.src = placeholderUrl;
-              img.removeAttribute('srcset');
-            }
-          }
-        });
+    function setActiveByRealIndex(realIndex) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === realIndex);
       });
     }
 
-    function setActiveByRealIndex(realIndex) {
-      slides.forEach((slide, i) => {
-        const isActive = i === realIndex;
-        slide.classList.toggle('is-active', isActive);
+    /**
+     * STRICT GIF CONTROL: Only ONE GIF plays at a time, only on centered slide, only after scroll settles
+     * @param {number} realIndex - The real index of the slide that should have its GIF playing
+     */
+    function updateCenterGif(realIndex) {
+      // Lock GIF during drag
+      if (isDragging) return;
+      
+      // Extra safety: Stop ALL GIFs globally first (including any that might be playing)
+      const allGifImages = document.querySelectorAll('.cpc-gif-image[data-gif-url]');
+      allGifImages.forEach((img) => {
+        const gifUrl = img.dataset.gifUrl;
+        const placeholderUrl = img.dataset.placeholderUrl;
         
-        const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
-        gifImages.forEach((img) => {
-          const gifUrl = img.dataset.gifUrl;
-          const placeholderUrl = img.dataset.placeholderUrl;
-          
-          if (gifUrl) {
-            if (isActive) {
-              // Play GIF when active
-              const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-              // Check if it's currently showing the placeholder
-              if (placeholderUrl && (img.src === placeholderUrl || img.src.includes(placeholderUrl))) {
-                // Swap from placeholder to GIF
-                const separator = gifUrl.includes('?') ? '&' : '?';
-                img.src = gifUrl + separator + '_t=' + Date.now();
-              } else if (!img.src.includes(baseGifUrl)) {
-                // Not showing placeholder or GIF, load the GIF
-                const separator = gifUrl.includes('?') ? '&' : '?';
-                img.src = gifUrl + separator + '_t=' + Date.now();
-              }
-            } else {
-              // Stop GIF when inactive - swap to placeholder
-              if (placeholderUrl) {
-                const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-                if (img.src.includes(baseGifUrl)) {
-                  img.src = placeholderUrl;
-                  img.removeAttribute('srcset');
-                }
-              }
-            }
+        if (gifUrl && placeholderUrl) {
+          const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
+          // If showing GIF (check by base URL to catch any cache-busted versions), swap to placeholder
+          if (img.src.includes(baseGifUrl)) {
+            img.src = placeholderUrl;
+            img.removeAttribute('srcset');
           }
-        });
+        }
       });
+      
+      // Now start GIF ONLY for the centered slide
+      if (realIndex >= 0 && realIndex < slides.length) {
+        const centerSlide = slides[realIndex];
+        if (centerSlide) {
+          const gifImages = centerSlide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+          gifImages.forEach((img) => {
+            const gifUrl = img.dataset.gifUrl;
+            const placeholderUrl = img.dataset.placeholderUrl;
+            
+            if (gifUrl && placeholderUrl) {
+              // Always append cache-busting param when starting a GIF
+              const separator = gifUrl.includes('?') ? '&' : '?';
+              img.src = gifUrl + separator + '_t=' + Date.now();
+            }
+          });
+        }
+      }
     }
 
     function updateDots() {
@@ -749,10 +738,17 @@
     }
 
     let scrollEndTimer = null;
+    let gifUpdateTimer = null;
 
     function onScroll() {
       // Don't correct during programmatic scrolling
       if (isScrolling || isProgrammaticScroll) return;
+      
+      // Clear any pending GIF updates during scroll
+      if (gifUpdateTimer) {
+        clearTimeout(gifUpdateTimer);
+        gifUpdateTimer = null;
+      }
       
       if (scrollEndTimer) clearTimeout(scrollEndTimer);
       scrollEndTimer = setTimeout(() => {
@@ -801,6 +797,14 @@
             setActiveByRealIndex(corrected);
             updateDots();
             setTimeout(() => { isCorrecting = false; }, 50);
+            
+            // Update GIF ONLY after scroll settles (debounce 120ms)
+            if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
+            gifUpdateTimer = setTimeout(() => {
+              if (!isDragging && !isScrolling) {
+                updateCenterGif(corrected);
+              }
+            }, 120);
           });
         } else {
           isCorrecting = false;
@@ -811,6 +815,14 @@
         currentIndex = getOriginalIndexByReal(corrected);
         setActiveByRealIndex(corrected);
         updateDots();
+        
+        // Update GIF ONLY after scroll settles (debounce 120ms)
+        if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
+        gifUpdateTimer = setTimeout(() => {
+          if (!isDragging && !isScrolling) {
+            updateCenterGif(corrected);
+          }
+        }, 120);
       }
     }
 
@@ -836,13 +848,22 @@
       setActiveByRealIndex(realIndex);
       updateDots();
 
+      // Update GIF ONLY after scroll settles (debounce based on scroll duration)
+      const scrollDuration = smooth ? 600 : 150;
+      if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
+      gifUpdateTimer = setTimeout(() => {
+        if (!isDragging && !isScrolling) {
+          updateCenterGif(realIndex);
+        }
+      }, scrollDuration + 120);
+
       setTimeout(() => {
         isScrolling = false;
         // Keep programmatic flag a bit longer to prevent correction
         setTimeout(() => {
           isProgrammaticScroll = false;
         }, smooth ? 200 : 100);
-      }, smooth ? 600 : 150);
+      }, scrollDuration);
 
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
@@ -1030,9 +1051,6 @@
       // Rebuild slides array
       slides = Array.from(track.querySelectorAll('.cpc-slide'));
       
-      // Stop all GIFs first
-      stopAllGifs();
-      
       // Start in the middle copy (first slide of middle copy)
       const middleStartIndex = clonesCount + currentIndex;
       const middleStartSlide = slides[middleStartIndex];
@@ -1046,6 +1064,14 @@
       currentRealIndex = middleStartIndex;
       setActiveByRealIndex(middleStartIndex);
       updateDots();
+      
+      // Update GIF ONLY after initialization settles (debounce 150ms)
+      if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
+      gifUpdateTimer = setTimeout(() => {
+        if (!isDragging && !isScrolling) {
+          updateCenterGif(middleStartIndex);
+        }
+      }, 150);
     }
 
     function init() {
