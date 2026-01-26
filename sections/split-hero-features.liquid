@@ -454,38 +454,56 @@
   /* Image Position: Middle (text on both sides) */
   .split-section--{{ section_id }} .split-feature-box--image-middle {
     flex-direction: row;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
     text-align: left;
-    padding: 2.4rem;
+    padding: 0;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-title--left {
     flex: 1;
     text-align: left;
-    margin: 0 1.6rem 0 0;
-    padding: 0;
+    margin: 0;
+    padding: 2.4rem;
+    padding-right: 1.6rem;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-image--middle {
     width: var(--feature-image-size, 120px);
     max-width: var(--feature-image-size, 120px);
-    height: var(--feature-image-size, 120px);
+    height: 100%;
+    min-height: 200px;
     flex-shrink: 0;
     margin: 0;
-    border-radius: 1.2rem;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-image--middle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-icon--middle {
+    width: var(--feature-image-size, 120px);
+    height: 100%;
+    min-height: 100%;
     flex-shrink: 0;
     margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
   }
 
   .split-section--{{ section_id }} .split-feature-box--image-middle .split-feature-description--right {
     flex: 1;
     text-align: right;
-    margin: 0 0 0 1.6rem;
-    padding: 0;
+    margin: 0;
+    padding: 2.4rem;
+    padding-left: 1.6rem;
   }
 
   .split-section--{{ section_id }} .split-feature-box:hover {
