@@ -74,18 +74,26 @@
                     {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
                       <img
                         draggable="false"
-                        src="{{ block.settings.external_gif_url }}"
+                        data-gif-url="{{ block.settings.external_gif_url }}"
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
-                        class="cpc-card-image"
+                        class="cpc-card-image cpc-gif-image"
                         style="object-position: {{ object_position }};"
                         {% unless forloop.first %}loading="lazy"{% endunless %}
                       >
                     {%- elsif media_source == 'custom_image_or_gif' and block.settings.custom_media != blank -%}
+                      {%- liquid
+                        assign media_url = block.settings.custom_media | image_url: width: 1200
+                        assign is_gif = false
+                        if block.settings.custom_media.alt contains '.gif' or media_url contains '.gif'
+                          assign is_gif = true
+                        endif
+                      -%}
                       <img
                         draggable="false"
-                        src="{{ block.settings.custom_media | image_url: width: 1200 }}"
+                        {% if is_gif %}data-gif-url="{{ media_url }}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"{% else %}src="{{ media_url }}"{% endif %}
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
-                        class="cpc-card-image"
+                        class="cpc-card-image{% if is_gif %} cpc-gif-image{% endif %}"
                         style="object-position: {{ object_position }};"
                         {% unless forloop.first %}loading="lazy"{% endunless %}
                       >
@@ -617,8 +625,32 @@
     }
 
     function setActiveByRealIndex(realIndex) {
+      const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      
       slides.forEach((slide, i) => {
-        slide.classList.toggle('is-active', i === realIndex);
+        const isActive = i === realIndex;
+        slide.classList.toggle('is-active', isActive);
+        
+        // Control GIF playback
+        const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+        gifImages.forEach((img) => {
+          const gifUrl = img.dataset.gifUrl;
+          if (gifUrl) {
+            if (isActive) {
+              // Play GIF when active - add timestamp to force reload/restart
+              const separator = gifUrl.includes('?') ? '&' : '?';
+              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
+              if (img.src !== gifUrlWithTimestamp && !img.src.startsWith(gifUrl.split('?')[0])) {
+                img.src = gifUrlWithTimestamp;
+              }
+            } else {
+              // Stop GIF when inactive
+              if (img.src !== placeholderGif && !img.src.startsWith('data:image/gif;base64')) {
+                img.src = placeholderGif;
+              }
+            }
+          }
+        });
       });
     }
 
