@@ -436,7 +436,11 @@
             "feature_icon": "",
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
-            "image_position": "top",
+            "image_position": "middle",
+            "image_size": 230,
+            "image_padding": 0,
+            "box_width": 0,
+            "box_height": 0,
             "title_color": "#000000",
             "description_color": "#000000"
           }
@@ -449,6 +453,10 @@
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
             "image_position": "top",
+            "image_size": 220,
+            "image_padding": 0,
+            "box_width": 0,
+            "box_height": 0,
             "title_color": "#000000",
             "description_color": "#000000"
           }
@@ -461,6 +469,10 @@
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
             "image_position": "bottom",
+            "image_size": 220,
+            "image_padding": 0,
+            "box_width": 0,
+            "box_height": 0,
             "title_color": "#000000",
             "description_color": "#000000"
           }
