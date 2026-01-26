@@ -95,6 +95,7 @@
             "media_source": "custom_image_or_gif",
             "custom_media": "shopify://shop_images/goat.gif",
             "external_gif_url": "",
+            "placeholder_image": "shopify://shop_images/GriBoo.png",
             "alt_text": "",
             "focal_position": "top"
           }
