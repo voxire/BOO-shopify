@@ -557,6 +557,23 @@
 </style>
 
 <script>
+  // Immediately stop any GIFs on page load
+  (function() {
+    const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const sectionId = '{{ section_id }}';
+    const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
+    if (section) {
+      const gifImages = section.querySelectorAll('.cpc-gif-image[data-gif-url]');
+      gifImages.forEach((img) => {
+        if (img.dataset.gifUrl) {
+          img.src = placeholderGif;
+        }
+      });
+    }
+  })();
+</script>
+
+<script>
   (function () {
     'use strict';
 
@@ -624,14 +641,36 @@
       return clonesCount + originalIndex;
     }
 
+    function stopAllGifs() {
+      const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      const allSlides = track ? track.querySelectorAll('.cpc-slide') : document.querySelectorAll('.cpc-slide');
+      allSlides.forEach((slide) => {
+        const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+        gifImages.forEach((img) => {
+          if (img.dataset.gifUrl) {
+            // Force stop by setting placeholder and removing any loading
+            img.src = placeholderGif;
+            img.removeAttribute('srcset');
+            // Clear any cached image
+            if (img.complete) {
+              img.src = '';
+              setTimeout(() => {
+                img.src = placeholderGif;
+              }, 0);
+            }
+          }
+        });
+      });
+    }
+
     function setActiveByRealIndex(realIndex) {
       const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
       
+      // First, stop ALL GIFs explicitly
       slides.forEach((slide, i) => {
         const isActive = i === realIndex;
         slide.classList.toggle('is-active', isActive);
         
-        // Control GIF playback
         const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
         gifImages.forEach((img) => {
           const gifUrl = img.dataset.gifUrl;
@@ -640,12 +679,21 @@
               // Play GIF when active - add timestamp to force reload/restart
               const separator = gifUrl.includes('?') ? '&' : '?';
               const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-              if (img.src !== gifUrlWithTimestamp && !img.src.startsWith(gifUrl.split('?')[0])) {
-                img.src = gifUrlWithTimestamp;
-              }
+              // Always set to ensure it plays
+              img.src = gifUrlWithTimestamp;
             } else {
-              // Stop GIF when inactive
-              if (img.src !== placeholderGif && !img.src.startsWith('data:image/gif;base64')) {
+              // Stop GIF when inactive - use multiple methods to ensure it stops
+              img.src = placeholderGif;
+              img.removeAttribute('srcset');
+              // Force browser to stop loading
+              if (img.complete) {
+                img.src = '';
+                setTimeout(() => {
+                  if (!slide.classList.contains('is-active')) {
+                    img.src = placeholderGif;
+                  }
+                }, 0);
+              } else {
                 img.src = placeholderGif;
               }
             }
@@ -940,6 +988,9 @@
       // Rebuild slides array
       slides = Array.from(track.querySelectorAll('.cpc-slide'));
       
+      // Stop all GIFs first
+      stopAllGifs();
+      
       // Start in the middle copy (first slide of middle copy)
       const middleStartIndex = clonesCount + currentIndex;
       const middleStartSlide = slides[middleStartIndex];
@@ -951,11 +1002,17 @@
       }
       
       currentRealIndex = middleStartIndex;
-      setActiveByRealIndex(middleStartIndex);
+      // Small delay to ensure all GIFs are stopped before setting active
+      setTimeout(() => {
+        setActiveByRealIndex(middleStartIndex);
+      }, 10);
       updateDots();
     }
 
     function init() {
+      // Stop all GIFs immediately on init
+      stopAllGifs();
+      
       // Get original slides
       originalSlides = Array.from(track.querySelectorAll('.cpc-slide')).filter(slide => !slide.dataset.clone);
       originalCount = originalSlides.length;
