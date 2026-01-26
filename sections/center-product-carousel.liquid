@@ -72,15 +72,26 @@
                     {%- endif -%}
 
                     {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
-                      <img
-                        draggable="false"
-                        data-gif-url="{{ block.settings.external_gif_url }}"
-                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
-                        class="cpc-card-image cpc-gif-image"
-                        style="object-position: {{ object_position }};"
-                        {% unless forloop.first %}loading="lazy"{% endunless %}
-                      >
+                      {%- if forloop.first -%}
+                        <img
+                          draggable="false"
+                          data-gif-url="{{ block.settings.external_gif_url }}"
+                          src="{{ block.settings.external_gif_url }}"
+                          alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                          class="cpc-card-image cpc-gif-image"
+                          style="object-position: {{ object_position }};"
+                        >
+                      {%- else -%}
+                        <img
+                          draggable="false"
+                          data-gif-url="{{ block.settings.external_gif_url }}"
+                          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                          alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                          class="cpc-card-image cpc-gif-image"
+                          style="object-position: {{ object_position }};"
+                          loading="lazy"
+                        >
+                      {%- endif -%}
                     {%- elsif media_source == 'custom_image_or_gif' and block.settings.custom_media != blank -%}
                       {%- liquid
                         assign media_url = block.settings.custom_media | image_url: width: 1200
@@ -89,14 +100,37 @@
                           assign is_gif = true
                         endif
                       -%}
-                      <img
-                        draggable="false"
-                        {% if is_gif %}data-gif-url="{{ media_url }}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"{% else %}src="{{ media_url }}"{% endif %}
-                        alt="{{ block.settings.alt_text | default: product.title | escape }}"
-                        class="cpc-card-image{% if is_gif %} cpc-gif-image{% endif %}"
-                        style="object-position: {{ object_position }};"
-                        {% unless forloop.first %}loading="lazy"{% endunless %}
-                      >
+                      {%- if is_gif -%}
+                        {%- if forloop.first -%}
+                          <img
+                            draggable="false"
+                            data-gif-url="{{ media_url }}"
+                            src="{{ media_url }}"
+                            alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                            class="cpc-card-image cpc-gif-image"
+                            style="object-position: {{ object_position }};"
+                          >
+                        {%- else -%}
+                          <img
+                            draggable="false"
+                            data-gif-url="{{ media_url }}"
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                            alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                            class="cpc-card-image cpc-gif-image"
+                            style="object-position: {{ object_position }};"
+                            loading="lazy"
+                          >
+                        {%- endif -%}
+                      {%- else -%}
+                        <img
+                          draggable="false"
+                          src="{{ media_url }}"
+                          alt="{{ block.settings.alt_text | default: product.title | escape }}"
+                          class="cpc-card-image"
+                          style="object-position: {{ object_position }};"
+                          {% unless forloop.first %}loading="lazy"{% endunless %}
+                        >
+                      {%- endif -%}
                     {%- elsif product.featured_media != blank -%}
                       <img
                         draggable="false"
@@ -557,16 +591,22 @@
 </style>
 
 <script>
-  // Immediately stop any GIFs on page load
+  // Immediately stop any GIFs on page load (except in active slide)
   (function() {
     const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const sectionId = '{{ section_id }}';
     const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
     if (section) {
-      const gifImages = section.querySelectorAll('.cpc-gif-image[data-gif-url]');
-      gifImages.forEach((img) => {
-        if (img.dataset.gifUrl) {
-          img.src = placeholderGif;
+      const allSlides = section.querySelectorAll('.cpc-slide');
+      allSlides.forEach((slide) => {
+        // Only stop GIFs in non-active slides
+        if (!slide.classList.contains('is-active')) {
+          const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+          gifImages.forEach((img) => {
+            if (img.dataset.gifUrl && !img.src.includes(img.dataset.gifUrl.split('?')[0].split('#')[0])) {
+              img.src = placeholderGif;
+            }
+          });
         }
       });
     }
@@ -645,18 +685,16 @@
       const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
       const allSlides = track ? track.querySelectorAll('.cpc-slide') : document.querySelectorAll('.cpc-slide');
       allSlides.forEach((slide) => {
+        // Don't stop GIFs in active slides
+        if (slide.classList.contains('is-active')) return;
+        
         const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
         gifImages.forEach((img) => {
           if (img.dataset.gifUrl) {
-            // Force stop by setting placeholder and removing any loading
-            img.src = placeholderGif;
-            img.removeAttribute('srcset');
-            // Clear any cached image
-            if (img.complete) {
-              img.src = '';
-              setTimeout(() => {
-                img.src = placeholderGif;
-              }, 0);
+            // Only stop if it's not already the placeholder
+            if (!img.src.includes('data:image/gif;base64')) {
+              img.src = placeholderGif;
+              img.removeAttribute('srcset');
             }
           }
         });
@@ -666,7 +704,6 @@
     function setActiveByRealIndex(realIndex) {
       const placeholderGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
       
-      // First, stop ALL GIFs explicitly
       slides.forEach((slide, i) => {
         const isActive = i === realIndex;
         slide.classList.toggle('is-active', isActive);
@@ -676,25 +713,22 @@
           const gifUrl = img.dataset.gifUrl;
           if (gifUrl) {
             if (isActive) {
-              // Play GIF when active - add timestamp to force reload/restart
-              const separator = gifUrl.includes('?') ? '&' : '?';
-              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-              // Always set to ensure it plays
-              img.src = gifUrlWithTimestamp;
+              // Play GIF when active
+              // Check if it's already the correct GIF URL (without timestamp)
+              const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
+              if (!img.src.includes(baseGifUrl)) {
+                // Add timestamp to force reload/restart if needed
+                const separator = gifUrl.includes('?') ? '&' : '?';
+                img.src = gifUrl + separator + '_t=' + Date.now();
+              } else if (img.src === placeholderGif || img.src.includes('data:image/gif;base64')) {
+                // If it's currently the placeholder, load the GIF
+                img.src = gifUrl;
+              }
             } else {
-              // Stop GIF when inactive - use multiple methods to ensure it stops
-              img.src = placeholderGif;
-              img.removeAttribute('srcset');
-              // Force browser to stop loading
-              if (img.complete) {
-                img.src = '';
-                setTimeout(() => {
-                  if (!slide.classList.contains('is-active')) {
-                    img.src = placeholderGif;
-                  }
-                }, 0);
-              } else {
+              // Stop GIF when inactive
+              if (img.src !== placeholderGif && !img.src.includes('data:image/gif;base64')) {
                 img.src = placeholderGif;
+                img.removeAttribute('srcset');
               }
             }
           }
@@ -1002,17 +1036,11 @@
       }
       
       currentRealIndex = middleStartIndex;
-      // Small delay to ensure all GIFs are stopped before setting active
-      setTimeout(() => {
-        setActiveByRealIndex(middleStartIndex);
-      }, 10);
+      setActiveByRealIndex(middleStartIndex);
       updateDots();
     }
 
     function init() {
-      // Stop all GIFs immediately on init
-      stopAllGifs();
-      
       // Get original slides
       originalSlides = Array.from(track.querySelectorAll('.cpc-slide')).filter(slide => !slide.dataset.clone);
       originalCount = originalSlides.length;
