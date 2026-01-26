@@ -13,6 +13,7 @@
   assign bottom_bg_color = section.settings.bottom_bg_color
   assign bottom_padding = section.settings.bottom_padding | default: 4
   assign features_layout = section.settings.features_layout | default: '3-columns'
+  assign features_container_width = section.settings.features_container_width
   assign section_radius = section.settings.section_radius | default: 24
   assign feature_blocks = section.blocks | where: 'type', 'feature'
 -%}
@@ -20,7 +21,7 @@
 <section
   id="SplitHeroFeatures-{{ section_id }}"
   class="split-section split-section--{{ section_id }}"
-  style="--split-section-radius: {{ section_radius }}px;--split-bottom-padding: {{ bottom_padding }}rem;{% if bottom_bg_color != blank %} --split-bottom-bg: {{ bottom_bg_color }};{% endif %}{% if top_bg_type == 'gradient' and top_bg_gradient != blank %} --split-top-bg: {{ top_bg_gradient }};{% elsif top_bg_type == 'image' and top_bg_image != blank %} --split-top-bg-image: url({{ top_bg_image | image_url: width: 1920 }});{% endif %}"
+  style="--split-section-radius: {{ section_radius }}px;--split-bottom-padding: {{ bottom_padding }}rem;{% if features_container_width != blank and features_container_width > 0 %} --features-container-width: {{ features_container_width }}px;{% endif %}{% if bottom_bg_color != blank %} --split-bottom-bg: {{ bottom_bg_color }};{% endif %}{% if top_bg_type == 'gradient' and top_bg_gradient != blank %} --split-top-bg: {{ top_bg_gradient }};{% elsif top_bg_type == 'image' and top_bg_image != blank %} --split-top-bg-image: url({{ top_bg_image | image_url: width: 1920 }});{% endif %}"
 >
   <div class="split-top">
     <div class="split-top-content">
@@ -242,6 +243,9 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 2.4rem;
+    width: 100%;
+    max-width: var(--features-container-width, 100%);
+    margin: 0 auto;
   }
 
   @media screen and (min-width: 750px) {
@@ -824,6 +828,17 @@
       ],
       "default": "3-columns",
       "info": "Layout arrangement for feature boxes (desktop only)"
+    },
+    {
+      "type": "range",
+      "id": "features_container_width",
+      "label": "Features Container Width",
+      "min": 0,
+      "max": 1600,
+      "step": 50,
+      "default": 0,
+      "unit": "px",
+      "info": "Maximum width of the features grid container. Leave at 0 for full width (100%)"
     },
     {
       "type": "header",
