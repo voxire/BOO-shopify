@@ -520,6 +520,8 @@
         "heading": "Similar Products",
         "subheading": "",
         "alignment": "center",
+        "heading_size": 26,
+        "heading_color": "#000000",
         "gap": 20,
         "card_radius": 18,
         "card_bottom_radius": 18,
