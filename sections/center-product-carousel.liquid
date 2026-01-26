@@ -72,10 +72,20 @@
                     {%- endif -%}
 
                     {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
+                      {%- liquid
+                        assign placeholder_url = block.settings.placeholder_image | image_url: width: 1200
+                        if placeholder_url == blank and product.featured_media != blank
+                          assign placeholder_url = product.featured_media | image_url: width: 1200
+                        endif
+                        if placeholder_url == blank
+                          assign placeholder_url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+                        endif
+                      -%}
                       <img
                         draggable="false"
                         data-gif-url="{{ block.settings.external_gif_url }}"
-                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        data-placeholder-url="{{ placeholder_url }}"
+                        {% if forloop.first %}src="{{ block.settings.external_gif_url }}"{% else %}src="{{ placeholder_url }}"{% endif %}
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
                         class="cpc-card-image cpc-gif-image"
                         style="object-position: {{ object_position }};"
@@ -90,10 +100,20 @@
                         endif
                       -%}
                       {%- if is_gif -%}
+                        {%- liquid
+                          assign placeholder_url = block.settings.placeholder_image | image_url: width: 1200
+                          if placeholder_url == blank and product.featured_media != blank
+                            assign placeholder_url = product.featured_media | image_url: width: 1200
+                          endif
+                          if placeholder_url == blank
+                            assign placeholder_url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+                          endif
+                        -%}
                         <img
                           draggable="false"
                           data-gif-url="{{ media_url }}"
-                          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                          data-placeholder-url="{{ placeholder_url }}"
+                          {% if forloop.first %}src="{{ media_url }}"{% else %}src="{{ placeholder_url }}"{% endif %}
                           alt="{{ block.settings.alt_text | default: product.title | escape }}"
                           class="cpc-card-image cpc-gif-image"
                           style="object-position: {{ object_position }};"
@@ -569,24 +589,24 @@
 </style>
 
 <script>
-  // Immediately pause any GIFs on page load (except in active slide)
+  // Immediately stop any GIFs on page load (except in active slide)
   (function() {
-    const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const sectionId = '{{ section_id }}';
     const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
     if (section) {
       const allSlides = section.querySelectorAll('.cpc-slide');
       allSlides.forEach((slide) => {
-        // Only pause GIFs in non-active slides
+        // Only stop GIFs in non-active slides
         if (!slide.classList.contains('is-active')) {
           const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
-            if (gifUrl) {
+            const placeholderUrl = img.dataset.placeholderUrl;
+            if (gifUrl && placeholderUrl) {
               const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-              // If it's showing the GIF, pause it by setting to transparent pixel
-              if (img.src && img.src.includes(baseGifUrl)) {
-                img.src = transparentPixel;
+              // If it's showing the GIF, swap to placeholder
+              if (img.src.includes(baseGifUrl)) {
+                img.src = placeholderUrl;
               }
             }
           });
@@ -666,45 +686,82 @@
 
     function setActiveByRealIndex(realIndex) {
       slides.forEach((slide, i) => {
-        slide.classList.toggle('is-active', i === realIndex);
+        const isActive = i === realIndex;
+        slide.classList.toggle('is-active', isActive);
+        
+        // Preload GIF for active slide immediately (in background, doesn't display yet)
+        if (isActive && !isDragging) {
+          const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+          gifImages.forEach((img) => {
+            const gifUrl = img.dataset.gifUrl;
+            if (gifUrl) {
+              // Preload in background for faster display when scroll settles
+              preloadGif(gifUrl);
+            }
+          });
+        }
       });
     }
 
     /**
-     * STRICT GIF CONTROL: Pause all GIFs, then play only the centered slide's GIF
+     * Preload GIF in background (doesn't display it, just loads into browser cache)
+     */
+    function preloadGif(gifUrl) {
+      if (!gifUrl) return;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = gifUrl;
+      document.head.appendChild(link);
+      // Remove after a short delay to clean up
+      setTimeout(() => {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link);
+        }
+      }, 1000);
+    }
+
+    /**
+     * STRICT GIF CONTROL: Only ONE GIF plays at a time, only on centered slide, only after scroll settles
      * @param {number} realIndex - The real index of the slide that should have its GIF playing
      */
     function updateCenterGif(realIndex) {
       // Lock GIF during drag
       if (isDragging) return;
       
-      const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-      
-      // Stop ALL GIFs globally first by setting src to transparent pixel (pauses them)
+      // Extra safety: Stop ALL GIFs globally first (including any that might be playing)
       const allGifImages = document.querySelectorAll('.cpc-gif-image[data-gif-url]');
       allGifImages.forEach((img) => {
         const gifUrl = img.dataset.gifUrl;
-        if (gifUrl) {
+        const placeholderUrl = img.dataset.placeholderUrl;
+        
+        if (gifUrl && placeholderUrl) {
           const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-          // If currently showing the GIF, pause it by setting to transparent pixel
-          if (img.src && img.src.includes(baseGifUrl)) {
-            img.src = transparentPixel;
+          // If showing GIF (check by base URL to catch any cache-busted versions), swap to placeholder
+          if (img.src.includes(baseGifUrl)) {
+            img.src = placeholderUrl;
             img.removeAttribute('srcset');
           }
         }
       });
       
-      // Now play GIF ONLY for the centered slide
+      // Now start GIF ONLY for the centered slide
       if (realIndex >= 0 && realIndex < slides.length) {
         const centerSlide = slides[realIndex];
         if (centerSlide) {
           const gifImages = centerSlide.querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
-            if (gifUrl) {
-              // Restart the GIF by setting src with cache-busting parameter
+            const placeholderUrl = img.dataset.placeholderUrl;
+            
+            if (gifUrl && placeholderUrl) {
+              // Preload the GIF in background for faster loading
+              preloadGif(gifUrl);
+              
+              // Set src directly with cache-busting param for immediate display
               const separator = gifUrl.includes('?') ? '&' : '?';
-              img.src = gifUrl + separator + '_t=' + Date.now();
+              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
+              img.src = gifUrlWithTimestamp;
             }
           });
         }
@@ -776,13 +833,13 @@
             updateDots();
             setTimeout(() => { isCorrecting = false; }, 50);
             
-            // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
+            // Update GIF ONLY after scroll settles (reduced debounce for faster response)
             if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
             gifUpdateTimer = setTimeout(() => {
               if (!isDragging && !isScrolling) {
                 updateCenterGif(corrected);
               }
-            }, 20);
+            }, 50);
           });
         } else {
           isCorrecting = false;
@@ -794,13 +851,13 @@
         setActiveByRealIndex(corrected);
         updateDots();
         
-        // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
+        // Update GIF ONLY after scroll settles (reduced debounce for faster response)
         if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
         gifUpdateTimer = setTimeout(() => {
           if (!isDragging && !isScrolling) {
             updateCenterGif(corrected);
           }
-        }, 20);
+        }, 50);
       }
     }
 
@@ -826,14 +883,14 @@
       setActiveByRealIndex(realIndex);
       updateDots();
 
-      // Update GIF ONLY after scroll settles (minimal debounce for fastest response)
+      // Update GIF ONLY after scroll settles (reduced debounce for faster response)
       const scrollDuration = smooth ? 600 : 150;
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(realIndex);
         }
-      }, scrollDuration + 20);
+      }, scrollDuration + 50);
 
       setTimeout(() => {
         isScrolling = false;
@@ -1043,13 +1100,13 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Update GIF immediately on init (GIF should already be preloading from setActiveByRealIndex)
+      // Update GIF ONLY after initialization settles (reduced debounce for faster response)
       if (gifUpdateTimer) clearTimeout(gifUpdateTimer);
       gifUpdateTimer = setTimeout(() => {
         if (!isDragging && !isScrolling) {
           updateCenterGif(middleStartIndex);
         }
-      }, 20);
+      }, 50);
     }
 
     function init() {
