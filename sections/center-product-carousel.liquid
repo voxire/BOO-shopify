@@ -72,20 +72,10 @@
                     {%- endif -%}
 
                     {%- if media_source == 'external_gif_url' and block.settings.external_gif_url != blank -%}
-                      {%- liquid
-                        assign placeholder_url = block.settings.placeholder_image | image_url: width: 1200
-                        if placeholder_url == blank and product.featured_media != blank
-                          assign placeholder_url = product.featured_media | image_url: width: 1200
-                        endif
-                        if placeholder_url == blank
-                          assign placeholder_url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-                        endif
-                      -%}
                       <img
                         draggable="false"
                         data-gif-url="{{ block.settings.external_gif_url }}"
-                        data-placeholder-url="{{ placeholder_url }}"
-                        {% if forloop.first %}src="{{ block.settings.external_gif_url }}"{% else %}src="{{ placeholder_url }}"{% endif %}
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                         alt="{{ block.settings.alt_text | default: product.title | escape }}"
                         class="cpc-card-image cpc-gif-image"
                         style="object-position: {{ object_position }};"
@@ -100,20 +90,10 @@
                         endif
                       -%}
                       {%- if is_gif -%}
-                        {%- liquid
-                          assign placeholder_url = block.settings.placeholder_image | image_url: width: 1200
-                          if placeholder_url == blank and product.featured_media != blank
-                            assign placeholder_url = product.featured_media | image_url: width: 1200
-                          endif
-                          if placeholder_url == blank
-                            assign placeholder_url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-                          endif
-                        -%}
                         <img
                           draggable="false"
                           data-gif-url="{{ media_url }}"
-                          data-placeholder-url="{{ placeholder_url }}"
-                          {% if forloop.first %}src="{{ media_url }}"{% else %}src="{{ placeholder_url }}"{% endif %}
+                          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                           alt="{{ block.settings.alt_text | default: product.title | escape }}"
                           class="cpc-card-image cpc-gif-image"
                           style="object-position: {{ object_position }};"
@@ -589,24 +569,24 @@
 </style>
 
 <script>
-  // Immediately stop any GIFs on page load (except in active slide)
+  // Immediately pause any GIFs on page load (except in active slide)
   (function() {
+    const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const sectionId = '{{ section_id }}';
     const section = document.querySelector(`#CenterProductCarousel-${sectionId}`);
     if (section) {
       const allSlides = section.querySelectorAll('.cpc-slide');
       allSlides.forEach((slide) => {
-        // Only stop GIFs in non-active slides
+        // Only pause GIFs in non-active slides
         if (!slide.classList.contains('is-active')) {
           const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
-            const placeholderUrl = img.dataset.placeholderUrl;
-            if (gifUrl && placeholderUrl) {
+            if (gifUrl) {
               const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-              // If it's showing the GIF, swap to placeholder
-              if (img.src.includes(baseGifUrl)) {
-                img.src = placeholderUrl;
+              // If it's showing the GIF, pause it by setting to transparent pixel
+              if (img.src && img.src.includes(baseGifUrl)) {
+                img.src = transparentPixel;
               }
             }
           });
@@ -686,108 +666,45 @@
 
     function setActiveByRealIndex(realIndex) {
       slides.forEach((slide, i) => {
-        const isActive = i === realIndex;
-        slide.classList.toggle('is-active', isActive);
-        
-        // Start loading GIF immediately when slide becomes active (don't wait for scroll to settle)
-        if (isActive && !isDragging) {
-          const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
-          gifImages.forEach((img) => {
-            const gifUrl = img.dataset.gifUrl;
-            const placeholderUrl = img.dataset.placeholderUrl;
-            
-            if (gifUrl && placeholderUrl) {
-              // Aggressively preload the GIF immediately
-              preloadGif(gifUrl);
-              
-              // Also start loading it in a hidden Image object for immediate caching
-              const preloadImg = new Image();
-              const separator = gifUrl.includes('?') ? '&' : '?';
-              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-              preloadImg.src = gifUrlWithTimestamp;
-              
-              // Store the preloaded URL for quick swap later
-              img.dataset.preloadedGifUrl = gifUrlWithTimestamp;
-            }
-          });
-        }
+        slide.classList.toggle('is-active', i === realIndex);
       });
     }
 
     /**
-     * Aggressively preload GIF using multiple methods for fastest loading
-     */
-    function preloadGif(gifUrl) {
-      if (!gifUrl) return;
-      
-      // Method 1: Link preload
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = gifUrl;
-      document.head.appendChild(link);
-      
-      // Method 2: Fetch to force download into cache
-      fetch(gifUrl, { mode: 'no-cors', cache: 'force-cache' }).catch(() => {
-        // Ignore CORS errors, still helps with caching
-      });
-      
-      // Method 3: Create Image object to trigger browser download
-      const img = new Image();
-      img.src = gifUrl;
-      
-      // Clean up link after a delay
-      setTimeout(() => {
-        if (link.parentNode) {
-          link.parentNode.removeChild(link);
-        }
-      }, 2000);
-    }
-
-    /**
-     * STRICT GIF CONTROL: Only ONE GIF plays at a time, only on centered slide, only after scroll settles
+     * STRICT GIF CONTROL: Pause all GIFs, then play only the centered slide's GIF
      * @param {number} realIndex - The real index of the slide that should have its GIF playing
      */
     function updateCenterGif(realIndex) {
       // Lock GIF during drag
       if (isDragging) return;
       
-      // Extra safety: Stop ALL GIFs globally first (including any that might be playing)
+      const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      
+      // Stop ALL GIFs globally first by setting src to transparent pixel (pauses them)
       const allGifImages = document.querySelectorAll('.cpc-gif-image[data-gif-url]');
       allGifImages.forEach((img) => {
         const gifUrl = img.dataset.gifUrl;
-        const placeholderUrl = img.dataset.placeholderUrl;
-        
-        if (gifUrl && placeholderUrl) {
+        if (gifUrl) {
           const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-          // If showing GIF (check by base URL to catch any cache-busted versions), swap to placeholder
-          if (img.src.includes(baseGifUrl)) {
-            img.src = placeholderUrl;
+          // If currently showing the GIF, pause it by setting to transparent pixel
+          if (img.src && img.src.includes(baseGifUrl)) {
+            img.src = transparentPixel;
             img.removeAttribute('srcset');
           }
         }
       });
       
-      // Now start GIF ONLY for the centered slide
+      // Now play GIF ONLY for the centered slide
       if (realIndex >= 0 && realIndex < slides.length) {
         const centerSlide = slides[realIndex];
         if (centerSlide) {
           const gifImages = centerSlide.querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
-            const placeholderUrl = img.dataset.placeholderUrl;
-            
-            if (gifUrl && placeholderUrl) {
-              // Use preloaded URL if available (browser will use cache if already loaded)
-              const preloadedUrl = img.dataset.preloadedGifUrl;
-              if (preloadedUrl) {
-                img.src = preloadedUrl;
-              } else {
-                // Fallback: load now with cache-busting
-                const separator = gifUrl.includes('?') ? '&' : '?';
-                const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-                img.src = gifUrlWithTimestamp;
-              }
+            if (gifUrl) {
+              // Restart the GIF by setting src with cache-busting parameter
+              const separator = gifUrl.includes('?') ? '&' : '?';
+              img.src = gifUrl + separator + '_t=' + Date.now();
             }
           });
         }
