@@ -517,7 +517,7 @@
       ],
       "name": "Center Product Carousel",
       "settings": {
-        "heading": "Featured Products",
+        "heading": "Similar Products",
         "subheading": "",
         "alignment": "center",
         "gap": 20,
