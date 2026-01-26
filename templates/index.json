@@ -437,8 +437,8 @@
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
             "image_position": "top",
-            "title_color": "",
-            "description_color": ""
+            "title_color": "#000000",
+            "description_color": "#000000"
           }
         },
         "feature_RGtrUV": {
@@ -449,8 +449,8 @@
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
             "image_position": "top",
-            "title_color": "",
-            "description_color": ""
+            "title_color": "#000000",
+            "description_color": "#000000"
           }
         },
         "feature_BjimTf": {
@@ -460,9 +460,9 @@
             "feature_icon": "",
             "feature_title": "Feature Title",
             "feature_description": "Describe your feature here",
-            "image_position": "top",
-            "title_color": "",
-            "description_color": ""
+            "image_position": "bottom",
+            "title_color": "#000000",
+            "description_color": "#000000"
           }
         }
       },
