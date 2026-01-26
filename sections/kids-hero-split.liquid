@@ -4,12 +4,9 @@
   assign top_rotated_text = section.settings.top_rotated_text
   assign top_button_text = section.settings.top_button_text
   assign top_button_url = section.settings.top_button_url
-  assign top_bg_type = section.settings.top_bg_type | default: 'gradient'
-  assign top_bg_image = section.settings.top_bg_image
-  assign top_bg_gradient = section.settings.top_bg_gradient
+  assign section_bg_image = section.settings.section_bg_image
   assign top_hero_image = section.settings.top_hero_image
   assign top_min_height = section.settings.top_min_height | default: 65
-  assign bottom_bg_color = section.settings.bottom_bg_color
   assign section_radius = section.settings.section_radius | default: 32
   assign card_blocks = section.blocks | where: 'type', 'card'
   assign product_image = section.settings.product_image
@@ -18,7 +15,7 @@
 <section
   id="KidsHeroSplit-{{ section_id }}"
   class="kids-hero-split kids-hero-split--{{ section_id }}"
-  style="--kids-section-radius: {{ section_radius }}px;{% if bottom_bg_color != blank %} --kids-bottom-bg: {{ bottom_bg_color }};{% endif %}{% if top_bg_type == 'gradient' and top_bg_gradient != blank %} --kids-top-bg: {{ top_bg_gradient }};{% elsif top_bg_type == 'image' and top_bg_image != blank %} --kids-top-bg-image: url({{ top_bg_image | image_url: width: 1920 }});{% endif %}"
+  style="--kids-section-radius: {{ section_radius }}px;{% if section_bg_image != blank %} --kids-section-bg-image: url({{ section_bg_image | image_url: width: 1920 }});{% endif %}"
 >
   <div class="kids-hero-top">
     <div class="kids-hero-content">
@@ -113,8 +110,12 @@
     margin: 0 auto;
     border-radius: var(--kids-section-radius);
     overflow: hidden;
-    background: var(--kids-bottom-bg, rgba(var(--color-background), 1));
+    background-image: var(--kids-section-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    position: relative;
   }
 
   /* Top Hero Area */
@@ -122,11 +123,7 @@
     width: 100%;
     min-height: {{ top_min_height }}vh;
     position: relative;
-    background: var(--kids-top-bg, linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%));
-    background-image: var(--kids-top-bg-image, none);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: transparent;
     border-radius: var(--kids-section-radius) var(--kids-section-radius) 0 0;
     padding: 4rem 2rem;
     display: flex;
@@ -215,9 +212,10 @@
   /* Bottom Content Area */
   .kids-hero-split--{{ section_id }} .kids-hero-bottom {
     width: 100%;
-    background: var(--kids-bottom-bg, rgba(var(--color-background), 1));
+    background: transparent;
     border-radius: 0 0 var(--kids-section-radius) var(--kids-section-radius);
     padding: 4rem 2rem;
+    position: relative;
   }
 
   .kids-hero-split--{{ section_id }} .kids-bottom-container {
@@ -373,35 +371,6 @@
       "label": "Button URL"
     },
     {
-      "type": "select",
-      "id": "top_bg_type",
-      "label": "Top Background Type",
-      "options": [
-        {
-          "value": "gradient",
-          "label": "Gradient"
-        },
-        {
-          "value": "image",
-          "label": "Image"
-        }
-      ],
-      "default": "gradient"
-    },
-    {
-      "type": "image_picker",
-      "id": "top_bg_image",
-      "label": "Top Background Image",
-      "info": "Only used if background type is 'Image'"
-    },
-    {
-      "type": "text",
-      "id": "top_bg_gradient",
-      "label": "Top Background Gradient",
-      "default": "linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)",
-      "info": "CSS gradient value"
-    },
-    {
       "type": "range",
       "id": "top_min_height",
       "label": "Top Area Minimum Height",
@@ -416,12 +385,6 @@
       "content": "Bottom Content Area"
     },
     {
-      "type": "color",
-      "id": "bottom_bg_color",
-      "label": "Bottom Background Color",
-      "info": "Leave empty to use theme default"
-    },
-    {
       "type": "image_picker",
       "id": "product_image",
       "label": "Product Image",
@@ -430,6 +393,12 @@
     {
       "type": "header",
       "content": "Section Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image",
+      "label": "Section Background Image",
+      "info": "Background image for the entire section (covers both top and bottom areas)"
     },
     {
       "type": "range",
