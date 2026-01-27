@@ -258,7 +258,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     gap: var(--cpc-gap);
     padding: 0;
     scrollbar-width: none;
@@ -280,6 +280,14 @@
     transition: none;
   }
 
+  .cpc-section--{{ section_id }} .cpc-track.is-scrolling .cpc-slide {
+    transition: none !important;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track.is-scrolling .cpc-card-image {
+    transition: none !important;
+  }
+
   .cpc-section--{{ section_id }} .cpc-slide {
     min-width: 0;
     flex: 0 0 100%;
@@ -288,6 +296,7 @@
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0.88;
     transform: scale(0.95);
+    will-change: transform, opacity;
   }
 
   @media screen and (min-width: 750px) {
@@ -354,6 +363,7 @@
     object-position: center;
     display: block;
     transition: transform 0.5s ease;
+    will-change: transform;
   }
 
   .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card-image {
@@ -824,69 +834,116 @@
       // Dots removed - no-op
     }
 
-    let scrollEndTimer = null;
-    let isProcessingScroll = false;
+    // Unified scroll settle engine using requestAnimationFrame
+    let scrollSettleRaf = null;
+    let lastScrollLeft = 0;
+    let stableFrameCount = 0;
+    const STABLE_FRAMES_REQUIRED = 6; // Require 6 frames of stability (~100ms at 60fps)
 
     /**
-     * Handle scroll events - runs AFTER loop correction completes
-     * Uses scroll position-based center detection (not getBoundingClientRect)
+     * Unified scroll settle engine - detects when scroll has stopped using rAF
+     * Only updates active state and GIF after scroll is completely stable
      */
-    function onScroll() {
-      // Block during active drag or if already processing
-      if (isDragging || isProcessingScroll || isCorrecting) return;
+    function startScrollSettle() {
+      // Mark as scrolling to disable transitions
+      if (!track.classList.contains('is-scrolling')) {
+        track.classList.add('is-scrolling');
+      }
       
-      // Clear any pending scroll-end handler
-      if (scrollEndTimer) clearTimeout(scrollEndTimer);
-      
-      // Single debounced handler: compute center, set active, update GIF
-      scrollEndTimer = setTimeout(() => {
-        // Double-check we're not dragging or correcting
-        if (isDragging || isCorrecting || slides.length === 0) return;
+      lastScrollLeft = track.scrollLeft;
+      stableFrameCount = 0;
+
+      // Cancel any existing settle loop
+      if (scrollSettleRaf) {
+        cancelAnimationFrame(scrollSettleRaf);
+      }
+
+      function checkScrollStable() {
+        const currentScrollLeft = track.scrollLeft;
         
-        isProcessingScroll = true;
-        
-        // Compute centered slide using scroll position (reliable with transforms)
-        const centeredIndex = getClosestIndexToCenter();
-        
-        // Handle infinite loop correction if needed
-        let correctedIndex = centeredIndex;
-        let needsCorrection = false;
-        
-        if (centeredIndex < clonesCount) {
-          // In prepended copies - jump to corresponding position in middle copy
-          const offsetInPre = centeredIndex % originalCount;
-          correctedIndex = clonesCount + offsetInPre;
-          needsCorrection = true;
-        } else if (centeredIndex >= clonesCount + originalCount) {
-          // In appended copies - jump to corresponding position in middle copy
-          const offsetInPost = (centeredIndex - clonesCount - originalCount) % originalCount;
-          correctedIndex = clonesCount + offsetInPost;
-          needsCorrection = true;
+        // If scroll position changed, reset stability counter
+        if (Math.abs(currentScrollLeft - lastScrollLeft) > 0.5) {
+          lastScrollLeft = currentScrollLeft;
+          stableFrameCount = 0;
+          scrollSettleRaf = requestAnimationFrame(checkScrollStable);
+          return;
         }
-        
-        // If correction needed, let correctPosition() handle it
-        // Otherwise update immediately
-        if (needsCorrection) {
-          correctPosition();
-          isProcessingScroll = false;
+
+        // Scroll position is stable - increment counter
+        stableFrameCount++;
+
+        // If stable for required frames, settle is complete
+        if (stableFrameCount >= STABLE_FRAMES_REQUIRED) {
+          // Remove scrolling class to re-enable transitions
+          track.classList.remove('is-scrolling');
+          
+          // Only process if not dragging or correcting
+          if (!isDragging && !isCorrecting && slides.length > 0) {
+            settleScroll();
+          }
+          
+          scrollSettleRaf = null;
         } else {
-          // We're in the middle copy - update immediately
-          currentRealIndex = correctedIndex;
-          currentIndex = getOriginalIndexByReal(correctedIndex);
-          setActiveByRealIndex(correctedIndex);
-          updateDots();
-          updateCenterGif(correctedIndex);
-          isProcessingScroll = false;
+          // Continue checking
+          scrollSettleRaf = requestAnimationFrame(checkScrollStable);
         }
-      }, 100);
+      }
+
+      scrollSettleRaf = requestAnimationFrame(checkScrollStable);
     }
 
     /**
-     * Correct position when in cloned regions - disables transitions during jump
-     * Runs BEFORE center detection to ensure accurate calculations
+     * Process scroll settle - compute center, handle correction, update active and GIF
+     */
+    function settleScroll() {
+      // Compute centered slide using scroll position (reliable with transforms)
+      const centeredIndex = getClosestIndexToCenter();
+      
+      // Handle infinite loop correction if needed
+      let correctedIndex = centeredIndex;
+      let needsCorrection = false;
+      
+      if (centeredIndex < clonesCount) {
+        // In prepended copies - jump to corresponding position in middle copy
+        const offsetInPre = centeredIndex % originalCount;
+        correctedIndex = clonesCount + offsetInPre;
+        needsCorrection = true;
+      } else if (centeredIndex >= clonesCount + originalCount) {
+        // In appended copies - jump to corresponding position in middle copy
+        const offsetInPost = (centeredIndex - clonesCount - originalCount) % originalCount;
+        correctedIndex = clonesCount + offsetInPost;
+        needsCorrection = true;
+      }
+      
+      // If correction needed, handle it
+      if (needsCorrection) {
+        correctPosition();
+      } else {
+        // We're in the middle copy - update immediately
+        currentRealIndex = correctedIndex;
+        currentIndex = getOriginalIndexByReal(correctedIndex);
+        setActiveByRealIndex(correctedIndex);
+        updateDots();
+        updateCenterGif(correctedIndex);
+      }
+    }
+
+    /**
+     * Handle scroll events - kick off settle engine
+     */
+    function onScroll() {
+      // Block during active drag
+      if (isDragging) return;
+      
+      // Start the settle engine
+      startScrollSettle();
+    }
+
+    /**
+     * Correct position when in cloned regions - instant jump without fighting animation
      */
     function correctPosition() {
-      if (isCorrecting || slides.length === 0 || isScrolling) return;
+      if (isCorrecting || slides.length === 0) return;
       
       // Use scroll position-based detection (reliable with transforms)
       const closestReal = getClosestIndexToCenter();
@@ -912,39 +969,52 @@
         isCorrecting = true;
         const target = slides[corrected];
         if (target) {
+          // Ensure scroll behavior is auto for instant jump
+          const originalScrollBehavior = track.style.scrollBehavior;
+          track.style.scrollBehavior = 'auto';
+          
+          // Mark as scrolling to disable transitions
+          track.classList.add('is-scrolling');
+          
           // Disable transitions on all slides during jump
           slides.forEach((slide) => {
             slide.style.transition = 'none';
           });
           
-          // Use requestAnimationFrame to ensure smooth jump
+          // Instant jump
           requestAnimationFrame(() => {
             track.scrollTo({
               left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
               behavior: 'auto'
             });
             
-            // Wait for scroll to complete, then update state
-            setTimeout(() => {
+            // Wait 1 rAF for jump to complete
+            requestAnimationFrame(() => {
               // Update indices and active state
               currentRealIndex = corrected;
               currentIndex = getOriginalIndexByReal(corrected);
               setActiveByRealIndex(corrected);
               updateDots();
               
-              // Re-enable transitions after jump completes
+              // Re-enable transitions
               slides.forEach((slide) => {
                 slide.style.transition = '';
               });
               
-              // Update GIF after correction
-              updateCenterGif(corrected);
+              // Restore scroll behavior
+              track.style.scrollBehavior = originalScrollBehavior;
               
-              // Allow correction to complete
-              setTimeout(() => { 
-                isCorrecting = false; 
-              }, 50);
-            }, 50);
+              // Remove scrolling class after one more frame
+              requestAnimationFrame(() => {
+                track.classList.remove('is-scrolling');
+                
+                // Update GIF after correction
+                updateCenterGif(corrected);
+                
+                // Allow correction to complete
+                isCorrecting = false;
+              });
+            });
           });
         } else {
           isCorrecting = false;
@@ -959,6 +1029,34 @@
       }
     }
 
+    /**
+     * Scroll to centered position - uses unified settle engine
+     */
+    function scrollToCentered(target, smooth = true) {
+      if (!target) return;
+      
+      // Mark as scrolling immediately to disable transitions
+      track.classList.add('is-scrolling');
+      
+      // Set active immediately for visual feedback
+      const realIndex = slides.indexOf(target);
+      if (realIndex >= 0) {
+        currentRealIndex = realIndex;
+        currentIndex = getOriginalIndexByReal(realIndex);
+        setActiveByRealIndex(realIndex);
+        updateDots();
+      }
+      
+      // Scroll to target
+      track.scrollTo({
+        left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+
+      // Start the unified settle engine (handles scroll end detection)
+      startScrollSettle();
+    }
+
     function scrollToRealIndex(realIndex, smooth = true) {
       if (slides.length === 0) return;
       
@@ -968,42 +1066,15 @@
       
       if (!target) return;
 
-      isScrolling = true;
       isProgrammaticScroll = true;
       
-      // Set active immediately for visual feedback
-      currentRealIndex = realIndex;
-      currentIndex = getOriginalIndexByReal(realIndex);
-      setActiveByRealIndex(realIndex);
-      updateDots();
-      
-      track.scrollTo({
-        left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
-        behavior: smooth ? 'smooth' : 'auto'
-      });
+      // Use unified scroll to centered function
+      scrollToCentered(target, smooth);
 
-      // GIF update will be handled by onScroll() debounce after scroll settles
-      const scrollDuration = smooth ? 600 : 150;
+      // Clear programmatic flag after settle completes
       setTimeout(() => {
-        isScrolling = false;
-        // Keep programmatic flag a bit longer to prevent correction
-        setTimeout(() => {
-          isProgrammaticScroll = false;
-          // Re-check center after programmatic scroll completes
-          // This ensures we're still centered correctly
-          if (!isDragging && !isCorrecting) {
-            const actualCenter = getClosestIndexToCenter();
-            if (actualCenter !== realIndex) {
-              // We've drifted - update to actual center
-              const corrected = actualCenter;
-              currentRealIndex = corrected;
-              currentIndex = getOriginalIndexByReal(corrected);
-              setActiveByRealIndex(corrected);
-              updateCenterGif(corrected);
-            }
-          }
-        }, smooth ? 200 : 100);
-      }, scrollDuration);
+        isProgrammaticScroll = false;
+      }, smooth ? 800 : 200);
 
       if (autoplayEnabled && !isPaused) resetAutoplay();
     }
@@ -1167,7 +1238,10 @@
 
         // Snap to the nearest centered slide using scroll position-based detection
         const closestRealIndex = getClosestIndexToCenter();
-        scrollToRealIndex(closestRealIndex, true);
+        const target = slides[closestRealIndex];
+        if (target) {
+          scrollToCentered(target, true);
+        }
       }
 
       // reset moved shortly after (keep window for click suppression)
@@ -1233,13 +1307,13 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Trigger scroll handler after initialization to update GIF (uses same debounce logic)
-      setTimeout(() => {
+      // Trigger scroll settle after initialization to update GIF
+      requestAnimationFrame(() => {
         if (track) {
-          // Manually trigger scroll end handler for initial load
-          onScroll();
+          // Manually trigger scroll settle for initial load
+          startScrollSettle();
         }
-      }, 100);
+      });
     }
 
     function init() {
