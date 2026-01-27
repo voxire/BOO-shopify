@@ -264,6 +264,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-snap-type: x mandatory;
+    contain: layout style paint;
   }
 
   .cpc-section--{{ section_id }} .cpc-track::-webkit-scrollbar {
@@ -293,10 +294,12 @@
     flex: 0 0 100%;
     scroll-snap-align: center;
     transform-origin: center;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     opacity: 0.88;
     transform: scale(0.95);
     will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   @media screen and (min-width: 750px) {
@@ -336,7 +339,7 @@
     background: rgba(var(--color-foreground), 0.03);
     border-radius: var(--cpc-card-radius);
     box-shadow: 0 4px 16px rgba(var(--color-foreground), 0.08);
-    transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: box-shadow 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-media-tile {
@@ -362,8 +365,10 @@
     object-fit: cover;
     object-position: center;
     display: block;
-    transition: transform 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .cpc-section--{{ section_id }} .cpc-slide.is-active .cpc-card-image {
@@ -838,7 +843,7 @@
     let scrollSettleRaf = null;
     let lastScrollLeft = 0;
     let stableFrameCount = 0;
-    const STABLE_FRAMES_REQUIRED = 6; // Require 6 frames of stability (~100ms at 60fps)
+    const STABLE_FRAMES_REQUIRED = 4; // Require 4 frames of stability (~67ms at 60fps) - faster response
 
     /**
      * Unified scroll settle engine - detects when scroll has stopped using rAF
@@ -860,9 +865,11 @@
 
       function checkScrollStable() {
         const currentScrollLeft = track.scrollLeft;
+        const scrollDelta = Math.abs(currentScrollLeft - lastScrollLeft);
         
-        // If scroll position changed, reset stability counter
-        if (Math.abs(currentScrollLeft - lastScrollLeft) > 0.5) {
+        // If scroll position changed significantly, reset stability counter
+        // Use 1px threshold to account for sub-pixel scrolling
+        if (scrollDelta > 1) {
           lastScrollLeft = currentScrollLeft;
           stableFrameCount = 0;
           scrollSettleRaf = requestAnimationFrame(checkScrollStable);
@@ -1047,11 +1054,19 @@
         updateDots();
       }
       
-      // Scroll to target
-      track.scrollTo({
-        left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
-        behavior: smooth ? 'smooth' : 'auto'
-      });
+      // Calculate target position
+      const targetLeft = target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2);
+      
+      // For smooth scrolling, use native smooth behavior
+      // For instant, use auto
+      if (smooth) {
+        track.scrollTo({
+          left: targetLeft,
+          behavior: 'smooth'
+        });
+      } else {
+        track.scrollLeft = targetLeft;
+      }
 
       // Start the unified settle engine (handles scroll end detection)
       startScrollSettle();
@@ -1161,10 +1176,16 @@
         return;
       }
 
-      // Horizontal intent → carousel scroll
+      // Horizontal intent → carousel scroll with momentum
       e.preventDefault();
       const delta = absX > 0 ? e.deltaX : e.deltaY;
-      track.scrollLeft += delta;
+      
+      // Apply momentum multiplier for smoother trackpad scrolling
+      const momentumMultiplier = Math.abs(delta) > 10 ? 1.2 : 1;
+      track.scrollLeft += delta * momentumMultiplier;
+      
+      // Kick off settle engine for smooth updates
+      startScrollSettle();
     }
 
     function handlePointerDown(e) {
@@ -1212,8 +1233,12 @@
         lastTapTime = 0;
         lastTapTarget = null;
 
-        // Drag-to-scroll (feels natural on desktop + mobile)
-        track.scrollLeft = startScrollLeft - dx;
+        // Drag-to-scroll with momentum smoothing
+        const newScrollLeft = startScrollLeft - dx;
+        track.scrollLeft = newScrollLeft;
+        
+        // Update last scroll position for settle engine
+        lastScrollLeft = newScrollLeft;
       }
     }
 
