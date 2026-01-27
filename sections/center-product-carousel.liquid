@@ -958,105 +958,97 @@
       resumeAutoplay();
     }
 
-    // Swipe detection
+    // ----- Drag / Swipe (reliable + click-safe) -----
     const DRAG_START_PX = 8;
-    const CHANGE_SLIDE_THRESHOLD_PERCENT = 0.15;
-    
-    let isDragging = false;
+
+    let isPointerDown = false;
+    let moved = false;
     let startX = 0;
-    let dragOffset = 0;
-    let didDrag = false;
-    let shouldPreventClick = false;
+    let startScrollLeft = 0;
+
+    // When we drag, suppress link clicks briefly after release
+    let suppressClickUntil = 0;
 
     function handlePointerDown(e) {
       if (originalCount <= 1) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      
-      isDragging = true;
-      didDrag = false;
-      shouldPreventClick = false; // Reset - allow clicks by default
-      startX = e.touches ? e.touches[0].clientX : e.clientX;
-      dragOffset = 0;
+
+      isPointerDown = true;
+      moved = false;
+
+      startX = e.clientX;
+      startScrollLeft = track.scrollLeft;
+
       track.style.cursor = 'grabbing';
       track.style.userSelect = 'none';
-      
-      // Try to capture pointer for better tracking
+
+      // Capture pointer so we still get pointerup even if pointer leaves the track
       try {
-        if (e.pointerId !== undefined) {
-          track.setPointerCapture(e.pointerId);
-        }
-      } catch (err) {
-        // Ignore if pointer capture fails
-      }
+        track.setPointerCapture(e.pointerId);
+      } catch (err) {}
     }
 
     function handlePointerMove(e) {
-      if (!isDragging) return;
-      
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      dragOffset = x - startX;
-      
-      if (Math.abs(dragOffset) > DRAG_START_PX) {
-        didDrag = true;
-        shouldPreventClick = true;
+      if (!isPointerDown) return;
+
+      const dx = e.clientX - startX;
+
+      // Only treat it as a drag after a small threshold (keeps taps as taps)
+      if (!moved && Math.abs(dx) > DRAG_START_PX) {
+        moved = true;
+      }
+
+      if (moved) {
+        // prevent the browser from interpreting as a "scroll/tap"
         e.preventDefault();
+
+        // Drag-to-scroll (feels natural on desktop + mobile)
+        track.scrollLeft = startScrollLeft - dx;
       }
     }
 
     function handlePointerUp(e) {
-      if (!isDragging) {
-        dragOffset = 0;
-        return;
-      }
-      
-      // Release pointer capture
-      try {
-        if (e.pointerId !== undefined) {
-          track.releasePointerCapture(e.pointerId);
-        }
-      } catch (err) {
-        // Ignore if release fails
-      }
-      
-      const slideWidth = slides[0] ? slides[0].offsetWidth : 0;
-      const threshold = slideWidth ? slideWidth * CHANGE_SLIDE_THRESHOLD_PERCENT : 50;
-      const wasDrag = Math.abs(dragOffset) > threshold;
-      
-      isDragging = false;
+      if (!isPointerDown) return;
+
+      isPointerDown = false;
+
       track.style.cursor = 'grab';
       track.style.userSelect = '';
-      
-      if (wasDrag && didDrag) {
-        // Significant drag - prevent link click and navigate carousel
-        shouldPreventClick = true;
-        e.preventDefault();
-        e.stopPropagation();
-        if (dragOffset > 0) {
-          scrollToPrev();
-        } else {
-          scrollToNext();
-        }
-      } else if (didDrag && Math.abs(dragOffset) > DRAG_START_PX) {
-        // Small drag that didn't change slide - snap to nearest and prevent click
-        shouldPreventClick = true;
-        e.preventDefault();
-        e.stopPropagation();
+
+      try {
+        track.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      if (moved) {
+        // We dragged: suppress accidental clicks for a short window
+        suppressClickUntil = Date.now() + 350;
+
+        // Snap to the nearest centered slide
         const closestRealIndex = getClosestIndexToCenter();
         scrollToRealIndex(closestRealIndex, true);
-      } else {
-        // No significant drag - allow normal clicks to work
-        shouldPreventClick = false;
       }
-      
-      // Reset flag after delay to allow click event to be prevented
+
+      // reset moved shortly after (keep window for click suppression)
       setTimeout(() => {
-        shouldPreventClick = false;
-        didDrag = false;
-      }, 200);
-      
-      dragOffset = 0;
-      didDrag = false;
+        moved = false;
+      }, 0);
     }
+
+    // SINGLE click suppression layer (capture phase)
+    // If we just dragged, prevent navigation. Otherwise allow normal <a href> navigation.
+    track.addEventListener(
+      'click',
+      (e) => {
+        const link = e.target.closest('a.cpc-card');
+        if (!link) return;
+
+        if (Date.now() < suppressClickUntil) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
 
     function buildInfiniteLoop() {
       // For 1 or fewer slides, no loop needed
@@ -1144,44 +1136,9 @@
       }, { passive: true });
 
       track.addEventListener('pointerdown', handlePointerDown);
-      track.addEventListener('pointermove', handlePointerMove);
+      track.addEventListener('pointermove', handlePointerMove, { passive: false });
       track.addEventListener('pointerup', handlePointerUp);
       track.addEventListener('pointercancel', handlePointerUp);
-
-      // Prevent link clicks only if a significant drag happened
-      // This allows normal clicks on product cards to navigate to product pages
-      track.addEventListener('click', (e) => {
-        const link = e.target.closest('a.cpc-card');
-        if (link) {
-          // Only prevent if there was a significant drag (user was swiping)
-          if (shouldPreventClick && didDrag) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-          }
-          // Otherwise, allow the link to navigate normally to the product page
-          // The href="{{ product.url }}" will handle navigation
-        }
-      }, true);
-      
-      // Ensure product links work - add direct click handlers as backup
-      // This ensures clicks work even if the track handler interferes
-      setTimeout(() => {
-        const productLinks = track.querySelectorAll('a.cpc-card');
-        productLinks.forEach(link => {
-          // Remove any existing handlers and add a clean one
-          link.addEventListener('click', function(e) {
-            // Only prevent if we're sure there was a drag
-            if (!shouldPreventClick || !didDrag) {
-              // Allow navigation - the href will work
-              return true;
-            }
-            // If there was a drag, prevent navigation
-            e.preventDefault();
-            return false;
-          }, false); // Use bubble phase, not capture
-        });
-      }, 100);
 
       if (autoplayEnabled) {
         startAutoplay();
