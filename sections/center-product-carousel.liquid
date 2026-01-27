@@ -54,7 +54,7 @@
               {%- assign product = block.settings.product -%}
               {%- if product != blank -%}
                 <div class="cpc-slide{% if forloop.first %} is-active{% endif %}" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
-                <a href="{{ product.url }}" class="cpc-card" draggable="false">
+                <div class="cpc-card">
                   <div class="cpc-media-tile">
                     {%- liquid
                       assign media_source = block.settings.media_source | default: 'product_featured'
@@ -152,7 +152,7 @@
                     {%- endif -%}
                   </div>
 
-                  <div class="cpc-info-card">
+                  <a href="{{ product.url }}" class="cpc-info-card" draggable="false">
                     <div class="cpc-info-thumb">
                       {%- if product.featured_media != blank -%}
                         <img
@@ -187,8 +187,8 @@
                         <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </div>
-                  </div>
-                </a>
+                  </a>
+                </div>
                 </div>
               {%- endif -%}
             {%- endfor -%}
@@ -312,23 +312,11 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    text-decoration: none;
-    color: inherit;
     background: transparent;
-    transition: transform 0.3s ease, opacity 0.3s ease;
     max-width: var(--cpc-card-width, 100%);
     width: 100%;
-    cursor: pointer;
     position: relative;
     z-index: 1;
-  }
-
-  .cpc-section--{{ section_id }} .cpc-card:hover {
-    opacity: 0.95;
-  }
-
-  .cpc-section--{{ section_id }} .cpc-card:active {
-    opacity: 0.9;
   }
 
   .cpc-section--{{ section_id }} .cpc-media-tile {
@@ -405,6 +393,17 @@
     box-shadow: 0 2px 12px rgba(var(--color-foreground), 0.06);
     position: relative;
     z-index: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-card:hover {
+    opacity: 0.95;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-info-card:active {
+    opacity: 0.9;
   }
 
   .cpc-section--{{ section_id }} .cpc-info-thumb {
@@ -1171,7 +1170,7 @@
     track.addEventListener(
       'click',
       (e) => {
-        const link = e.target.closest('a.cpc-card');
+        const link = e.target.closest('a.cpc-info-card');
         if (!link) return;
 
         // Only block clicks if a REAL drag happened
