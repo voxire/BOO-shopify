@@ -151,7 +151,6 @@
 }
 
 .scg-{{ sid }}__wrap {
-  padding-top: 0 !important;
   position: relative;
   z-index: 2;
 }
@@ -310,6 +309,8 @@
     margin:0;
     padding:0;
     --scg-blur: 3px;
+    --scg-grid-align: {{ section.settings.grid_vertical_align | default: 'start' }};
+    --scg-grid-offset-top: {{ section.settings.grid_offset_top | default: 0 }}px;
   }
 
   /* grid centered in the section */
@@ -317,12 +318,13 @@
     width:100%;
     max-width:{{ section.settings.max_width }}px;
     margin:0 auto;
+    margin-top: var(--scg-grid-offset-top);
     padding:{{ grid_wrap_padding_top }}px {{ grid_wrap_padding_right }}px {{ grid_wrap_padding_bottom }}px {{ grid_wrap_padding_left }}px;
     min-height:{{ section.settings.height_vh }}vh;
     display:grid;
     grid-template-columns:repeat({{ section.settings.columns }}, minmax(0,1fr));
     gap:{{ section.settings.gap }}px;
-    align-content:center;
+    align-content: var(--scg-grid-align);
   }
 
   /* allow hover in editor */
@@ -1496,6 +1498,29 @@ document.addEventListener('DOMContentLoaded', function() {
     {
       "type": "header",
       "content": "Grid Settings"
+    },
+    {
+      "type": "select",
+      "id": "grid_vertical_align",
+      "label": "Grid vertical alignment (desktop)",
+      "default": "start",
+      "options": [
+        { "value": "start", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "end", "label": "Bottom" }
+      ],
+      "info": "Controls how the grid is vertically aligned within its container"
+    },
+    {
+      "type": "range",
+      "id": "grid_offset_top",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap below filter (desktop)",
+      "default": 0,
+      "info": "Positive = more space, Negative = pull tiles up."
     },
     {
       "type": "range",
