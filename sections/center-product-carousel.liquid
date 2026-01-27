@@ -676,19 +676,32 @@
       return 1;
     }
 
+    /**
+     * Get closest slide to center using scroll position and offsets (not getBoundingClientRect)
+     * This is reliable even with CSS transforms and cloned slides
+     */
     function getClosestIndexToCenter() {
-      const trackRect = track.getBoundingClientRect();
-      const trackCenter = trackRect.left + trackRect.width / 2;
+      if (slides.length === 0) return 0;
+
+      const scrollLeft = track.scrollLeft;
+      const trackCenter = track.offsetWidth / 2;
+      const viewportCenter = scrollLeft + trackCenter;
 
       let closestIndex = 0;
       let closestDistance = Infinity;
 
       slides.forEach((slide, index) => {
-        const r = slide.getBoundingClientRect();
-        const c = r.left + r.width / 2;
-        const d = Math.abs(trackCenter - c);
-        if (d < closestDistance) {
-          closestDistance = d;
+        // Use offsetLeft + offsetWidth/2 to get slide center position
+        // This is unaffected by CSS transforms
+        const slideLeft = slide.offsetLeft;
+        const slideWidth = slide.offsetWidth;
+        const slideCenter = slideLeft + slideWidth / 2;
+        
+        // Calculate distance from viewport center to slide center
+        const distance = Math.abs(viewportCenter - slideCenter);
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
           closestIndex = index;
         }
       });
@@ -706,14 +719,25 @@
       return clonesCount + originalIndex;
     }
 
+    /**
+     * Set active slide - ensures exactly ONE slide has .is-active at all times
+     */
     function setActiveByRealIndex(realIndex) {
-      slides.forEach((slide, i) => {
-        const isActive = i === realIndex;
-        slide.classList.toggle('is-active', isActive);
+      // Clamp to valid range
+      realIndex = Math.max(0, Math.min(slides.length - 1, realIndex));
+      
+      // Remove is-active from ALL slides first
+      slides.forEach((slide) => {
+        slide.classList.remove('is-active');
+      });
+      
+      // Then add to the correct one
+      if (slides[realIndex]) {
+        slides[realIndex].classList.add('is-active');
         
         // Preload GIF for active slide immediately (in background, doesn't display yet)
-        if (isActive && !isDragging) {
-          const gifImages = slide.querySelectorAll('.cpc-gif-image[data-gif-url]');
+        if (!isDragging) {
+          const gifImages = slides[realIndex].querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
             if (gifUrl) {
@@ -722,7 +746,7 @@
             }
           });
         }
-      });
+      }
     }
 
     /**
@@ -795,48 +819,70 @@
     }
 
     let scrollEndTimer = null;
+    let isProcessingScroll = false;
 
+    /**
+     * Handle scroll events - runs AFTER loop correction completes
+     * Uses scroll position-based center detection (not getBoundingClientRect)
+     */
     function onScroll() {
-      // ONLY block during active drag - allow scroll-end handler to run after programmatic scrolls
-      if (isDragging) return;
+      // Block during active drag or if already processing
+      if (isDragging || isProcessingScroll || isCorrecting) return;
       
       // Clear any pending scroll-end handler
       if (scrollEndTimer) clearTimeout(scrollEndTimer);
       
       // Single debounced handler: compute center, set active, update GIF
       scrollEndTimer = setTimeout(() => {
-        // Only block if actively dragging or no slides
-        if (isDragging || slides.length === 0) return;
+        // Double-check we're not dragging or correcting
+        if (isDragging || isCorrecting || slides.length === 0) return;
         
-        // Compute centered slide
+        isProcessingScroll = true;
+        
+        // Compute centered slide using scroll position (reliable with transforms)
         const centeredIndex = getClosestIndexToCenter();
         
         // Handle infinite loop correction if needed
         let correctedIndex = centeredIndex;
+        let needsCorrection = false;
+        
         if (centeredIndex < clonesCount) {
           // In prepended copies - jump to corresponding position in middle copy
           const offsetInPre = centeredIndex % originalCount;
           correctedIndex = clonesCount + offsetInPre;
+          needsCorrection = true;
         } else if (centeredIndex >= clonesCount + originalCount) {
           // In appended copies - jump to corresponding position in middle copy
           const offsetInPost = (centeredIndex - clonesCount - originalCount) % originalCount;
           correctedIndex = clonesCount + offsetInPost;
+          needsCorrection = true;
         }
         
-        // Update indices and active state
-        currentRealIndex = correctedIndex;
-        currentIndex = getOriginalIndexByReal(correctedIndex);
-        setActiveByRealIndex(correctedIndex);
-        updateDots();
-        
-        // Update GIF immediately after scroll settles (80-120ms debounce)
-        updateCenterGif(correctedIndex);
+        // If correction needed, let correctPosition() handle it
+        // Otherwise update immediately
+        if (needsCorrection) {
+          correctPosition();
+          isProcessingScroll = false;
+        } else {
+          // We're in the middle copy - update immediately
+          currentRealIndex = correctedIndex;
+          currentIndex = getOriginalIndexByReal(correctedIndex);
+          setActiveByRealIndex(correctedIndex);
+          updateDots();
+          updateCenterGif(correctedIndex);
+          isProcessingScroll = false;
+        }
       }, 100);
     }
 
+    /**
+     * Correct position when in cloned regions - disables transitions during jump
+     * Runs BEFORE center detection to ensure accurate calculations
+     */
     function correctPosition() {
       if (isCorrecting || slides.length === 0 || isScrolling) return;
       
+      // Use scroll position-based detection (reliable with transforms)
       const closestReal = getClosestIndexToCenter();
       let corrected = closestReal;
       let needsJump = false;
@@ -860,19 +906,39 @@
         isCorrecting = true;
         const target = slides[corrected];
         if (target) {
+          // Disable transitions on all slides during jump
+          slides.forEach((slide) => {
+            slide.style.transition = 'none';
+          });
+          
           // Use requestAnimationFrame to ensure smooth jump
           requestAnimationFrame(() => {
             track.scrollTo({
               left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
               behavior: 'auto'
             });
-            // Update indices after jump
-            currentRealIndex = corrected;
-            currentIndex = getOriginalIndexByReal(corrected);
-            setActiveByRealIndex(corrected);
-            updateDots();
-            setTimeout(() => { isCorrecting = false; }, 50);
-            // GIF update will be handled by onScroll() debounce
+            
+            // Wait for scroll to complete, then update state
+            setTimeout(() => {
+              // Update indices and active state
+              currentRealIndex = corrected;
+              currentIndex = getOriginalIndexByReal(corrected);
+              setActiveByRealIndex(corrected);
+              updateDots();
+              
+              // Re-enable transitions after jump completes
+              slides.forEach((slide) => {
+                slide.style.transition = '';
+              });
+              
+              // Update GIF after correction
+              updateCenterGif(corrected);
+              
+              // Allow correction to complete
+              setTimeout(() => { 
+                isCorrecting = false; 
+              }, 50);
+            }, 50);
           });
         } else {
           isCorrecting = false;
@@ -883,7 +949,7 @@
         currentIndex = getOriginalIndexByReal(corrected);
         setActiveByRealIndex(corrected);
         updateDots();
-        // GIF update will be handled by onScroll() debounce
+        updateCenterGif(corrected);
       }
     }
 
@@ -898,16 +964,17 @@
 
       isScrolling = true;
       isProgrammaticScroll = true;
+      
+      // Set active immediately for visual feedback
       currentRealIndex = realIndex;
       currentIndex = getOriginalIndexByReal(realIndex);
+      setActiveByRealIndex(realIndex);
+      updateDots();
       
       track.scrollTo({
         left: target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2),
         behavior: smooth ? 'smooth' : 'auto'
       });
-
-      setActiveByRealIndex(realIndex);
-      updateDots();
 
       // GIF update will be handled by onScroll() debounce after scroll settles
       const scrollDuration = smooth ? 600 : 150;
@@ -916,6 +983,19 @@
         // Keep programmatic flag a bit longer to prevent correction
         setTimeout(() => {
           isProgrammaticScroll = false;
+          // Re-check center after programmatic scroll completes
+          // This ensures we're still centered correctly
+          if (!isDragging && !isCorrecting) {
+            const actualCenter = getClosestIndexToCenter();
+            if (actualCenter !== realIndex) {
+              // We've drifted - update to actual center
+              const corrected = actualCenter;
+              currentRealIndex = corrected;
+              currentIndex = getOriginalIndexByReal(corrected);
+              setActiveByRealIndex(corrected);
+              updateCenterGif(corrected);
+            }
+          }
         }, smooth ? 200 : 100);
       }, scrollDuration);
 
@@ -1065,7 +1145,7 @@
         // We dragged: suppress accidental clicks for a short window
         suppressClickUntil = Date.now() + 350;
 
-        // Snap to the nearest centered slide
+        // Snap to the nearest centered slide using scroll position-based detection
         const closestRealIndex = getClosestIndexToCenter();
         scrollToRealIndex(closestRealIndex, true);
       }
