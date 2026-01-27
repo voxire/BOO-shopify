@@ -974,7 +974,7 @@
       
       isDragging = true;
       didDrag = false;
-      shouldPreventClick = false;
+      shouldPreventClick = false; // Reset - allow clicks by default
       startX = e.touches ? e.touches[0].clientX : e.clientX;
       dragOffset = 0;
       track.style.cursor = 'grabbing';
@@ -1027,6 +1027,8 @@
       track.style.userSelect = '';
       
       if (wasDrag && didDrag) {
+        // Significant drag - prevent link click and navigate carousel
+        shouldPreventClick = true;
         e.preventDefault();
         e.stopPropagation();
         if (dragOffset > 0) {
@@ -1034,18 +1036,23 @@
         } else {
           scrollToNext();
         }
-      } else if (didDrag) {
+      } else if (didDrag && Math.abs(dragOffset) > DRAG_START_PX) {
         // Small drag that didn't change slide - snap to nearest and prevent click
+        shouldPreventClick = true;
         e.preventDefault();
         e.stopPropagation();
         const closestRealIndex = getClosestIndexToCenter();
         scrollToRealIndex(closestRealIndex, true);
+      } else {
+        // No significant drag - allow normal clicks to work
+        shouldPreventClick = false;
       }
       
       // Reset flag after delay to allow click event to be prevented
       setTimeout(() => {
         shouldPreventClick = false;
-      }, 150);
+        didDrag = false;
+      }, 200);
       
       dragOffset = 0;
       didDrag = false;
@@ -1145,14 +1152,36 @@
       // This allows normal clicks on product cards to navigate to product pages
       track.addEventListener('click', (e) => {
         const link = e.target.closest('a.cpc-card');
-        if (link && shouldPreventClick && didDrag) {
-          // Only prevent if there was a significant drag
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
+        if (link) {
+          // Only prevent if there was a significant drag (user was swiping)
+          if (shouldPreventClick && didDrag) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+          // Otherwise, allow the link to navigate normally to the product page
+          // The href="{{ product.url }}" will handle navigation
         }
-        // Allow normal link clicks to proceed - products are clickable!
       }, true);
+      
+      // Ensure product links work - add direct click handlers as backup
+      // This ensures clicks work even if the track handler interferes
+      setTimeout(() => {
+        const productLinks = track.querySelectorAll('a.cpc-card');
+        productLinks.forEach(link => {
+          // Remove any existing handlers and add a clean one
+          link.addEventListener('click', function(e) {
+            // Only prevent if we're sure there was a drag
+            if (!shouldPreventClick || !didDrag) {
+              // Allow navigation - the href will work
+              return true;
+            }
+            // If there was a drag, prevent navigation
+            e.preventDefault();
+            return false;
+          }, false); // Use bubble phase, not capture
+        });
+      }, 100);
 
       if (autoplayEnabled) {
         startAutoplay();
