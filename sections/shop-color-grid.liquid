@@ -1,10 +1,29 @@
 {% assign sid = section.id | replace: '_', '' | downcase %}
 
+{%- liquid
+  assign section_padding_top = section.settings.section_padding_top | default: 0
+  assign section_padding_bottom = section.settings.section_padding_bottom | default: 0
+  assign section_padding_left = section.settings.section_padding_left | default: 0
+  assign section_padding_right = section.settings.section_padding_right | default: 0
+  assign section_margin_top = section.settings.section_margin_top | default: 0
+  assign section_margin_bottom = section.settings.section_margin_bottom | default: 0
+  assign heading_padding_top = section.settings.heading_padding_top | default: 0
+  assign heading_padding_bottom = section.settings.heading_padding_bottom | default: 0
+  assign heading_padding_left = section.settings.heading_padding_left | default: 20
+  assign heading_padding_right = section.settings.heading_padding_right | default: 20
+  assign age_filter_margin_top = section.settings.age_filter_margin_top | default: 15
+  assign age_filter_margin_bottom = section.settings.age_filter_margin_bottom | default: 0
+  assign mobile_carousel_padding_top = section.settings.mobile_carousel_padding_top | default: 20
+  assign mobile_carousel_padding_bottom = section.settings.mobile_carousel_padding_bottom | default: 40
+  assign mobile_carousel_padding_left = section.settings.mobile_carousel_padding_left | default: 0
+  assign mobile_carousel_padding_right = section.settings.mobile_carousel_padding_right | default: 0
+-%}
+
 {% style %}
 /* ===== ANIMATED GAMING STYLE ===== */
 .scg-heading-wrapper {
   text-align: center;
-  padding: 0px 20px 0px;
+  padding: {{ heading_padding_top }}px {{ heading_padding_right }}px {{ heading_padding_bottom }}px {{ heading_padding_left }}px;
   position: relative;
   overflow: hidden;
 }
@@ -135,7 +154,8 @@
 
 /* ===== AGE FILTER STYLES ===== */
 .scg-age-filter {
-  margin-top: 15px;
+  margin-top: {{ age_filter_margin_top }}px;
+  margin-bottom: {{ age_filter_margin_bottom }}px;
   text-align: center;
 }
 
@@ -266,8 +286,8 @@
   }
   #shopify-section-{{ section.id }}{
     background: {{ section.settings.section_bg }} !important;
-    margin:0 !important;
-    padding:0 !important;
+    margin: {{ section_margin_top }}px 0 {{ section_margin_bottom }}px 0 !important;
+    padding: {{ section_padding_top }}px {{ section_padding_right }}px {{ section_padding_bottom }}px {{ section_padding_left }}px !important;
   }
   #shopify-section-{{ section.id }} .page-width{
     max-width:none !important;
@@ -450,7 +470,7 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  padding: 20px 0 40px;
+  padding: {{ mobile_carousel_padding_top }}px {{ mobile_carousel_padding_right }}px {{ mobile_carousel_padding_bottom }}px {{ mobile_carousel_padding_left }}px;
 }
 
 .scg-carousel__container {
@@ -1229,6 +1249,198 @@ document.addEventListener('DOMContentLoaded', function() {
       "content": "Layout Settings"
     },
     { "type": "color", "id": "section_bg", "label": "Section background", "default": "#ffffff" },
+    {
+      "type": "header",
+      "content": "Section Padding & Margin"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 0,
+      "info": "Controls the top padding of the entire section"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 0,
+      "info": "Controls the bottom padding of the entire section"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_left",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Left",
+      "default": 0,
+      "info": "Controls the left padding of the entire section"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_right",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Padding Right",
+      "default": 0,
+      "info": "Controls the right padding of the entire section"
+    },
+    {
+      "type": "range",
+      "id": "section_margin_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Margin Top",
+      "default": 0,
+      "info": "Controls the top margin (space above) the entire section"
+    },
+    {
+      "type": "range",
+      "id": "section_margin_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Section Margin Bottom",
+      "default": 0,
+      "info": "Controls the bottom margin (space below) the entire section"
+    },
+    {
+      "type": "header",
+      "content": "Heading Area Padding"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Top",
+      "default": 0,
+      "info": "Controls the top padding around the heading text area"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Bottom",
+      "default": 0,
+      "info": "Controls the bottom padding around the heading text area"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Left",
+      "default": 20,
+      "info": "Controls the left padding around the heading text area"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Padding Right",
+      "default": 20,
+      "info": "Controls the right padding around the heading text area"
+    },
+    {
+      "type": "header",
+      "content": "Age Filter Margin"
+    },
+    {
+      "type": "range",
+      "id": "age_filter_margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Age Filter Margin Top",
+      "default": 15,
+      "info": "Controls the space above the age filter buttons"
+    },
+    {
+      "type": "range",
+      "id": "age_filter_margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Age Filter Margin Bottom",
+      "default": 0,
+      "info": "Controls the space below the age filter buttons"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Carousel Padding"
+    },
+    {
+      "type": "range",
+      "id": "mobile_carousel_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Carousel Padding Top",
+      "default": 20,
+      "info": "Controls the top padding of the mobile carousel (visible on mobile devices only)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_carousel_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Carousel Padding Bottom",
+      "default": 40,
+      "info": "Controls the bottom padding of the mobile carousel (visible on mobile devices only)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_carousel_padding_left",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Carousel Padding Left",
+      "default": 0,
+      "info": "Controls the left padding of the mobile carousel (visible on mobile devices only)"
+    },
+    {
+      "type": "range",
+      "id": "mobile_carousel_padding_right",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Carousel Padding Right",
+      "default": 0,
+      "info": "Controls the right padding of the mobile carousel (visible on mobile devices only)"
+    },
 
     {
       "type": "range",
