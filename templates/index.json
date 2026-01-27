@@ -424,7 +424,7 @@
         "mobile_carousel_padding_bottom": 40,
         "mobile_carousel_padding_left": 0,
         "mobile_carousel_padding_right": 0,
-        "grid_wrap_padding_top": -100,
+        "grid_wrap_padding_top": 0,
         "grid_wrap_padding_bottom": 40,
         "grid_wrap_padding_left": 40,
         "grid_wrap_padding_right": 40,
