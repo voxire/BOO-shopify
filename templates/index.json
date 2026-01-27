@@ -502,6 +502,47 @@
         "section_width": 1450,
         "section_radius": 24
       }
+    },
+    "section_clickable_lookbook_C9jhBk": {
+      "type": "section-clickable-lookbook",
+      "blocks": {
+        "lookbook_image_pUXgXA": {
+          "type": "lookbook_image",
+          "settings": {
+            "image": "shopify://shop_images/FoxBoo.png"
+          }
+        },
+        "hotspot_jYx4qm": {
+          "type": "hotspot",
+          "settings": {
+            "product": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
+            "dot_x": 50,
+            "dot_y": 50
+          }
+        },
+        "hotspot_G3t6VP": {
+          "type": "hotspot",
+          "settings": {
+            "product": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
+            "dot_x": 49,
+            "dot_y": 18
+          }
+        }
+      },
+      "block_order": [
+        "lookbook_image_pUXgXA",
+        "hotspot_jYx4qm",
+        "hotspot_G3t6VP"
+      ],
+      "name": "Clickable Lookbook",
+      "settings": {
+        "background_color": "#ffffff",
+        "border_radius": 12,
+        "hotspot_color": "#000000",
+        "hotspot_size": 32,
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
@@ -510,6 +551,7 @@
     "best_sellers_on_sale_ygnM6X",
     "hers_labs_hero_AAQ9WT",
     "shop_color_grid_ifdnEa",
-    "split_hero_features_hJ4mnm"
+    "split_hero_features_hJ4mnm",
+    "section_clickable_lookbook_C9jhBk"
   ]
 }
