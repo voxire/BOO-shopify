@@ -17,6 +17,10 @@
   assign mobile_carousel_padding_bottom = section.settings.mobile_carousel_padding_bottom | default: 40
   assign mobile_carousel_padding_left = section.settings.mobile_carousel_padding_left | default: 0
   assign mobile_carousel_padding_right = section.settings.mobile_carousel_padding_right | default: 0
+  assign grid_wrap_padding_top = section.settings.grid_wrap_padding_top | default: 0
+  assign grid_wrap_padding_bottom = section.settings.grid_wrap_padding_bottom | default: 0
+  assign grid_wrap_padding_left = section.settings.grid_wrap_padding_left | default: 40
+  assign grid_wrap_padding_right = section.settings.grid_wrap_padding_right | default: 40
 -%}
 
 {% style %}
@@ -313,7 +317,7 @@
     width:100%;
     max-width:{{ section.settings.max_width }}px;
     margin:0 auto;
-    padding:0 {{ section.settings.outer_padding }}px {{ section.settings.outer_padding }}px;
+    padding:{{ grid_wrap_padding_top }}px {{ grid_wrap_padding_right }}px {{ grid_wrap_padding_bottom }}px {{ grid_wrap_padding_left }}px;
     min-height:{{ section.settings.height_vh }}vh;
     display:grid;
     grid-template-columns:repeat({{ section.settings.columns }}, minmax(0,1fr));
@@ -1441,7 +1445,58 @@ document.addEventListener('DOMContentLoaded', function() {
       "default": 0,
       "info": "Controls the right padding of the mobile carousel (visible on mobile devices only)"
     },
-
+    {
+      "type": "header",
+      "content": "Grid Wrap Padding (Product Grid Container)"
+    },
+    {
+      "type": "range",
+      "id": "grid_wrap_padding_top",
+      "min": -100,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Grid Wrap Padding Top",
+      "default": 0,
+      "info": "Controls the top padding inside the grid container (the wrapper that contains all product tiles). Negative values will pull the grid upward."
+    },
+    {
+      "type": "range",
+      "id": "grid_wrap_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Grid Wrap Padding Bottom",
+      "default": 40,
+      "info": "Controls the bottom padding inside the grid container (the wrapper that contains all product tiles)"
+    },
+    {
+      "type": "range",
+      "id": "grid_wrap_padding_left",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Grid Wrap Padding Left",
+      "default": 40,
+      "info": "Controls the left padding inside the grid container (the wrapper that contains all product tiles)"
+    },
+    {
+      "type": "range",
+      "id": "grid_wrap_padding_right",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Grid Wrap Padding Right",
+      "default": 40,
+      "info": "Controls the right padding inside the grid container (the wrapper that contains all product tiles)"
+    },
+    {
+      "type": "header",
+      "content": "Grid Settings"
+    },
     {
       "type": "range",
       "id": "max_width",
