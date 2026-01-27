@@ -6,6 +6,13 @@
   assign hotspot_size = section.settings.hotspot_size
   assign padding_top = section.settings.padding_top
   assign padding_bottom = section.settings.padding_bottom
+  assign tooltip_title_size = section.settings.tooltip_title_size | default: 14
+  assign tooltip_price_size = section.settings.tooltip_price_size | default: 13
+  assign tooltip_cta_size = section.settings.tooltip_cta_size | default: 12
+  assign tooltip_title_color = section.settings.tooltip_title_color
+  assign tooltip_price_color = section.settings.tooltip_price_color
+  assign tooltip_cta_color = section.settings.tooltip_cta_color
+  assign tooltip_bg_color = section.settings.tooltip_bg_color
   assign image_blocks = section.blocks | where: 'type', 'lookbook_image'
   assign hotspot_blocks = section.blocks | where: 'type', 'hotspot'
 -%}
@@ -114,7 +121,7 @@
     bottom: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
-    background: #000000;
+    background: {% if tooltip_bg_color != blank %}{{ tooltip_bg_color }}{% else %}#000000{% endif %};
     color: #ffffff;
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -140,28 +147,40 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: #000000;
+    border-top-color: {% if tooltip_bg_color != blank %}{{ tooltip_bg_color }}{% else %}#000000{% endif %};
   }
 
   .clickable-lookbook-{{ section_id }}__tooltip-title {
     display: block;
     font-weight: 600;
     margin-bottom: 0.25rem;
+    font-size: {{ tooltip_title_size }}px;
+    {% if tooltip_title_color != blank %}
+      color: {{ tooltip_title_color }};
+    {% endif %}
   }
 
   .clickable-lookbook-{{ section_id }}__tooltip-price {
     display: block;
-    font-size: 0.8125rem;
+    font-size: {{ tooltip_price_size }}px;
     opacity: 0.9;
     margin-bottom: 0.25rem;
+    {% if tooltip_price_color != blank %}
+      color: {{ tooltip_price_color }};
+      opacity: 1;
+    {% endif %}
   }
 
   .clickable-lookbook-{{ section_id }}__tooltip-cta {
     display: block;
-    font-size: 0.75rem;
+    font-size: {{ tooltip_cta_size }}px;
     opacity: 0.8;
     margin-top: 0.375rem;
     font-style: italic;
+    {% if tooltip_cta_color != blank %}
+      color: {{ tooltip_cta_color }};
+      opacity: 1;
+    {% endif %}
   }
 
   /* Desktop: Show tooltip on hover */
@@ -216,15 +235,15 @@
     }
 
     .clickable-lookbook-{{ section_id }}__tooltip-title {
-      font-size: 0.875rem;
+      font-size: {{ tooltip_title_size | times: 0.9 | round }}px;
     }
 
     .clickable-lookbook-{{ section_id }}__tooltip-price {
-      font-size: 0.75rem;
+      font-size: {{ tooltip_price_size | times: 0.9 | round }}px;
     }
 
     .clickable-lookbook-{{ section_id }}__tooltip-cta {
-      font-size: 0.6875rem;
+      font-size: {{ tooltip_cta_size | times: 0.9 | round }}px;
     }
   }
 {%- endstyle -%}
@@ -401,6 +420,68 @@
       "unit": "px",
       "label": "Hotspot Size",
       "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Tooltip Text Sizes"
+    },
+    {
+      "type": "range",
+      "id": "tooltip_title_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Tooltip Title Size",
+      "default": 14,
+      "info": "Font size for product title in tooltip"
+    },
+    {
+      "type": "range",
+      "id": "tooltip_price_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Tooltip Price Size",
+      "default": 13,
+      "info": "Font size for product price in tooltip"
+    },
+    {
+      "type": "range",
+      "id": "tooltip_cta_size",
+      "min": 8,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Tooltip CTA Size",
+      "default": 12,
+      "info": "Font size for 'View product' text in tooltip"
+    },
+    {
+      "type": "color",
+      "id": "tooltip_bg_color",
+      "label": "Tooltip Background Color",
+      "default": "#000000",
+      "info": "Background color for the tooltip box"
+    },
+    {
+      "type": "color",
+      "id": "tooltip_title_color",
+      "label": "Tooltip Title Color",
+      "info": "Leave empty to use default white"
+    },
+    {
+      "type": "color",
+      "id": "tooltip_price_color",
+      "label": "Tooltip Price Color",
+      "info": "Leave empty to use default white"
+    },
+    {
+      "type": "color",
+      "id": "tooltip_cta_color",
+      "label": "Tooltip CTA Color",
+      "info": "Leave empty to use default white"
     },
     {
       "type": "header",
