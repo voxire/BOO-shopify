@@ -1060,6 +1060,12 @@
     // When we drag, suppress link clicks briefly after release
     let suppressClickUntil = 0;
 
+    // Double-tap detection
+    let lastTapTime = 0;
+    let lastTapTarget = null;
+    const DOUBLE_TAP_DELAY = 300; // ms between taps
+    const DOUBLE_TAP_DISTANCE = 50; // max pixel distance between taps
+
     function handleWheel(e) {
       if (originalCount <= 1) return;
 
@@ -1121,6 +1127,10 @@
         // prevent the browser from interpreting as a "scroll/tap"
         e.preventDefault();
 
+        // Reset double-tap tracking when dragging
+        lastTapTime = 0;
+        lastTapTarget = null;
+
         // Drag-to-scroll (feels natural on desktop + mobile)
         track.scrollLeft = startScrollLeft - dx;
       }
@@ -1168,6 +1178,39 @@
         if (moved && Date.now() < suppressClickUntil) {
           e.preventDefault();
           e.stopPropagation();
+          return;
+        }
+
+        // Double-tap detection
+        const currentTime = Date.now();
+        const timeSinceLastTap = currentTime - lastTapTime;
+        const isDoubleTap = timeSinceLastTap < DOUBLE_TAP_DELAY && 
+                           lastTapTarget === link &&
+                           !moved; // Don't trigger on drag
+
+        if (isDoubleTap) {
+          // Double tap detected - navigate to product page
+          e.preventDefault();
+          e.stopPropagation();
+          const href = link.getAttribute('href');
+          if (href) {
+            window.location.href = href;
+          }
+          // Reset tap tracking
+          lastTapTime = 0;
+          lastTapTarget = null;
+        } else {
+          // Single tap - store for potential double tap
+          lastTapTime = currentTime;
+          lastTapTarget = link;
+          
+          // Clear after delay to prevent stale double-tap detection
+          setTimeout(() => {
+            if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
+              lastTapTime = 0;
+              lastTapTarget = null;
+            }
+          }, DOUBLE_TAP_DELAY);
         }
       },
       true
