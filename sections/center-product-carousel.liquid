@@ -392,9 +392,10 @@
     {%- endif -%}
     box-shadow: 0 2px 12px rgba(var(--color-foreground), 0.06);
     position: relative;
-    z-index: 1;
+    z-index: 10;
     text-decoration: none;
     cursor: pointer;
+    pointer-events: auto;
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
@@ -601,6 +602,12 @@
   .cpc-section--{{ section_id }} .cpc-track {
     cursor: grab;
     touch-action: pan-y;
+  }
+
+  /* Ensure info card links are always clickable */
+  .cpc-section--{{ section_id }} .cpc-info-card,
+  .cpc-section--{{ section_id }} .cpc-info-card * {
+    pointer-events: auto;
   }
 
   .cpc-section--{{ section_id }} .cpc-track:active {
@@ -1165,55 +1172,53 @@
       }, 0);
     }
 
-    // SINGLE click suppression layer (capture phase)
-    // If we just dragged, prevent navigation. Otherwise allow normal <a href> navigation.
-    track.addEventListener(
-      'click',
-      (e) => {
-        const link = e.target.closest('a.cpc-info-card');
-        if (!link) return;
+    // Click handler for product links
+    // Handles double-tap and prevents navigation only after drag
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a.cpc-info-card');
+      if (!link || !section.contains(link)) return;
 
-        // Only block clicks if a REAL drag happened
-        if (moved && Date.now() < suppressClickUntil) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
+      // Only block clicks if a REAL drag happened
+      if (moved && Date.now() < suppressClickUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Double-tap detection
+      const currentTime = Date.now();
+      const timeSinceLastTap = currentTime - lastTapTime;
+      const isDoubleTap = timeSinceLastTap < DOUBLE_TAP_DELAY && 
+                         lastTapTarget === link &&
+                         !moved; // Don't trigger on drag
+
+      if (isDoubleTap) {
+        // Double tap detected - navigate to product page immediately
+        e.preventDefault();
+        e.stopPropagation();
+        const href = link.getAttribute('href');
+        if (href) {
+          window.location.href = href;
         }
-
-        // Double-tap detection
-        const currentTime = Date.now();
-        const timeSinceLastTap = currentTime - lastTapTime;
-        const isDoubleTap = timeSinceLastTap < DOUBLE_TAP_DELAY && 
-                           lastTapTarget === link &&
-                           !moved; // Don't trigger on drag
-
-        if (isDoubleTap) {
-          // Double tap detected - navigate to product page
-          e.preventDefault();
-          e.stopPropagation();
-          const href = link.getAttribute('href');
-          if (href) {
-            window.location.href = href;
+        // Reset tap tracking
+        lastTapTime = 0;
+        lastTapTarget = null;
+      } else {
+        // Single tap - allow default link behavior (navigation)
+        // Store for potential double tap detection
+        lastTapTime = currentTime;
+        lastTapTarget = link;
+        
+        // Don't prevent default - let the link navigate normally
+        // Clear after delay to prevent stale double-tap detection
+        setTimeout(() => {
+          if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
+            lastTapTime = 0;
+            lastTapTarget = null;
           }
-          // Reset tap tracking
-          lastTapTime = 0;
-          lastTapTarget = null;
-        } else {
-          // Single tap - store for potential double tap
-          lastTapTime = currentTime;
-          lastTapTarget = link;
-          
-          // Clear after delay to prevent stale double-tap detection
-          setTimeout(() => {
-            if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
-              lastTapTime = 0;
-              lastTapTarget = null;
-            }
-          }, DOUBLE_TAP_DELAY);
-        }
-      },
-      true
-    );
+        }, DOUBLE_TAP_DELAY);
+      }
+    }, true); // Use capture phase to catch before other handlers
 
     function buildInfiniteLoop() {
       // For 1 or fewer slides, no loop needed
