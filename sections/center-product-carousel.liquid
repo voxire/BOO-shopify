@@ -658,6 +658,7 @@
     let isScrolling = false;
     let isCorrecting = false;
     let isProgrammaticScroll = false;
+    let isDragging = false;
 
     function getSlidesPerView() {
       if (window.matchMedia('(min-width: 990px)').matches) return 3;
@@ -975,6 +976,7 @@
 
       isPointerDown = true;
       moved = false;
+      isDragging = false;
 
       startX = e.clientX;
       startScrollLeft = track.scrollLeft;
@@ -996,9 +998,11 @@
       // Only treat it as a drag after a small threshold (keeps taps as taps)
       if (!moved && Math.abs(dx) > DRAG_START_PX) {
         moved = true;
+        isDragging = true;
       }
 
       if (moved) {
+        isDragging = true;
         // prevent the browser from interpreting as a "scroll/tap"
         e.preventDefault();
 
@@ -1018,6 +1022,8 @@
       try {
         track.releasePointerCapture(e.pointerId);
       } catch (err) {}
+
+      isDragging = false;
 
       if (moved) {
         // We dragged: suppress accidental clicks for a short window
