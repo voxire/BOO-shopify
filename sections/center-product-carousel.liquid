@@ -305,9 +305,20 @@
     text-decoration: none;
     color: inherit;
     background: transparent;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     max-width: var(--cpc-card-width, 100%);
     width: 100%;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card:hover {
+    opacity: 0.95;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-card:active {
+    opacity: 0.9;
   }
 
   .cpc-section--{{ section_id }} .cpc-media-tile {
@@ -1130,12 +1141,17 @@
       track.addEventListener('pointerup', handlePointerUp);
       track.addEventListener('pointercancel', handlePointerUp);
 
-      // Prevent link clicks only if drag happened
+      // Prevent link clicks only if a significant drag happened
+      // This allows normal clicks on product cards to navigate to product pages
       track.addEventListener('click', (e) => {
-        if (shouldPreventClick && e.target.closest('a')) {
+        const link = e.target.closest('a.cpc-card');
+        if (link && shouldPreventClick && didDrag) {
+          // Only prevent if there was a significant drag
           e.preventDefault();
           e.stopPropagation();
+          return false;
         }
+        // Allow normal link clicks to proceed - products are clickable!
       }, true);
 
       if (autoplayEnabled) {
