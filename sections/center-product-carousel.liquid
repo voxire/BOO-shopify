@@ -270,6 +270,12 @@
     display: none;
   }
 
+  .cpc-section--{{ section_id }} .cpc-track.is-dragging {
+    scroll-snap-type: none !important;
+    scroll-behavior: auto !important;
+    cursor: grabbing;
+  }
+
   .cpc-section--{{ section_id }} .cpc-slide {
     min-width: 0;
     flex: 0 0 100%;
@@ -970,6 +976,30 @@
     // When we drag, suppress link clicks briefly after release
     let suppressClickUntil = 0;
 
+    function handleWheel(e) {
+      if (originalCount <= 1) return;
+
+      const absX = Math.abs(e.deltaX);
+      const absY = Math.abs(e.deltaY);
+
+      const isVerticalIntent = absY > absX && !e.shiftKey;
+
+      // Vertical scroll → PAGE scroll only
+      if (isVerticalIntent) {
+        e.preventDefault();
+        window.scrollBy({
+          top: e.deltaY,
+          behavior: 'auto'
+        });
+        return;
+      }
+
+      // Horizontal intent → carousel scroll
+      e.preventDefault();
+      const delta = absX > 0 ? e.deltaX : e.deltaY;
+      track.scrollLeft += delta;
+    }
+
     function handlePointerDown(e) {
       if (originalCount <= 1) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -981,6 +1011,7 @@
       startX = e.clientX;
       startScrollLeft = track.scrollLeft;
 
+      track.classList.add('is-dragging');
       track.style.cursor = 'grabbing';
       track.style.userSelect = 'none';
 
@@ -1016,6 +1047,7 @@
 
       isPointerDown = false;
 
+      track.classList.remove('is-dragging');
       track.style.cursor = 'grab';
       track.style.userSelect = '';
 
@@ -1048,7 +1080,8 @@
         const link = e.target.closest('a.cpc-card');
         if (!link) return;
 
-        if (Date.now() < suppressClickUntil) {
+        // Only block clicks if a REAL drag happened
+        if (moved && Date.now() < suppressClickUntil) {
           e.preventDefault();
           e.stopPropagation();
         }
@@ -1145,6 +1178,7 @@
       track.addEventListener('pointermove', handlePointerMove, { passive: false });
       track.addEventListener('pointerup', handlePointerUp);
       track.addEventListener('pointercancel', handlePointerUp);
+      track.addEventListener('wheel', handleWheel, { passive: false });
 
       if (autoplayEnabled) {
         startAutoplay();
