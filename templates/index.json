@@ -502,73 +502,6 @@
         "section_width": 1450,
         "section_radius": 24
       }
-    },
-    "3d_card_carousel_rnqqP6": {
-      "type": "3d-card-carousel",
-      "blocks": {
-        "slide_CfRFNC": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/DinoBoo.png",
-            "title": "Card Title",
-            "price_text": "$99.00",
-            "button_link": ""
-          }
-        },
-        "slide_7zTiyc": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/Shaboo.png",
-            "title": "Card Title",
-            "price_text": "$99.00",
-            "button_link": ""
-          }
-        },
-        "slide_UKUkQh": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/BunBoo.png",
-            "title": "Card Title",
-            "price_text": "$99.00",
-            "button_link": ""
-          }
-        },
-        "slide_67QUTg": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/GriBoo.png",
-            "title": "Card Title",
-            "price_text": "$99.00",
-            "button_link": ""
-          }
-        },
-        "slide_BMVcCL": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/FoxBoo.png",
-            "title": "Card Title",
-            "price_text": "$99.00",
-            "button_link": ""
-          }
-        }
-      },
-      "block_order": [
-        "slide_CfRFNC",
-        "slide_7zTiyc",
-        "slide_UKUkQh",
-        "slide_67QUTg",
-        "slide_BMVcCL"
-      ],
-      "name": "3D Card Carousel",
-      "settings": {
-        "card_radius": 24,
-        "card_width_mobile": 280,
-        "card_width_desktop": 320,
-        "card_spacing_desktop": 40,
-        "perspective_depth": 1000,
-        "autoplay_enabled": false,
-        "autoplay_speed": 5000
-      }
     }
   },
   "order": [
@@ -577,7 +510,6 @@
     "best_sellers_on_sale_ygnM6X",
     "hers_labs_hero_AAQ9WT",
     "shop_color_grid_ifdnEa",
-    "split_hero_features_hJ4mnm",
-    "3d_card_carousel_rnqqP6"
+    "split_hero_features_hJ4mnm"
   ]
 }
