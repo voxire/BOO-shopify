@@ -540,6 +540,13 @@
         "border_radius": 12,
         "hotspot_color": "#000000",
         "hotspot_size": 32,
+        "tooltip_title_size": 17,
+        "tooltip_price_size": 13,
+        "tooltip_cta_size": 12,
+        "tooltip_bg_color": "#000000",
+        "tooltip_title_color": "",
+        "tooltip_price_color": "",
+        "tooltip_cta_color": "",
         "padding_top": 80,
         "padding_bottom": 80
       }
