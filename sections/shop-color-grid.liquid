@@ -395,8 +395,13 @@
 
   /* === Smooth hover system (no :has) === */
   .scg-{{ sid }}__wrap {
-    /* helps isolate paint work */
-    contain: layout paint style;
+    /* was: contain: layout paint style;  <-- this clips the raised card */
+    contain: layout style;      /* or remove contain entirely */
+    overflow: visible;
+
+    /* reserve room for translateY(-14px) so top corners never clip */
+    padding-top: 18px;
+    margin-top: calc(var(--scg-grid-offset-top) - 18px);
   }
 
   .scg-{{ sid }}__tile {
