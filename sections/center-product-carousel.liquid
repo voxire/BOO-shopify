@@ -1255,17 +1255,26 @@
         return;
       }
 
-      // Horizontal intent → carousel scroll with momentum
+      // Horizontal intent → snap to next/previous product
       e.preventDefault();
       const delta = absX > 0 ? e.deltaX : e.deltaY;
       
-      // Apply momentum multiplier for smoother trackpad scrolling
-      const momentumMultiplier = Math.abs(delta) > 10 ? 1.2 : 1;
-      track.scrollLeft += delta * momentumMultiplier;
+      // Determine scroll direction and snap to next/previous product
+      const currentCenter = getClosestIndexToCenter();
+      let targetIndex;
       
-      // Update active preview and schedule settle
-      scheduleActivePreview();
-      scheduleSettle();
+      if (delta > 0) {
+        // Scrolling right → go to next product
+        targetIndex = Math.min(slides.length - 1, currentCenter + 1);
+      } else {
+        // Scrolling left → go to previous product
+        targetIndex = Math.max(0, currentCenter - 1);
+      }
+      
+      // Only snap if we're actually moving to a different product
+      if (targetIndex !== currentCenter && slides[targetIndex]) {
+        scrollToCentered(slides[targetIndex], true);
+      }
     }
 
     function handlePointerDown(e) {
