@@ -594,6 +594,13 @@
   }
   
   /* Hover effects disabled on mobile via @media (hover: none) rule above */
+
+  /* Hide entire section on mobile when show_on_mobile is disabled */
+  {% unless section.settings.show_on_mobile %}
+  #shopify-section-{{ section.id }} {
+    display: none !important;
+  }
+  {% endunless %}
 }
 
 
@@ -1174,6 +1181,17 @@ document.addEventListener('DOMContentLoaded', function() {
   "name": "Shop color grid",
   "tag": "section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Mobile Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_mobile",
+      "label": "Show on mobile",
+      "default": true,
+      "info": "Uncheck to hide this entire section on mobile devices (screens under 990px)"
+    },
     {
       "type": "header",
       "content": "Content Settings"
