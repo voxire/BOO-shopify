@@ -595,12 +595,12 @@
   
   /* Hover effects disabled on mobile via @media (hover: none) rule above */
 
-  /* Hide entire section on mobile when show_on_mobile is disabled */
-  {% unless section.settings.show_on_mobile %}
+  /* Hide entire section on mobile when hide_on_mobile is enabled */
+  {% if section.settings.hide_on_mobile %}
   #shopify-section-{{ section.id }} {
     display: none !important;
   }
-  {% endunless %}
+  {% endif %}
 }
 
 
@@ -1187,10 +1187,10 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "checkbox",
-      "id": "show_on_mobile",
-      "label": "Show on mobile",
-      "default": true,
-      "info": "Uncheck to hide this entire section on mobile devices (screens under 990px)"
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false,
+      "info": "Check to hide this entire section on mobile devices (screens under 990px)"
     },
     {
       "type": "header",
