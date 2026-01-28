@@ -399,7 +399,7 @@
       "name": "Shop color grid",
       "settings": {
         "heading_text": "Choose Your Character",
-        "heading_color": "",
+        "heading_color": "#000000",
         "filter_title": "Select your Age",
         "filter_button_1_text": "0.5 - 4 Years",
         "filter_button_1_range": "0.5-4",
