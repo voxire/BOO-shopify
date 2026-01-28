@@ -263,7 +263,7 @@
     padding: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-snap-type: x proximity;
+    scroll-snap-type: none;
     contain: layout style paint;
   }
 
@@ -939,7 +939,9 @@
         if (target) {
           // Ensure scroll behavior is auto for instant jump
           const originalScrollBehavior = track.style.scrollBehavior;
+          const originalSnapType = track.style.scrollSnapType;
           track.style.scrollBehavior = 'auto';
+          track.style.scrollSnapType = 'none'; // Disable snap during programmatic jump
           
           // Instant jump
           requestAnimationFrame(() => {
@@ -956,8 +958,9 @@
               setActiveByRealIndex(corrected);
               updateDots();
               
-              // Restore scroll behavior
+              // Restore scroll behavior and snap type
               track.style.scrollBehavior = originalScrollBehavior;
+              track.style.scrollSnapType = originalSnapType || '';
               
               // Update GIF after correction
               updateCenterGif(corrected);
@@ -1009,6 +1012,8 @@
 
       function step(now) {
         const t = Math.min(1, (now - start) / duration);
+        // Ensure snap stays disabled during entire animation
+        track.style.scrollSnapType = 'none';
         track.scrollLeft = fromLeft + delta * easeInOutCubic(t);
 
         // keep center highlight updating while animating
@@ -1018,7 +1023,10 @@
           snapRaf = requestAnimationFrame(step);
         } else {
           snapRaf = null;
-          track.style.scrollSnapType = prevSnapType || '';
+          // Only restore snap after animation completes, with a small delay to prevent immediate snap
+          requestAnimationFrame(() => {
+            track.style.scrollSnapType = prevSnapType || '';
+          });
           scheduleActivePreview();
           scheduleSettle();
         }
@@ -1041,7 +1049,14 @@
         animateScrollLeft(targetLeft, isMobile ? 420 : 340);
       } else {
         cancelSnap();
+        // Disable snap for instant scroll
+        const originalSnapType = track.style.scrollSnapType;
+        track.style.scrollSnapType = 'none';
         track.scrollLeft = targetLeft;
+        // Restore snap immediately after
+        requestAnimationFrame(() => {
+          track.style.scrollSnapType = originalSnapType || '';
+        });
         scheduleActivePreview();
         scheduleSettle();
       }
@@ -1149,6 +1164,10 @@
       pendingScrollLeft = value;
       if (dragRaf) return;
       dragRaf = requestAnimationFrame(() => {
+        // During drag, snap is already disabled via CSS class, but ensure it's off
+        if (isDragging) {
+          track.style.scrollSnapType = 'none';
+        }
         track.scrollLeft = pendingScrollLeft;
         dragRaf = null;
       });
@@ -1416,9 +1435,16 @@
       const middleStartIndex = clonesCount + currentIndex;
       const middleStartSlide = slides[middleStartIndex];
       if (middleStartSlide) {
+        // Disable snap during programmatic initialization
+        const originalSnapType = track.style.scrollSnapType;
+        track.style.scrollSnapType = 'none';
         track.scrollTo({
           left: middleStartSlide.offsetLeft - (track.offsetWidth / 2) + (middleStartSlide.offsetWidth / 2),
           behavior: 'auto'
+        });
+        // Restore snap after a brief delay
+        requestAnimationFrame(() => {
+          track.style.scrollSnapType = originalSnapType || '';
         });
       }
       
