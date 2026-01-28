@@ -124,7 +124,7 @@
         "section_padding_right": 0,
         "section_margin_top": 0,
         "section_margin_bottom": 0,
-        "heading_padding_top": 0,
+        "heading_padding_top": 32,
         "heading_padding_bottom": 0,
         "heading_padding_left": 20,
         "heading_padding_right": 20,
