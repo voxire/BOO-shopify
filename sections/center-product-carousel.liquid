@@ -285,14 +285,6 @@
     transition: transform 120ms ease;
   }
 
-  .cpc-section--{{ section_id }} .cpc-track.is-scrolling .cpc-slide {
-    transition: none !important;
-  }
-
-  .cpc-section--{{ section_id }} .cpc-track.is-scrolling .cpc-card-image {
-    transition: none !important;
-  }
-
   .cpc-section--{{ section_id }} .cpc-slide {
     min-width: 0;
     flex: 0 0 100%;
@@ -801,15 +793,15 @@
       // Lock GIF during drag or inertia
       if (isDragging || isInertia) return;
       
-      // Extra safety: Stop ALL GIFs globally first (including any that might be playing)
-      const allGifImages = document.querySelectorAll('.cpc-gif-image[data-gif-url]');
+      // Stop ALL GIFs in this section first (section-scoped, not global)
+      const allGifImages = section.querySelectorAll('.cpc-gif-image[data-gif-url]');
       allGifImages.forEach((img) => {
         const gifUrl = img.dataset.gifUrl;
         const placeholderUrl = img.dataset.placeholderUrl;
         
         if (gifUrl && placeholderUrl) {
           const baseGifUrl = gifUrl.split('?')[0].split('#')[0];
-          // If showing GIF (check by base URL to catch any cache-busted versions), swap to placeholder
+          // If showing GIF, swap to placeholder
           if (img.src.includes(baseGifUrl)) {
             img.src = placeholderUrl;
             img.removeAttribute('srcset');
@@ -827,13 +819,8 @@
             const placeholderUrl = img.dataset.placeholderUrl;
             
             if (gifUrl && placeholderUrl) {
-              // Preload the GIF in background for faster loading
-              preloadGif(gifUrl);
-              
-              // Set src directly with cache-busting param for immediate display
-              const separator = gifUrl.includes('?') ? '&' : '?';
-              const gifUrlWithTimestamp = gifUrl + separator + '_t=' + Date.now();
-              img.src = gifUrlWithTimestamp;
+              // Set src directly - no cache-busting, instant from cache
+              img.src = gifUrl;
             }
           });
         }
@@ -844,86 +831,58 @@
       // Dots removed - no-op
     }
 
-    // Unified scroll settle engine using requestAnimationFrame
-    let scrollSettleRaf = null;
-    let lastScrollLeft = 0;
-    let stableFrameCount = 0;
-    const STABLE_FRAMES_REQUIRED = 4; // Require 4 frames of stability (~67ms at 60fps) - faster response
+    // Simple debounce settle engine
+    let settleTimer = null;
+    const SETTLE_DELAY = 90; // ms
 
     /**
-     * Unified scroll settle engine - detects when scroll has stopped using rAF
-     * Only updates active state and GIF after scroll is completely stable
+     * Schedule settle - finalizes loop correction + GIF after scroll stops
      */
-    function startScrollSettle() {
-      // Mark as scrolling to disable transitions
-      if (!track.classList.contains('is-scrolling')) {
-        track.classList.add('is-scrolling');
-      }
-      
-      lastScrollLeft = track.scrollLeft;
-      stableFrameCount = 0;
+    function scheduleSettle() {
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        if (isDragging || isInertia || isCorrecting) return;
+        // finalize: loop correction + gif
+        settleScroll();
+      }, SETTLE_DELAY);
+    }
 
-      // Cancel any existing settle loop
-      if (scrollSettleRaf) {
-        cancelAnimationFrame(scrollSettleRaf);
-      }
+    // rAF active preview updater - makes center card pop instantly during scroll
+    let activeRaf = null;
+    function scheduleActivePreview() {
+      if (activeRaf) return;
+      activeRaf = requestAnimationFrame(() => {
+        activeRaf = null;
+        if (!slides.length) return;
 
-      function checkScrollStable() {
-        const currentScrollLeft = track.scrollLeft;
-        const scrollDelta = Math.abs(currentScrollLeft - lastScrollLeft);
-        
-        // If scroll position changed significantly, reset stability counter
-        // Use 1px threshold to account for sub-pixel scrolling
-        if (scrollDelta > 1) {
-          lastScrollLeft = currentScrollLeft;
-          stableFrameCount = 0;
-          scrollSettleRaf = requestAnimationFrame(checkScrollStable);
-          return;
+        // compute closest index based on current scrollLeft
+        const idx = getClosestIndexToCenter();
+
+        if (idx !== currentRealIndex) {
+          currentRealIndex = idx;
+          currentIndex = getOriginalIndexByReal(idx);
+          setActiveByRealIndex(idx); // THIS makes the "push up" immediate
+          updateDots();
         }
-
-        // Scroll position is stable - increment counter
-        stableFrameCount++;
-
-        // If stable for required frames, settle is complete
-        if (stableFrameCount >= STABLE_FRAMES_REQUIRED) {
-          // Remove scrolling class to re-enable transitions
-          track.classList.remove('is-scrolling');
-          
-          // Only process if not dragging or correcting
-          if (!isDragging && !isCorrecting && slides.length > 0) {
-            settleScroll();
-          }
-          
-          scrollSettleRaf = null;
-        } else {
-          // Continue checking
-          scrollSettleRaf = requestAnimationFrame(checkScrollStable);
-        }
-      }
-
-      scrollSettleRaf = requestAnimationFrame(checkScrollStable);
+      });
     }
 
     /**
-     * Process scroll settle - compute center, handle correction, update active and GIF
+     * Process scroll settle - handle correction and GIF only
+     * Active state is already updated by scheduleActivePreview() during scroll
      */
     function settleScroll() {
       // Compute centered slide using scroll position (reliable with transforms)
       const centeredIndex = getClosestIndexToCenter();
       
       // Handle infinite loop correction if needed
-      let correctedIndex = centeredIndex;
       let needsCorrection = false;
       
       if (centeredIndex < clonesCount) {
         // In prepended copies - jump to corresponding position in middle copy
-        const offsetInPre = centeredIndex % originalCount;
-        correctedIndex = clonesCount + offsetInPre;
         needsCorrection = true;
       } else if (centeredIndex >= clonesCount + originalCount) {
         // In appended copies - jump to corresponding position in middle copy
-        const offsetInPost = (centeredIndex - clonesCount - originalCount) % originalCount;
-        correctedIndex = clonesCount + offsetInPost;
         needsCorrection = true;
       }
       
@@ -931,24 +890,22 @@
       if (needsCorrection) {
         correctPosition();
       } else {
-        // We're in the middle copy - update immediately
-        currentRealIndex = correctedIndex;
-        currentIndex = getOriginalIndexByReal(correctedIndex);
-        setActiveByRealIndex(correctedIndex);
-        updateDots();
-        updateCenterGif(correctedIndex);
+        // We're in the middle copy - just update GIF (active already set by preview)
+        updateCenterGif(centeredIndex);
       }
     }
 
     /**
-     * Handle scroll events - kick off settle engine
+     * Handle scroll events - instantly update active state, schedule settle for correction + GIF
      */
     function onScroll() {
-      // Block during active drag or inertia
-      if (isDragging || isInertia) return;
-      
-      // Start the settle engine
-      startScrollSettle();
+      if (isDragging || isInertia) {
+        scheduleActivePreview();
+        // no settle while dragging/inertia
+        return;
+      }
+      scheduleActivePreview();
+      scheduleSettle();
     }
 
     /**
@@ -985,14 +942,6 @@
           const originalScrollBehavior = track.style.scrollBehavior;
           track.style.scrollBehavior = 'auto';
           
-          // Mark as scrolling to disable transitions
-          track.classList.add('is-scrolling');
-          
-          // Disable transitions on all slides during jump
-          slides.forEach((slide) => {
-            slide.style.transition = 'none';
-          });
-          
           // Instant jump
           requestAnimationFrame(() => {
             track.scrollTo({
@@ -1008,56 +957,30 @@
               setActiveByRealIndex(corrected);
               updateDots();
               
-              // Re-enable transitions
-              slides.forEach((slide) => {
-                slide.style.transition = '';
-              });
-              
               // Restore scroll behavior
               track.style.scrollBehavior = originalScrollBehavior;
               
-              // Remove scrolling class after one more frame
-              requestAnimationFrame(() => {
-                track.classList.remove('is-scrolling');
-                
-                // Update GIF after correction
-                updateCenterGif(corrected);
-                
-                // Allow correction to complete
-                isCorrecting = false;
-              });
+              // Update GIF after correction
+              updateCenterGif(corrected);
+              
+              // Allow correction to complete
+              isCorrecting = false;
             });
           });
         } else {
           isCorrecting = false;
         }
       } else {
-        // We're in the middle copy - just update indices without jumping
-        currentRealIndex = corrected;
-        currentIndex = getOriginalIndexByReal(corrected);
-        setActiveByRealIndex(corrected);
-        updateDots();
+        // We're in the middle copy - just update GIF (active already set by preview)
         updateCenterGif(corrected);
       }
     }
 
     /**
-     * Scroll to centered position - uses unified settle engine
+     * Scroll to centered position - uses new active preview + settle system
      */
     function scrollToCentered(target, smooth = true) {
       if (!target) return;
-      
-      // Mark as scrolling immediately to disable transitions
-      track.classList.add('is-scrolling');
-      
-      // Set active immediately for visual feedback
-      const realIndex = slides.indexOf(target);
-      if (realIndex >= 0) {
-        currentRealIndex = realIndex;
-        currentIndex = getOriginalIndexByReal(realIndex);
-        setActiveByRealIndex(realIndex);
-        updateDots();
-      }
       
       // Calculate target position
       const targetLeft = target.offsetLeft - (track.offsetWidth / 2) + (target.offsetWidth / 2);
@@ -1073,8 +996,9 @@
         track.scrollLeft = targetLeft;
       }
 
-      // Start the unified settle engine (handles scroll end detection)
-      startScrollSettle();
+      // Immediately update active preview and schedule settle
+      scheduleActivePreview();
+      scheduleSettle();
     }
 
     function scrollToRealIndex(realIndex, smooth = true) {
@@ -1220,6 +1144,9 @@
         const next = track.scrollLeft + velocity * dt;
         scheduleScrollLeft(next);
 
+        // Update center highlight during inertia
+        scheduleActivePreview();
+
         // decay velocity
         velocity *= Math.pow(DECAY, dt / 16);
 
@@ -1267,8 +1194,9 @@
       const momentumMultiplier = Math.abs(delta) > 10 ? 1.2 : 1;
       track.scrollLeft += delta * momentumMultiplier;
       
-      // Kick off settle engine for smooth updates
-      startScrollSettle();
+      // Update active preview and schedule settle
+      scheduleActivePreview();
+      scheduleSettle();
     }
 
     function handlePointerDown(e) {
@@ -1345,6 +1273,9 @@
         // Drag-to-scroll using rAF scheduler
         const next = startScrollLeft - dx;
         scheduleScrollLeft(next);
+        
+        // Update center highlight while dragging
+        scheduleActivePreview();
         
         // Update last scroll position for settle engine
         lastScrollLeft = next;
@@ -1443,11 +1374,12 @@
       setActiveByRealIndex(middleStartIndex);
       updateDots();
       
-      // Trigger scroll settle after initialization to update GIF
+      // Trigger active preview and settle after initialization to update GIF
       requestAnimationFrame(() => {
         if (track) {
-          // Manually trigger scroll settle for initial load
-          startScrollSettle();
+          // Manually trigger active preview and settle for initial load
+          scheduleActivePreview();
+          scheduleSettle();
         }
       });
     }
