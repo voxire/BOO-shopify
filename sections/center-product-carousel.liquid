@@ -898,9 +898,9 @@
      * Handle scroll events - instantly update active state, schedule settle for correction + GIF
      */
     function onScroll() {
-      if (isDragging || isInertia) {
+      if (isDragging || isInertia || isWheelScrolling) {
         scheduleActivePreview();
-        // no settle while dragging/inertia
+        // no settle while dragging/inertia/wheel scrolling
         return;
       }
       scheduleActivePreview();
@@ -1157,6 +1157,12 @@
     const DOUBLE_TAP_DELAY = 300; // ms between taps
     const DOUBLE_TAP_DISTANCE = 50; // max pixel distance between taps
 
+    // Wheel scroll debouncing - prevent multiple jumps
+    let wheelScrollTimer = null;
+    let isWheelScrolling = false;
+    let lastWheelDirection = 0; // Track last scroll direction
+    const WHEEL_SCROLL_DEBOUNCE = 300; // ms - increased to prevent rapid jumps
+
     /**
      * Schedule scrollLeft update via rAF for smooth batched updates
      */
@@ -1257,7 +1263,21 @@
 
       // Horizontal intent → snap to next/previous product
       e.preventDefault();
+      
       const delta = absX > 0 ? e.deltaX : e.deltaY;
+      const scrollDirection = delta > 0 ? 1 : -1;
+      
+      // Debounce: ignore wheel events if we're already processing one
+      // Also ignore if direction changed (user reversed scroll)
+      if (isWheelScrolling) {
+        // If direction changed, reset and allow new direction
+        if (scrollDirection !== lastWheelDirection) {
+          clearTimeout(wheelScrollTimer);
+          isWheelScrolling = false;
+        } else {
+          return; // Same direction, ignore
+        }
+      }
       
       // Determine scroll direction and snap to next/previous product
       const currentCenter = getClosestIndexToCenter();
@@ -1273,7 +1293,21 @@
       
       // Only snap if we're actually moving to a different product
       if (targetIndex !== currentCenter && slides[targetIndex]) {
+        // Mark as scrolling and store direction
+        isWheelScrolling = true;
+        lastWheelDirection = scrollDirection;
+        
+        // Cancel any ongoing snap animation
+        cancelSnap();
+        
         scrollToCentered(slides[targetIndex], true);
+        
+        // Reset flag after debounce period
+        clearTimeout(wheelScrollTimer);
+        wheelScrollTimer = setTimeout(() => {
+          isWheelScrolling = false;
+          lastWheelDirection = 0;
+        }, WHEEL_SCROLL_DEBOUNCE);
       }
     }
 
