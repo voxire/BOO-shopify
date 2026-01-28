@@ -98,6 +98,7 @@
       "custom_css": [],
       "name": "Shop color grid (full screen)",
       "settings": {
+        "hide_on_mobile": true,
         "heading_text": "Choose Your Character",
         "heading_color": "#000000",
         "filter_title": "Select your Age",

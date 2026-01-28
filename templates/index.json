@@ -310,6 +310,7 @@
       ],
       "name": "Shop color grid",
       "settings": {
+        "hide_on_mobile": false,
         "heading_text": "Choose Your Character",
         "heading_color": "#000000",
         "filter_title": "Select your Age",
