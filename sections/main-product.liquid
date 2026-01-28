@@ -37,6 +37,73 @@
         padding-bottom: {{ section.settings.padding_bottom }}px;
       }
     }
+
+    /* Force all text to black on product pages */
+    product-info,
+    product-info *:not(button):not(input):not(select):not(textarea),
+    product-info h1,
+    product-info h2,
+    product-info h3,
+    product-info h4,
+    product-info h5,
+    product-info h6,
+    product-info p,
+    product-info span,
+    product-info a,
+    product-info label,
+    product-info li,
+    product-info td,
+    product-info th,
+    .product__info-container,
+    .product__info-container *:not(button):not(input):not(select):not(textarea),
+    .product__title,
+    .product__title *,
+    .product__text,
+    .product__text *,
+    .product__description,
+    .product__description *,
+    .price,
+    .price *,
+    .product-form,
+    .product-form *:not(button):not(input):not(select):not(textarea),
+    .product-form label,
+    .product-form .form__label,
+    .product__tax,
+    .product__tax *,
+    .product__sku,
+    .product__sku *,
+    .product__inventory,
+    .product__inventory *,
+    .accordion__title,
+    .accordion__content,
+    .accordion__content *,
+    .pdp-minimal__title,
+    .pdp-minimal__kicker,
+    .pdp-minimal__size,
+    .pdp-minimal__price,
+    .pdp-minimal__price *,
+    .pdp-fitscale__labels,
+    .product-popup-modal__content,
+    .product-popup-modal__content *:not(button):not(input):not(select):not(textarea),
+    .product-popup-modal__button,
+    .volume-pricing-note,
+    .volume-pricing-note *,
+    .installment,
+    .installment * {
+      color: #000000 !important;
+    }
+
+    /* Override CSS variables for product pages */
+    product-info {
+      --color-foreground: 0, 0, 0 !important;
+    }
+
+    /* Ensure links are also black */
+    product-info a,
+    .product__info-container a,
+    .product-popup-modal__content a {
+      color: #000000 !important;
+    }
   {%- endstyle -%}
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
