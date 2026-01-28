@@ -898,9 +898,9 @@
      * Handle scroll events - instantly update active state, schedule settle for correction + GIF
      */
     function onScroll() {
-      if (isDragging || isInertia || isWheelScrolling) {
+      if (isDragging || isInertia) {
         scheduleActivePreview();
-        // no settle while dragging/inertia/wheel scrolling
+        // no settle while dragging/inertia
         return;
       }
       scheduleActivePreview();
@@ -979,11 +979,15 @@
     }
 
     // --- Controlled snap animation (prevents jitter + too-fast snapping) ---
+    let isSnapAnimating = false;
+    let snapLockUntil = 0; // timestamp in ms
     let snapRaf = null;
 
     function cancelSnap() {
       if (snapRaf) cancelAnimationFrame(snapRaf);
       snapRaf = null;
+      isSnapAnimating = false;
+      snapLockUntil = 0;
     }
 
     // cubic ease in/out
@@ -993,12 +997,16 @@
 
     function animateScrollLeft(toLeft, duration = 360) {
       cancelSnap();
+      
+      isSnapAnimating = true;
+      snapLockUntil = Date.now() + duration + 140; // buffer prevents "extra wheel burst" skipping
 
       const fromLeft = track.scrollLeft;
       const delta = toLeft - fromLeft;
 
       if (Math.abs(delta) < 0.5) {
         track.scrollLeft = toLeft;
+        isSnapAnimating = false;
         scheduleActivePreview();
         scheduleSettle();
         return;
@@ -1023,6 +1031,9 @@
           snapRaf = requestAnimationFrame(step);
         } else {
           snapRaf = null;
+          isSnapAnimating = false;
+          // keep snapLockUntil as-is; it will expire naturally
+          
           // Only restore snap after animation completes, with a small delay to prevent immediate snap
           requestAnimationFrame(() => {
             track.style.scrollSnapType = prevSnapType || '';
@@ -1157,12 +1168,6 @@
     const DOUBLE_TAP_DELAY = 300; // ms between taps
     const DOUBLE_TAP_DISTANCE = 50; // max pixel distance between taps
 
-    // Wheel scroll debouncing - prevent multiple jumps
-    let wheelScrollTimer = null;
-    let isWheelScrolling = false;
-    let lastWheelDirection = 0; // Track last scroll direction
-    const WHEEL_SCROLL_DEBOUNCE = 300; // ms - increased to prevent rapid jumps
-
     /**
      * Schedule scrollLeft update via rAF for smooth batched updates
      */
@@ -1242,73 +1247,35 @@
     }
 
     function handleWheel(e) {
-      cancelSnap();
-      
       if (originalCount <= 1) return;
 
       const absX = Math.abs(e.deltaX);
       const absY = Math.abs(e.deltaY);
-
       const isVerticalIntent = absY > absX && !e.shiftKey;
 
-      // Vertical scroll → PAGE scroll only
-      if (isVerticalIntent) {
-        e.preventDefault();
-        window.scrollBy({
-          top: e.deltaY,
-          behavior: 'auto'
-        });
-        return;
-      }
+      // Vertical scroll: let page scroll naturally (don't hijack)
+      if (isVerticalIntent) return;
 
-      // Horizontal intent → snap to next/previous product
+      // Horizontal intent: we control the carousel
       e.preventDefault();
-      
+
+      // IMPORTANT: while snap animating (or within lock window), ignore extra wheel events
+      const now = Date.now();
+      if (isSnapAnimating || now < snapLockUntil) return;
+
       const delta = absX > 0 ? e.deltaX : e.deltaY;
-      const scrollDirection = delta > 0 ? 1 : -1;
-      
-      // Debounce: ignore wheel events if we're already processing one
-      // Also ignore if direction changed (user reversed scroll)
-      if (isWheelScrolling) {
-        // If direction changed, reset and allow new direction
-        if (scrollDirection !== lastWheelDirection) {
-          clearTimeout(wheelScrollTimer);
-          isWheelScrolling = false;
-        } else {
-          return; // Same direction, ignore
-        }
-      }
-      
-      // Determine scroll direction and snap to next/previous product
+
+      // Ignore micro wheel noise (trackpads can emit tiny deltas)
+      if (Math.abs(delta) < 6) return;
+
+      const dir = delta > 0 ? 1 : -1;
+
       const currentCenter = getClosestIndexToCenter();
-      let targetIndex;
-      
-      if (delta > 0) {
-        // Scrolling right → go to next product
-        targetIndex = Math.min(slides.length - 1, currentCenter + 1);
-      } else {
-        // Scrolling left → go to previous product
-        targetIndex = Math.max(0, currentCenter - 1);
-      }
-      
-      // Only snap if we're actually moving to a different product
-      if (targetIndex !== currentCenter && slides[targetIndex]) {
-        // Mark as scrolling and store direction
-        isWheelScrolling = true;
-        lastWheelDirection = scrollDirection;
-        
-        // Cancel any ongoing snap animation
-        cancelSnap();
-        
-        scrollToCentered(slides[targetIndex], true);
-        
-        // Reset flag after debounce period
-        clearTimeout(wheelScrollTimer);
-        wheelScrollTimer = setTimeout(() => {
-          isWheelScrolling = false;
-          lastWheelDirection = 0;
-        }, WHEEL_SCROLL_DEBOUNCE);
-      }
+      const targetIndex = Math.max(0, Math.min(slides.length - 1, currentCenter + dir));
+      if (targetIndex === currentCenter || !slides[targetIndex]) return;
+
+      // start the snap – this sets lock inside animateScrollLeft()
+      scrollToCentered(slides[targetIndex], true);
     }
 
     function handlePointerDown(e) {
