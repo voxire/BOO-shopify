@@ -278,7 +278,11 @@
   }
 
   .cpc-section--{{ section_id }} .cpc-track.is-dragging .cpc-slide {
-    transition: none;
+    transition: transform 120ms ease, opacity 120ms ease;
+  }
+
+  .cpc-section--{{ section_id }} .cpc-track.is-dragging .cpc-card-image {
+    transition: transform 120ms ease;
   }
 
   .cpc-section--{{ section_id }} .cpc-track.is-scrolling .cpc-slide {
@@ -293,6 +297,7 @@
     min-width: 0;
     flex: 0 0 100%;
     scroll-snap-align: center;
+    scroll-snap-stop: always;
     transform-origin: center;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     opacity: 0.88;
@@ -757,7 +762,7 @@
         slides[realIndex].classList.add('is-active');
         
         // Preload GIF for active slide immediately (in background, doesn't display yet)
-        if (!isDragging) {
+        if (!isDragging && !isInertia) {
           const gifImages = slides[realIndex].querySelectorAll('.cpc-gif-image[data-gif-url]');
           gifImages.forEach((img) => {
             const gifUrl = img.dataset.gifUrl;
@@ -793,8 +798,8 @@
      * @param {number} realIndex - The real index of the slide that should have its GIF playing
      */
     function updateCenterGif(realIndex) {
-      // Lock GIF during drag
-      if (isDragging) return;
+      // Lock GIF during drag or inertia
+      if (isDragging || isInertia) return;
       
       // Extra safety: Stop ALL GIFs globally first (including any that might be playing)
       const allGifImages = document.querySelectorAll('.cpc-gif-image[data-gif-url]');
@@ -939,8 +944,8 @@
      * Handle scroll events - kick off settle engine
      */
     function onScroll() {
-      // Block during active drag
-      if (isDragging) return;
+      // Block during active drag or inertia
+      if (isDragging || isInertia) return;
       
       // Start the settle engine
       startScrollSettle();
@@ -1149,6 +1154,15 @@
     let startX = 0;
     let startScrollLeft = 0;
 
+    // rAF-driven scroll scheduler
+    let dragRaf = null;
+    let pendingScrollLeft = 0;
+    let lastMoveX = 0;
+    let lastMoveT = 0;
+    let velocity = 0; // px/ms
+    let inertiaRaf = null;
+    let isInertia = false;
+
     // When we drag, suppress link clicks briefly after release
     let suppressClickUntil = 0;
 
@@ -1157,6 +1171,75 @@
     let lastTapTarget = null;
     const DOUBLE_TAP_DELAY = 300; // ms between taps
     const DOUBLE_TAP_DISTANCE = 50; // max pixel distance between taps
+
+    /**
+     * Schedule scrollLeft update via rAF for smooth batched updates
+     */
+    function scheduleScrollLeft(value) {
+      pendingScrollLeft = value;
+      if (dragRaf) return;
+      dragRaf = requestAnimationFrame(() => {
+        track.scrollLeft = pendingScrollLeft;
+        dragRaf = null;
+      });
+    }
+
+    /**
+     * Stop ALL GIFs in the section (including active slide) during drag
+     */
+    function stopAllGifsInSection() {
+      const imgs = section.querySelectorAll('.cpc-gif-image[data-gif-url]');
+      imgs.forEach(img => {
+        const gifUrl = img.dataset.gifUrl;
+        const placeholderUrl = img.dataset.placeholderUrl;
+        if (!gifUrl || !placeholderUrl) return;
+        const base = gifUrl.split('?')[0].split('#')[0];
+        if (img.src && img.src.includes(base)) {
+          img.src = placeholderUrl;
+          img.removeAttribute('srcset');
+        }
+      });
+    }
+
+    /**
+     * Start inertia scroll after drag release
+     */
+    function startInertiaScroll() {
+      if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
+      isInertia = true;
+
+      const DECAY = 0.95; // per frame-ish
+      let lastT = performance.now();
+
+      function step() {
+        const now = performance.now();
+        const dt = Math.min(32, now - lastT);
+        lastT = now;
+
+        // advance scroll
+        const next = track.scrollLeft + velocity * dt;
+        scheduleScrollLeft(next);
+
+        // decay velocity
+        velocity *= Math.pow(DECAY, dt / 16);
+
+        if (Math.abs(velocity) < 0.03) {
+          isInertia = false;
+          inertiaRaf = null;
+
+          // snap to nearest slide (smooth)
+          const closest = getClosestIndexToCenter();
+          const target = slides[closest];
+          if (target) scrollToCentered(target, true);
+
+          return;
+        }
+
+        inertiaRaf = requestAnimationFrame(step);
+      }
+
+      inertiaRaf = requestAnimationFrame(step);
+    }
 
     function handleWheel(e) {
       if (originalCount <= 1) return;
@@ -1196,12 +1279,27 @@
       const link = e.target.closest('a.cpc-info-card');
       if (link) return; // Let the link handle the click
 
+      // Stop all GIFs before dragging starts
+      stopAllGifsInSection();
+
+      // Cancel any ongoing inertia
+      if (inertiaRaf) {
+        cancelAnimationFrame(inertiaRaf);
+        inertiaRaf = null;
+        isInertia = false;
+      }
+
       isPointerDown = true;
       moved = false;
       isDragging = false;
 
       startX = e.clientX;
       startScrollLeft = track.scrollLeft;
+
+      // Reset velocity tracking
+      lastMoveX = e.clientX;
+      lastMoveT = performance.now();
+      velocity = 0;
 
       track.classList.add('is-dragging');
       track.style.cursor = 'grabbing';
@@ -1233,12 +1331,23 @@
         lastTapTime = 0;
         lastTapTarget = null;
 
-        // Drag-to-scroll with momentum smoothing
-        const newScrollLeft = startScrollLeft - dx;
-        track.scrollLeft = newScrollLeft;
+        // Compute velocity (px/ms)
+        const now = performance.now();
+        const dt = Math.max(8, now - lastMoveT);
+        const dxStep = e.clientX - lastMoveX;
+        // scrollLeft moves opposite to pointer movement:
+        const v = (-dxStep) / dt;
+        // smooth it:
+        velocity = velocity * 0.8 + v * 0.2;
+        lastMoveX = e.clientX;
+        lastMoveT = now;
+
+        // Drag-to-scroll using rAF scheduler
+        const next = startScrollLeft - dx;
+        scheduleScrollLeft(next);
         
         // Update last scroll position for settle engine
-        lastScrollLeft = newScrollLeft;
+        lastScrollLeft = next;
       }
     }
 
@@ -1261,11 +1370,13 @@
         // We dragged: suppress accidental clicks for a short window
         suppressClickUntil = Date.now() + 350;
 
-        // Snap to the nearest centered slide using scroll position-based detection
-        const closestRealIndex = getClosestIndexToCenter();
-        const target = slides[closestRealIndex];
-        if (target) {
-          scrollToCentered(target, true);
+        // Start inertia if velocity is meaningful, otherwise snap immediately
+        if (Math.abs(velocity) > 0.15) {
+          startInertiaScroll();
+        } else {
+          const closest = getClosestIndexToCenter();
+          const target = slides[closest];
+          if (target) scrollToCentered(target, true);
         }
       }
 
