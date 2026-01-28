@@ -39,16 +39,6 @@
         "padding_bottom": 36
       }
     },
-    "1766198384ec95d504": {
-      "type": "_blocks",
-      "disabled": true,
-      "settings": {}
-    },
-    "17661987485ac72ce4": {
-      "type": "_blocks",
-      "disabled": true,
-      "settings": {}
-    },
     "shop_color_grid_mytb9M": {
       "type": "shop-color-grid",
       "blocks": {
@@ -158,146 +148,6 @@
         "overlay_hover_opacity": 33
       }
     },
-    "1767114833c9c201eb": {
-      "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_da32be5_RpgUkX": {
-          "type": "ai_gen_block_da32be5",
-          "settings": {
-            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
-            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
-            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
-            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
-            "tile_height": 670,
-            "tile_gap": 32,
-            "top_padding": 80,
-            "bottom_padding": 80,
-            "side_margin": 60,
-            "border_radius": 20,
-            "shadow_x": 0,
-            "shadow_y": 4,
-            "shadow_blur": 20,
-            "shadow_opacity": 0.1,
-            "blur_amount": 6,
-            "fade_opacity": 0.5,
-            "hover_scale": 1,
-            "show_overlay": true,
-            "title_size": 18,
-            "price_size": 16
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_da32be5_RpgUkX"
-      ],
-      "disabled": true,
-      "settings": {}
-    },
-    "1767115431d2365970": {
-      "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_690f344_BUJGTT": {
-          "type": "ai_gen_block_690f344",
-          "settings": {
-            "section_padding": 40,
-            "tile_gap": 8,
-            "transition_speed": 0.3,
-            "tile_1_product": "",
-            "tile_1_blur": 50,
-            "tile_2_product": "",
-            "tile_2_blur": 50,
-            "tile_3_product": "",
-            "tile_3_blur": 50,
-            "tile_4_product": "",
-            "tile_4_blur": 50,
-            "tile_5_product": "",
-            "tile_5_blur": 50
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_690f344_BUJGTT"
-      ],
-      "disabled": true,
-      "settings": {}
-    },
-    "1767115924e3e1520e": {
-      "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_3d9aa66_RUi9hf": {
-          "type": "ai_gen_block_3d9aa66",
-          "settings": {
-            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "custom_image_1": "shopify://shop_images/greenpng.png",
-            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
-            "custom_image_2": "shopify://shop_images/pinkbunny.png",
-            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
-            "custom_image_3": "shopify://shop_images/blue.png",
-            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
-            "custom_image_4": "shopify://shop_images/red.png",
-            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
-            "custom_image_5": "shopify://shop_images/grey.png",
-            "padding_top": 90,
-            "padding_bottom": 90,
-            "padding_horizontal": 80,
-            "tile_gap": 32,
-            "border_radius": 20,
-            "shadow_vertical": 4,
-            "shadow_blur": 15,
-            "shadow_opacity": 15,
-            "hover_blur": 6,
-            "hover_opacity": 50,
-            "label_color": "#ffffff",
-            "label_font_size": 16,
-            "label_font_weight": 600
-          },
-          "blocks": {}
-        },
-        "ai_gen_block_3d9aa66_ptKNrn": {
-          "type": "ai_gen_block_3d9aa66",
-          "settings": {
-            "product_1": "green-dinosaur-plush-toy-for-babies-toddlers-lebanon",
-            "custom_image_1": "shopify://shop_images/greenpng.png",
-            "product_2": "light-pink-rabbit-costume-for-babies-toddlers-lebanon",
-            "custom_image_2": "shopify://shop_images/pinkbunny.png",
-            "product_3": "dark-blue-shark-costume-for-babies-toddlers-lebanon",
-            "custom_image_3": "shopify://shop_images/blue.png",
-            "product_4": "dark-pink-fox-costume-for-babies-toddlers-lebanon",
-            "custom_image_4": "shopify://shop_images/red.png",
-            "product_5": "grey-dragon-costume-for-babies-toddlers-lebanon",
-            "custom_image_5": "shopify://shop_images/grey.png",
-            "padding_top": 90,
-            "padding_bottom": 90,
-            "padding_horizontal": 80,
-            "tile_gap": 32,
-            "border_radius": 20,
-            "shadow_vertical": 4,
-            "shadow_blur": 15,
-            "shadow_opacity": 15,
-            "hover_blur": 10,
-            "hover_opacity": 50,
-            "label_color": "#ffffff",
-            "label_font_size": 16,
-            "label_font_weight": 600
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_3d9aa66_RUi9hf",
-        "ai_gen_block_3d9aa66_ptKNrn"
-      ],
-      "disabled": true,
-      "settings": {}
-    },
-    "1767117382e575a2c4": {
-      "type": "_blocks",
-      "disabled": true,
-      "settings": {}
-    },
     "hex_prism_carousel_WBiKbP": {
       "type": "hex-prism-carousel",
       "blocks": {
@@ -361,7 +211,7 @@
           "settings": {
             "name": "Bunny Set",
             "ages": "2-4",
-            "image": "shopify://shop_images/OIP.webp",
+            "image": "shopify://shop_images/pinkbunny.png",
             "link": "",
             "gradient_start": "#4a90e2",
             "gradient_end": "#7b68ee"
@@ -376,7 +226,6 @@
         "face_FCNhBE",
         "face_3HAW8z"
       ],
-      "disabled": true,
       "name": "Hex Prism Carousel",
       "settings": {
         "perspective": 1600,
@@ -406,13 +255,7 @@
   "order": [
     "banner",
     "product-grid",
-    "1766198384ec95d504",
-    "17661987485ac72ce4",
     "shop_color_grid_mytb9M",
-    "1767114833c9c201eb",
-    "1767115431d2365970",
-    "1767115924e3e1520e",
-    "1767117382e575a2c4",
     "hex_prism_carousel_WBiKbP"
   ]
 }
