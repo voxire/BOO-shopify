@@ -263,7 +263,7 @@
     padding: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-snap-type: none;
+    scroll-snap-type: x proximity;
     contain: layout style paint;
   }
 
@@ -939,9 +939,7 @@
         if (target) {
           // Ensure scroll behavior is auto for instant jump
           const originalScrollBehavior = track.style.scrollBehavior;
-          const originalSnapType = track.style.scrollSnapType;
           track.style.scrollBehavior = 'auto';
-          track.style.scrollSnapType = 'none'; // Disable snap during programmatic jump
           
           // Instant jump
           requestAnimationFrame(() => {
@@ -958,9 +956,8 @@
               setActiveByRealIndex(corrected);
               updateDots();
               
-              // Restore scroll behavior and snap type
+              // Restore scroll behavior
               track.style.scrollBehavior = originalScrollBehavior;
-              track.style.scrollSnapType = originalSnapType || '';
               
               // Update GIF after correction
               updateCenterGif(corrected);
@@ -979,15 +976,11 @@
     }
 
     // --- Controlled snap animation (prevents jitter + too-fast snapping) ---
-    let isSnapAnimating = false;
-    let snapLockUntil = 0; // timestamp in ms
     let snapRaf = null;
 
     function cancelSnap() {
       if (snapRaf) cancelAnimationFrame(snapRaf);
       snapRaf = null;
-      isSnapAnimating = false;
-      snapLockUntil = 0;
     }
 
     // cubic ease in/out
@@ -997,16 +990,12 @@
 
     function animateScrollLeft(toLeft, duration = 360) {
       cancelSnap();
-      
-      isSnapAnimating = true;
-      snapLockUntil = Date.now() + duration + 140; // buffer prevents "extra wheel burst" skipping
 
       const fromLeft = track.scrollLeft;
       const delta = toLeft - fromLeft;
 
       if (Math.abs(delta) < 0.5) {
         track.scrollLeft = toLeft;
-        isSnapAnimating = false;
         scheduleActivePreview();
         scheduleSettle();
         return;
@@ -1020,8 +1009,6 @@
 
       function step(now) {
         const t = Math.min(1, (now - start) / duration);
-        // Ensure snap stays disabled during entire animation
-        track.style.scrollSnapType = 'none';
         track.scrollLeft = fromLeft + delta * easeInOutCubic(t);
 
         // keep center highlight updating while animating
@@ -1031,13 +1018,7 @@
           snapRaf = requestAnimationFrame(step);
         } else {
           snapRaf = null;
-          isSnapAnimating = false;
-          // keep snapLockUntil as-is; it will expire naturally
-          
-          // Only restore snap after animation completes, with a small delay to prevent immediate snap
-          requestAnimationFrame(() => {
-            track.style.scrollSnapType = prevSnapType || '';
-          });
+          track.style.scrollSnapType = prevSnapType || '';
           scheduleActivePreview();
           scheduleSettle();
         }
@@ -1060,14 +1041,7 @@
         animateScrollLeft(targetLeft, isMobile ? 420 : 340);
       } else {
         cancelSnap();
-        // Disable snap for instant scroll
-        const originalSnapType = track.style.scrollSnapType;
-        track.style.scrollSnapType = 'none';
         track.scrollLeft = targetLeft;
-        // Restore snap immediately after
-        requestAnimationFrame(() => {
-          track.style.scrollSnapType = originalSnapType || '';
-        });
         scheduleActivePreview();
         scheduleSettle();
       }
@@ -1175,10 +1149,6 @@
       pendingScrollLeft = value;
       if (dragRaf) return;
       dragRaf = requestAnimationFrame(() => {
-        // During drag, snap is already disabled via CSS class, but ensure it's off
-        if (isDragging) {
-          track.style.scrollSnapType = 'none';
-        }
         track.scrollLeft = pendingScrollLeft;
         dragRaf = null;
       });
@@ -1247,35 +1217,36 @@
     }
 
     function handleWheel(e) {
+      cancelSnap();
+      
       if (originalCount <= 1) return;
 
       const absX = Math.abs(e.deltaX);
       const absY = Math.abs(e.deltaY);
+
       const isVerticalIntent = absY > absX && !e.shiftKey;
 
-      // Vertical scroll: let page scroll naturally (don't hijack)
-      if (isVerticalIntent) return;
+      // Vertical scroll → PAGE scroll only
+      if (isVerticalIntent) {
+        e.preventDefault();
+        window.scrollBy({
+          top: e.deltaY,
+          behavior: 'auto'
+        });
+        return;
+      }
 
-      // Horizontal intent: we control the carousel
+      // Horizontal intent → carousel scroll with momentum
       e.preventDefault();
-
-      // IMPORTANT: while snap animating (or within lock window), ignore extra wheel events
-      const now = Date.now();
-      if (isSnapAnimating || now < snapLockUntil) return;
-
       const delta = absX > 0 ? e.deltaX : e.deltaY;
-
-      // Ignore micro wheel noise (trackpads can emit tiny deltas)
-      if (Math.abs(delta) < 6) return;
-
-      const dir = delta > 0 ? 1 : -1;
-
-      const currentCenter = getClosestIndexToCenter();
-      const targetIndex = Math.max(0, Math.min(slides.length - 1, currentCenter + dir));
-      if (targetIndex === currentCenter || !slides[targetIndex]) return;
-
-      // start the snap – this sets lock inside animateScrollLeft()
-      scrollToCentered(slides[targetIndex], true);
+      
+      // Apply momentum multiplier for smoother trackpad scrolling
+      const momentumMultiplier = Math.abs(delta) > 10 ? 1.2 : 1;
+      track.scrollLeft += delta * momentumMultiplier;
+      
+      // Update active preview and schedule settle
+      scheduleActivePreview();
+      scheduleSettle();
     }
 
     function handlePointerDown(e) {
@@ -1445,16 +1416,9 @@
       const middleStartIndex = clonesCount + currentIndex;
       const middleStartSlide = slides[middleStartIndex];
       if (middleStartSlide) {
-        // Disable snap during programmatic initialization
-        const originalSnapType = track.style.scrollSnapType;
-        track.style.scrollSnapType = 'none';
         track.scrollTo({
           left: middleStartSlide.offsetLeft - (track.offsetWidth / 2) + (middleStartSlide.offsetWidth / 2),
           behavior: 'auto'
-        });
-        // Restore snap after a brief delay
-        requestAnimationFrame(() => {
-          track.style.scrollSnapType = originalSnapType || '';
         });
       }
       
